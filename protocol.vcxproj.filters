@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Overlay">
+      <UniqueIdentifier>{de1e132e-5c52-4d8c-9143-b2f9b3f13942}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\imgui\imgui.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\imgui\imgui_demo.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\imgui\imgui_draw.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\imgui\imgui_impl_dx11.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\imgui\imgui_impl_win32.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\imgui\imgui_tables.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\imgui\imgui_widgets.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="overlay\dx11\moverlay.cpp">
+      <Filter>Overlay</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_structures.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_math.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imconfig.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imgui.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imgui_impl_dx11.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imgui_impl_metal.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imgui_impl_osx.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imgui_impl_win32.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imgui_internal.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imstb_rectpack.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imstb_textedit.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\imstb_truetype.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\imgui\VKDefs.hh">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\dx11\moverlay.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="overlay\overlay.h">
+      <Filter>Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="util.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="overlay\imgui\imgui_impl_metal.mm">
+      <Filter>Overlay</Filter>
+    </None>
+    <None Include="overlay\imgui\imgui_impl_osx.mm">
+      <Filter>Overlay</Filter>
+    </None>
+  </ItemGroup>
+</Project>
