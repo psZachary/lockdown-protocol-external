@@ -19,29 +19,71 @@ static void render_callback() {
 
 	static bool esp_enabled = true;
 	static bool gun_esp_enabled = true;
+	static bool knife_esp_enabled = true;
+	static bool object_esp_enabled = true;
+	//static bool c4_esp_enabled = false;
 	static bool speedhack = false;
-	static bool fast_melee = true;
-	static bool max_damage = true;
-	static bool infinite_stamina = true;
-	static bool auto_fire = true;
-	static bool rapid_fire = true;
+	static bool fast_melee = false;
+	static bool max_damage = false;
+	static bool infinite_stamina = false;
+	static bool god_mode = false;
+	static bool auto_fire = false;
+	static bool rapid_fire = false;
 	static bool no_recoil = true;
-	static bool infinite_melee_range = true;
+	static bool infinite_melee_range = false;
+	static bool living_state = false;
+
+
+	if (GetAsyncKeyState(VK_F2) & 1) {
+		esp_enabled = !esp_enabled;
+	}
+	if (GetAsyncKeyState(VK_F3) & 1) {
+		gun_esp_enabled = !gun_esp_enabled;
+	}
+	if (GetAsyncKeyState(VK_F4) & 1) {
+		knife_esp_enabled = !knife_esp_enabled;
+	}
+	if (GetAsyncKeyState(VK_F5) & 1) {
+		object_esp_enabled = !object_esp_enabled;
+	}
+	/*if (GetAsyncKeyState(VK_F6) & 1) {
+		c4_esp_enabled = !c4_esp_enabled;
+	}*/
+	if (GetAsyncKeyState(VK_F6) & 1) {
+		speedhack = !speedhack;
+	}
+	if (GetAsyncKeyState(VK_F7) & 1) {
+		god_mode = !god_mode;
+	}
+	if (GetAsyncKeyState(VK_F8) & 1) {
+		infinite_stamina = !infinite_stamina;
+	}
+	if (GetAsyncKeyState(VK_F9) & 1) {
+		living_state = !living_state;
+	}
 
 	if (menu_open) {
 		ImGui::Begin("Hawk Tuah Protocol");
-
-		ImGui::Checkbox("Player ESP", &esp_enabled);
-		ImGui::Checkbox("Gun ESP", &gun_esp_enabled);
-		ImGui::Checkbox("Infinite Stamina", &infinite_stamina);
-		ImGui::Checkbox("Speedhack", &speedhack);
+		ImGui::Text("[         ESP          ]");
+		ImGui::Checkbox("[F2] Player ESP", &esp_enabled);
+		ImGui::Checkbox("[F3] Gun ESP", &gun_esp_enabled);
+		ImGui::Checkbox("[F4] Knife ESP", &knife_esp_enabled);
+		ImGui::Checkbox("[F5] Object ESP", &object_esp_enabled);
+		//ImGui::Checkbox("C4 ESP", &c4_esp_enabled);
+		ImGui::Text("[        PLAYER        ]");
+		ImGui::Checkbox("[F6] Speedhack", &speedhack);
+		ImGui::Checkbox("[F7] God Mode", &god_mode);
+		ImGui::Checkbox("[F8] Infinite Stamina", &infinite_stamina);
+		ImGui::Checkbox("[F9] Revive", &living_state); 
+		ImGui::Text("[        WEAPON        ]");
 		ImGui::Checkbox("Fast Melee", &fast_melee);
 		ImGui::Checkbox("Infinite Melee Range", &infinite_melee_range);
+		ImGui::Text("------------------------");
 		ImGui::Checkbox("Auto Fire", &auto_fire);
 		ImGui::Checkbox("Rapid Fire", &rapid_fire);
-		ImGui::Checkbox("Max Damage", &max_damage);
 		ImGui::Checkbox("No Recoil", &no_recoil);
-
+		ImGui::Checkbox("Max Damage", &max_damage);
+		ImGui::Text("[       ONI EDIT       ]");		
 		ImGui::End();
 	}
 
@@ -62,8 +104,18 @@ static void render_callback() {
 
 	auto local_mec = (mec_pawn*)local_controller->get_pawn();
 
+	if (living_state) {
+		local_mec->set_alive(true);
+		local_mec->set_health(100);
+		living_state = !living_state;
+	}
+
 	if (infinite_stamina) {
 		local_mec->set_stamina(1.);
+	}
+
+	if (god_mode) {
+		local_mec->set_health(100);
 	}
 
 	if (speedhack) {
@@ -71,7 +123,7 @@ static void render_callback() {
 		local_mec->set_max_speed(2000.0);
 		local_mec->set_friction(100000);
 	}
-
+	
 	if (fast_melee || infinite_melee_range) {
 		auto hand_item = (u_data_melee*)local_mec->get_hand_item();
 		if (util::get_name_from_fname(hand_item->class_private()->fname_index()).find("Data_Melee_C") != std::string::npos) {
@@ -83,7 +135,6 @@ static void render_callback() {
 			}
 			if (infinite_melee_range)
 				mtype->set_range(10000);
-			
 		}
 	}
 
@@ -100,7 +151,7 @@ static void render_callback() {
 					if (!state) continue;
 					auto name = state->get_player_name_private().read_string();
 					auto role = mec->get_player_role();
-
+					
 					auto mec_root = mec->get_root_component();
 					if (!mec_root) continue;
 
@@ -151,7 +202,68 @@ static void render_callback() {
 						auto position = item_root->get_relative_location();
 						vector3 screen_position{};
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-							overlay->draw_text(screen_position, IM_COL32(255, 69, 0, 255), "[GUN]", true);
+							if (item_name == "PISTOL") {
+								overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[PISTOL]", true);
+							}
+							else if (item_name == "REVOLVER") {
+								overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[REVOLVER]", true);
+							}
+							else if (item_name == "SHORTY") {
+								overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[SHORTY]", true);
+							}							
+						}
+					}
+				}
+
+				if (item_name == "KNIFE") {
+					auto item_root = item->get_root_component();
+					if (!item_root) continue;
+
+					if (knife_esp_enabled) {
+						auto position = item_root->get_relative_location();
+						vector3 screen_position{};
+						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+							overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[KNIFE]", true);
+						}
+					}
+				}
+
+				//if (item_name == "C4" || item_name == "DETONATOR") {
+				//	auto item_root = item->get_root_component();
+				//	if (!item_root) continue;
+
+				//	if (c4_esp_enabled) {
+				//		auto position = item_root->get_relative_location();
+				//		vector3 screen_position{};
+				//		if (item_name == "C4") {
+				//			overlay->draw_text(screen_position, IM_COL32(255, 0, 200, 255), "[C4]", true);
+				//		}
+				//		else if (item_name == "DETONATOR") {
+				//			overlay->draw_text(screen_position, IM_COL32(255, 0, 200, 255), "[DETONATOR]", true);
+				//		}
+				//	}
+				//}
+
+				if (item_name == "GAZ BOTTLE" || item_name == "VENT FILTER" || item_name == "RICE" || item_name == "PACKAGE") {
+					auto item_root = item->get_root_component();
+					if (!item_root) continue;
+
+					if (object_esp_enabled) {
+						auto position = item_root->get_relative_location();
+						vector3 screen_position{};
+						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+							if (item_name == "GAZ BOTTLE") {
+								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[GAZ BOTTLE]", true);
+							}
+							else if (item_name == "VENT FILTER") {
+								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[VENT FILTER]", true);
+							}
+							else if (item_name == "RICE") {
+								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[RICE]", true);
+							}
+							else if (item_name == "PACKAGE") {
+								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[PACKAGE]", true);
+							}
 						}
 					}
 				}
