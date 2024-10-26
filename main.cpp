@@ -17,11 +17,10 @@ static void render_callback() {
 		menu_open = !menu_open;
 	}
 
-	static bool esp_enabled = true;
-	static bool gun_esp_enabled = true;
-	static bool knife_esp_enabled = true;
-	static bool object_esp_enabled = true;
-	//static bool c4_esp_enabled = false;
+	static bool player_esp = true;
+	static bool weapon_esp = true;
+	static bool primary_object_esp = true;
+	static bool secondary_object_esp = true;
 	static bool speedhack = false;
 	static bool fast_melee = false;
 	static bool max_damage = false;
@@ -35,20 +34,17 @@ static void render_callback() {
 
 
 	if (GetAsyncKeyState(VK_F2) & 1) {
-		esp_enabled = !esp_enabled;
+		player_esp = !player_esp;
 	}
 	if (GetAsyncKeyState(VK_F3) & 1) {
-		gun_esp_enabled = !gun_esp_enabled;
+		weapon_esp = !weapon_esp;
 	}
 	if (GetAsyncKeyState(VK_F4) & 1) {
-		knife_esp_enabled = !knife_esp_enabled;
+		primary_object_esp = !primary_object_esp;
 	}
 	if (GetAsyncKeyState(VK_F5) & 1) {
-		object_esp_enabled = !object_esp_enabled;
+		secondary_object_esp = !secondary_object_esp;
 	}
-	/*if (GetAsyncKeyState(VK_F6) & 1) {
-		c4_esp_enabled = !c4_esp_enabled;
-	}*/
 	if (GetAsyncKeyState(VK_F6) & 1) {
 		speedhack = !speedhack;
 	}
@@ -65,11 +61,10 @@ static void render_callback() {
 	if (menu_open) {
 		ImGui::Begin("Hawk Tuah Protocol");
 		ImGui::Text("[         ESP          ]");
-		ImGui::Checkbox("[F2] Player ESP", &esp_enabled);
-		ImGui::Checkbox("[F3] Gun ESP", &gun_esp_enabled);
-		ImGui::Checkbox("[F4] Knife ESP", &knife_esp_enabled);
-		ImGui::Checkbox("[F5] Object ESP", &object_esp_enabled);
-		//ImGui::Checkbox("C4 ESP", &c4_esp_enabled);
+		ImGui::Checkbox("[F2] Player ESP", &player_esp);
+		ImGui::Checkbox("[F3] Weapon ESP", &weapon_esp);
+		ImGui::Checkbox("[F4] Primary Object ESP", &primary_object_esp);
+		ImGui::Checkbox("[F5] Other Object ESP", &secondary_object_esp);
 		ImGui::Text("[        PLAYER        ]");
 		ImGui::Checkbox("[F6] Speedhack", &speedhack);
 		ImGui::Checkbox("[F7] God Mode", &god_mode);
@@ -144,7 +139,7 @@ static void render_callback() {
 		for (auto actor : actors.list()) {
 			auto class_name = util::get_name_from_fname(actor->class_private()->fname_index());
 			auto name = util::get_name_from_fname(actor->outer()->fname_index());
-			if (esp_enabled) {
+			if (player_esp) {
 				if (class_name.find("Mec_C") != std::string::npos) {
 					auto mec = (mec_pawn*)(actor);
 					auto state = mec->player_state();
@@ -159,7 +154,7 @@ static void render_callback() {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						auto color = role == 4 ? IM_COL32(255, 0, 0, 255) : IM_COL32(0, 255, 0, 255);
-						auto name_norm = "[" + name + "]" + (role == 4 ? " [DISSIDENT]" : "");
+						auto name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "");
 						overlay->draw_text(screen_position, color, name_norm.c_str(), true);
 					}
 				}
@@ -171,7 +166,7 @@ static void render_callback() {
 				auto data = item->get_data();
 				auto item_name = data->get_name().read_string();
 
-				if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY") {
+				if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
 					auto gun_data = (u_data_gun*)data;
 					auto item_root = item->get_root_component();
 					if (!item_root) continue;
@@ -198,71 +193,102 @@ static void render_callback() {
 						gun_data->set_run_precision(0.0);
 					}
 
-					if (gun_esp_enabled) {
+					if (weapon_esp) {
 						auto position = item_root->get_relative_location();
 						vector3 screen_position{};
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 							if (item_name == "PISTOL") {
-								overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[PISTOL]", true);
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[PISTOL]", true); // Orange
 							}
 							else if (item_name == "REVOLVER") {
-								overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[REVOLVER]", true);
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[REVOLVER]", true);
 							}
 							else if (item_name == "SHORTY") {
-								overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[SHORTY]", true);
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SHORTY]", true);
+							}	
+							else if (item_name == "SMG") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SMG]", true);
+							}	
+							else if (item_name == "RIFLE") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[RIFLE]", true);
+							}	
+							else if (item_name == "SHOTGUN") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SHOTGUN]", true);
 							}							
 						}
 					}
 				}
 
-				if (item_name == "KNIFE") {
+				if (item_name == "KNIFE" || item_name == "C4" || item_name == "DETONATOR") {
 					auto item_root = item->get_root_component();
 					if (!item_root) continue;
 
-					if (knife_esp_enabled) {
+					if (weapon_esp) {
 						auto position = item_root->get_relative_location();
 						vector3 screen_position{};
+
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-							overlay->draw_text(screen_position, IM_COL32(171, 0, 223, 255), "[KNIFE]", true);
+							if (item_name == "KNIFE") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[KNIFE]", true); // Orange
+							}
+							else if (item_name == "C4") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[C4]", true);
+							}
+							else if (item_name == "DETONATOR") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[DETONATOR]", true);
+							}
+						}					
+					}
+				}
+
+				if (item_name == "GAZ BOTTLE" || item_name == "VENT FILTER" || item_name == "RICE" || item_name == "PACKAGE" || item_name == "SAMPLE") {
+					auto item_root = item->get_root_component();
+					if (!item_root) continue;
+
+					if (primary_object_esp) {
+						auto position = item_root->get_relative_location();
+						vector3 screen_position{};
+						
+						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+							if (item_name == "GAZ BOTTLE") {
+								overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), "[GAZ BOTTLE]", true); // Blue
+							}
+							else if (item_name == "VENT FILTER") {
+								overlay->draw_text(screen_position, IM_COL32(65, 115, 217, 255), "[VENT FILTER]", true); // Light Blue
+							}
+							else if (item_name == "RICE") {
+								overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[RICE]", true); // Tan-ish
+							}
+							else if (item_name == "PACKAGE") {
+								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[PACKAGE]", true); // Brown
+							}
+							else if (item_name == "SAMPLE") {
+								overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[SAMPLE]", true); // Purple
+							}
 						}
 					}
 				}
 
-				//if (item_name == "C4" || item_name == "DETONATOR") {
-				//	auto item_root = item->get_root_component();
-				//	if (!item_root) continue;
-
-				//	if (c4_esp_enabled) {
-				//		auto position = item_root->get_relative_location();
-				//		vector3 screen_position{};
-				//		if (item_name == "C4") {
-				//			overlay->draw_text(screen_position, IM_COL32(255, 0, 200, 255), "[C4]", true);
-				//		}
-				//		else if (item_name == "DETONATOR") {
-				//			overlay->draw_text(screen_position, IM_COL32(255, 0, 200, 255), "[DETONATOR]", true);
-				//		}
-				//	}
-				//}
-
-				if (item_name == "GAZ BOTTLE" || item_name == "VENT FILTER" || item_name == "RICE" || item_name == "PACKAGE") {
+				if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER") {
 					auto item_root = item->get_root_component();
 					if (!item_root) continue;
 
-					if (object_esp_enabled) {
+					if (secondary_object_esp) {
 						auto position = item_root->get_relative_location();
 						vector3 screen_position{};
+
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-							if (item_name == "GAZ BOTTLE") {
-								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[GAZ BOTTLE]", true);
+							if (item_name == "FUSE") {
+								overlay->draw_text(screen_position, IM_COL32(105, 105, 105, 255), "[FUSE]", true); // Grey
 							}
-							else if (item_name == "VENT FILTER") {
-								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[VENT FILTER]", true);
+							else if (item_name == "BATTERY") {
+								overlay->draw_text(screen_position, IM_COL32(189, 189, 189, 255), "[BATTERY]", true); // Light Grey
 							}
-							else if (item_name == "RICE") {
-								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[RICE]", true);
+							else if (item_name == "SCREW DRIVER") {
+								overlay->draw_text(screen_position, IM_COL32(255, 255, 255, 255), "[SCREW DRIVER]", true); // Tan-ish
 							}
-							else if (item_name == "PACKAGE") {
-								overlay->draw_text(screen_position, IM_COL32(239, 255, 0, 255), "[PACKAGE]", true);
+							else if (item_name == "CONTAINER") {
+								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[CONTAINER]", true); // Pink-sih purple
 							}
 						}
 					}
