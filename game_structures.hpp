@@ -33,9 +33,6 @@ namespace protocol {
 				wchar_t data[250];
 			};
 
-
-
-
 			class u_object
 			{
 			public:
@@ -475,12 +472,18 @@ namespace protocol {
 				OFFSET(0x78, slow2, double);
 				OFFSET(0x80, slow3, double);
 				OFFSET(0x88, default_speed, double);
+				OFFSET(0x1D0, player_map_location_x, vector2);
+				OFFSET(0x1E0, player_map_location_y, vector2);
+				OFFSET(0x1F0, player_map_result_x, vector2);
+				OFFSET(0x200, player_map_result_y, vector2);
 
 			};
 			class mec_pawn : public a_pawn {
 			public:
 				GET_OFFSET(0x0C09, player_role, int);
 				OFFSET(0x0C38, stamina, double);
+				OFFSET(0x800, health, int);
+				OFFSET(0xC99, alive, bool);
 				OFFSET(0x0710, acceleration, vector2);
 				OFFSET(0x0608, fire_spread, double);
 				OFFSET(0x0618, vertical_recoil, double);
@@ -500,6 +503,7 @@ namespace protocol {
 				OFFSET(0x0DD0, friction, double);
 				OFFSET(0x0A40, player_data, u_data_player*);
 				OFFSET(0x0690, hand_item, u_data_item*);
+				OFFSET(0x878, bag_item, u_data_item*);
 			};
 		}
 	}

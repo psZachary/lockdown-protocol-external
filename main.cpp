@@ -17,31 +17,68 @@ static void render_callback() {
 		menu_open = !menu_open;
 	}
 
-	static bool esp_enabled = true;
-	static bool gun_esp_enabled = true;
+	static bool player_esp = true;
+	static bool weapon_esp = true;
+	static bool primary_object_esp = true;
+	static bool secondary_object_esp = true;
 	static bool speedhack = false;
-	static bool fast_melee = true;
-	static bool max_damage = true;
-	static bool infinite_stamina = true;
-	static bool auto_fire = true;
-	static bool rapid_fire = true;
+	static bool fast_melee = false;
+	static bool max_damage = false;
+	static bool infinite_stamina = false;
+	static bool god_mode = false;
+	static bool auto_fire = false;
+	static bool rapid_fire = false;
 	static bool no_recoil = true;
-	static bool infinite_melee_range = true;
+	static bool infinite_melee_range = false;
+	static bool living_state = false;
+
+
+	if (GetAsyncKeyState(VK_F2) & 1) {
+		player_esp = !player_esp;
+	}
+	if (GetAsyncKeyState(VK_F3) & 1) {
+		weapon_esp = !weapon_esp;
+	}
+	if (GetAsyncKeyState(VK_F4) & 1) {
+		primary_object_esp = !primary_object_esp;
+	}
+	if (GetAsyncKeyState(VK_F5) & 1) {
+		secondary_object_esp = !secondary_object_esp;
+	}
+	if (GetAsyncKeyState(VK_F6) & 1) {
+		speedhack = !speedhack;
+	}
+	if (GetAsyncKeyState(VK_F7) & 1) {
+		god_mode = !god_mode;
+	}
+	if (GetAsyncKeyState(VK_F8) & 1) {
+		infinite_stamina = !infinite_stamina;
+	}
+	if (GetAsyncKeyState(VK_F9) & 1) {
+		living_state = !living_state;
+	}
 
 	if (menu_open) {
 		ImGui::Begin("Hawk Tuah Protocol");
-
-		ImGui::Checkbox("Player ESP", &esp_enabled);
-		ImGui::Checkbox("Gun ESP", &gun_esp_enabled);
-		ImGui::Checkbox("Infinite Stamina", &infinite_stamina);
-		ImGui::Checkbox("Speedhack", &speedhack);
+		ImGui::Text("[         ESP          ]");
+		ImGui::Checkbox("[F2] Player ESP", &player_esp);
+		ImGui::Checkbox("[F3] Weapon ESP", &weapon_esp);
+		ImGui::Checkbox("[F4] Primary Object ESP", &primary_object_esp);
+		ImGui::Checkbox("[F5] Other Object ESP", &secondary_object_esp);
+		ImGui::Text("[        PLAYER        ]");
+		ImGui::Checkbox("[F6] Speedhack", &speedhack);
+		ImGui::Checkbox("[F7] God Mode", &god_mode);
+		ImGui::Checkbox("[F8] Infinite Stamina", &infinite_stamina);
+		ImGui::Checkbox("[F9] Revive", &living_state); 
+		ImGui::Text("[        WEAPON        ]");
 		ImGui::Checkbox("Fast Melee", &fast_melee);
 		ImGui::Checkbox("Infinite Melee Range", &infinite_melee_range);
+		ImGui::Text("------------------------");
 		ImGui::Checkbox("Auto Fire", &auto_fire);
 		ImGui::Checkbox("Rapid Fire", &rapid_fire);
-		ImGui::Checkbox("Max Damage", &max_damage);
 		ImGui::Checkbox("No Recoil", &no_recoil);
-
+		ImGui::Checkbox("Max Damage", &max_damage);
+		ImGui::Text("[       ONI EDIT       ]");		
 		ImGui::End();
 	}
 
@@ -62,8 +99,18 @@ static void render_callback() {
 
 	auto local_mec = (mec_pawn*)local_controller->get_pawn();
 
+	if (living_state) {
+		local_mec->set_alive(true);
+		local_mec->set_health(100);
+		living_state = !living_state;
+	}
+
 	if (infinite_stamina) {
 		local_mec->set_stamina(1.);
+	}
+
+	if (god_mode) {
+		local_mec->set_health(100);
 	}
 
 	if (speedhack) {
@@ -71,7 +118,7 @@ static void render_callback() {
 		local_mec->set_max_speed(2000.0);
 		local_mec->set_friction(100000);
 	}
-
+	
 	if (fast_melee || infinite_melee_range) {
 		auto hand_item = (u_data_melee*)local_mec->get_hand_item();
 		if (util::get_name_from_fname(hand_item->class_private()->fname_index()).find("Data_Melee_C") != std::string::npos) {
@@ -83,7 +130,6 @@ static void render_callback() {
 			}
 			if (infinite_melee_range)
 				mtype->set_range(10000);
-			
 		}
 	}
 
@@ -93,14 +139,14 @@ static void render_callback() {
 		for (auto actor : actors.list()) {
 			auto class_name = util::get_name_from_fname(actor->class_private()->fname_index());
 			auto name = util::get_name_from_fname(actor->outer()->fname_index());
-			if (esp_enabled) {
+			if (player_esp) {
 				if (class_name.find("Mec_C") != std::string::npos) {
 					auto mec = (mec_pawn*)(actor);
 					auto state = mec->player_state();
 					if (!state) continue;
 					auto name = state->get_player_name_private().read_string();
 					auto role = mec->get_player_role();
-
+					
 					auto mec_root = mec->get_root_component();
 					if (!mec_root) continue;
 
@@ -108,7 +154,7 @@ static void render_callback() {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						auto color = role == 4 ? IM_COL32(255, 0, 0, 255) : IM_COL32(0, 255, 0, 255);
-						auto name_norm = "[" + name + "]" + (role == 4 ? " [DISSIDENT]" : "");
+						auto name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "");
 						overlay->draw_text(screen_position, color, name_norm.c_str(), true);
 					}
 				}
@@ -120,7 +166,7 @@ static void render_callback() {
 				auto data = item->get_data();
 				auto item_name = data->get_name().read_string();
 
-				if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY") {
+				if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
 					auto gun_data = (u_data_gun*)data;
 					auto item_root = item->get_root_component();
 					if (!item_root) continue;
@@ -147,11 +193,103 @@ static void render_callback() {
 						gun_data->set_run_precision(0.0);
 					}
 
-					if (gun_esp_enabled) {
+					if (weapon_esp) {
 						auto position = item_root->get_relative_location();
 						vector3 screen_position{};
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-							overlay->draw_text(screen_position, IM_COL32(255, 69, 0, 255), "[GUN]", true);
+							if (item_name == "PISTOL") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[PISTOL]", true); // Orange
+							}
+							else if (item_name == "REVOLVER") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[REVOLVER]", true);
+							}
+							else if (item_name == "SHORTY") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SHORTY]", true);
+							}	
+							else if (item_name == "SMG") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SMG]", true);
+							}	
+							else if (item_name == "RIFLE") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[RIFLE]", true);
+							}	
+							else if (item_name == "SHOTGUN") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SHOTGUN]", true);
+							}							
+						}
+					}
+				}
+
+				if (item_name == "KNIFE" || item_name == "C4" || item_name == "DETONATOR") {
+					auto item_root = item->get_root_component();
+					if (!item_root) continue;
+
+					if (weapon_esp) {
+						auto position = item_root->get_relative_location();
+						vector3 screen_position{};
+
+						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+							if (item_name == "KNIFE") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[KNIFE]", true); // Orange
+							}
+							else if (item_name == "C4") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[C4]", true);
+							}
+							else if (item_name == "DETONATOR") {
+								overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[DETONATOR]", true);
+							}
+						}					
+					}
+				}
+
+				if (item_name == "GAZ BOTTLE" || item_name == "VENT FILTER" || item_name == "RICE" || item_name == "PACKAGE" || item_name == "SAMPLE") {
+					auto item_root = item->get_root_component();
+					if (!item_root) continue;
+
+					if (primary_object_esp) {
+						auto position = item_root->get_relative_location();
+						vector3 screen_position{};
+						
+						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+							if (item_name == "GAZ BOTTLE") {
+								overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), "[GAZ BOTTLE]", true); // Blue
+							}
+							else if (item_name == "VENT FILTER") {
+								overlay->draw_text(screen_position, IM_COL32(65, 115, 217, 255), "[VENT FILTER]", true); // Light Blue
+							}
+							else if (item_name == "RICE") {
+								overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[RICE]", true); // Tan-ish
+							}
+							else if (item_name == "PACKAGE") {
+								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[PACKAGE]", true); // Brown
+							}
+							else if (item_name == "SAMPLE") {
+								overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[SAMPLE]", true); // Purple
+							}
+						}
+					}
+				}
+
+				if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER") {
+					auto item_root = item->get_root_component();
+					if (!item_root) continue;
+
+					if (secondary_object_esp) {
+						auto position = item_root->get_relative_location();
+						vector3 screen_position{};
+
+						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+							if (item_name == "FUSE") {
+								overlay->draw_text(screen_position, IM_COL32(105, 105, 105, 255), "[FUSE]", true); // Grey
+							}
+							else if (item_name == "BATTERY") {
+								overlay->draw_text(screen_position, IM_COL32(189, 189, 189, 255), "[BATTERY]", true); // Light Grey
+							}
+							else if (item_name == "SCREW DRIVER") {
+								overlay->draw_text(screen_position, IM_COL32(255, 255, 255, 255), "[SCREW DRIVER]", true); // Tan-ish
+							}
+							else if (item_name == "CONTAINER") {
+								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[CONTAINER]", true); // Pink-sih purple
+							}
 						}
 					}
 				}
