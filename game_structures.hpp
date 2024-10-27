@@ -57,6 +57,11 @@ namespace protocol {
 				char _pad[0x4];
 			};
 
+			struct FStr_ItemState {
+				int32_t Value_8;        
+				int32_t Time_15;       
+			};
+
 			template <typename T>
 			class t_array {
 			public:
@@ -276,6 +281,11 @@ namespace protocol {
 				}
 			};
 
+			class character_movement_component : public u_object {
+			public:
+				OFFSET(0x178, jump_z_velocity, float);
+				OFFSET(0x170, gravity_scale, float);
+			};
 
 			class a_actor : public u_object {
 			public:
@@ -290,7 +300,6 @@ namespace protocol {
 					return mem::rpm<a_player_state*>(pthis + 0x02B0);
 				}
 			};
-
 
 			class a_player_camera_manager {
 			public:
@@ -378,6 +387,7 @@ namespace protocol {
 				u_skeletal_mesh_component* mesh() {
 					return mem::rpm<u_skeletal_mesh_component*>(pthis + 0x0280);
 				}
+				GET_OFFSET(0x320, CharacterMovement, character_movement_component*);
 			};
 
 			struct u_attribute_set : public u_object {
@@ -407,6 +417,8 @@ namespace protocol {
 			class u_data_item : public u_object {
 			public:
 				GET_OFFSET(0x30, name, fstring);
+				GET_OFFSET(0x120, use_name, fstring);
+				OFFSET(0x190, can_inventory, bool);
 			};
 			class u_data_meleetype : public u_object {
 			public:
@@ -414,6 +426,12 @@ namespace protocol {
 				OFFSET(0x0058, cast_time, double);
 				OFFSET(0x0068, range, int32_t);
 				OFFSET(0x0038, stun, double);
+				OFFSET(0x0030, heal, int32_t);
+				OFFSET(0x0034, stamina, int32_t);
+				OFFSET(0x0048, crit_stun, double);
+				OFFSET(0x0040, crit_heal, int32_t);
+				OFFSET(0x0044, crit_stamina, int32_t);
+				OFFSET(0x0050, cost, int32_t);
 			};
 			class u_data_melee : public u_data_item {
 			public:
@@ -462,9 +480,13 @@ namespace protocol {
 			class world_item : public a_actor {
 			public:
 				GET_OFFSET(0x3B8, data, u_data_item*);
+				GET_OFFSET(0x448, distance, float);
 			};
 			class u_data_player : public u_object {
 			public:
+				OFFSET(0x1B8, regen_hp_speed, double);
+				OFFSET(0x1A8, min_regen, double);
+				OFFSET(0x1B0, max_regen, double);
 				OFFSET(0x0058, speed1, double);
 				OFFSET(0x60, speed2, double);
 				OFFSET(0x0068, speed3, double);
@@ -484,6 +506,10 @@ namespace protocol {
 				OFFSET(0x0C38, stamina, double);
 				OFFSET(0x800, health, int);
 				OFFSET(0xC99, alive, bool);
+				OFFSET(0x4D4, onfloor, bool);
+				OFFSET(0xD72, can_play, bool);
+				OFFSET(0x568, run, bool);
+				OFFSET(0x569, walk, bool);
 				OFFSET(0x0710, acceleration, vector2);
 				OFFSET(0x0608, fire_spread, double);
 				OFFSET(0x0618, vertical_recoil, double);
@@ -501,9 +527,15 @@ namespace protocol {
 				OFFSET(0x0B80, mec_speed, double);
 				OFFSET(0x0610, recovery, double);
 				OFFSET(0x0DD0, friction, double);
+				OFFSET(0x870, hand_state, FStr_ItemState);
+				OFFSET(0x880, bag_state, FStr_ItemState);
 				OFFSET(0x0A40, player_data, u_data_player*);
 				OFFSET(0x0690, hand_item, u_data_item*);
 				OFFSET(0x878, bag_item, u_data_item*);
+
+				a_character* get_player_character() {
+					return reinterpret_cast<a_character*>(this);
+				}
 			};
 		}
 	}

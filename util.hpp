@@ -112,5 +112,4 @@ namespace util {
 		}
 		else return "";
 	}
-
 }
