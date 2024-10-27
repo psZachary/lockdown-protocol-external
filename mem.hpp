@@ -90,9 +90,12 @@ namespace mem {
     template <typename T>
     inline T rpm(uintptr_t address) {
         T data = T();
-
-        mem::read_raw(address, (void*)(&data), sizeof(data));
-
+        mem::read_raw(address, &data, sizeof(T));
         return data;
+    }
+
+    template <typename T>
+    inline bool rpm(uintptr_t address, T* buffer) {
+        return ReadProcessMemory(process, reinterpret_cast<LPCVOID>(address), buffer, sizeof(T), NULL);
     }
 }
