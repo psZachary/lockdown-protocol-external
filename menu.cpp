@@ -3,6 +3,7 @@
 #include "overlay/imgui/imgui.h"
 #include "config.h"
 #include "globals.h"
+#include "util.hpp"
 
 using namespace globals;
 using namespace config;
@@ -21,8 +22,9 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition"); 
-
+		ImGui::Begin("Hawk Tuah Protocol"); 
+		auto cursor_position = util::cursor_position();
+		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255,255,255,255));
 		ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.1059f, 0.3765f, 0.6510f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.1059f, 0.3765f, 0.6510f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.1059f, 0.3765f, 0.6510f, 1.0f));

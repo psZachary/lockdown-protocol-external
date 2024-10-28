@@ -85,7 +85,12 @@ namespace util {
 
 		return true;
 	}
-
+	static vector2 cursor_position() {
+		POINT cursor_point{};
+		if (!GetCursorPos(&cursor_point))
+			return vector2{ 0.f,0.f };
+		return vector2{ static_cast<float>(cursor_point.x), static_cast<float>(cursor_point.y) };
+	}
 	static std::string get_name_from_fname(int key)
 	{
 		static std::map<int, std::string> cached_fnames{};
