@@ -8,6 +8,7 @@
 #include "config.h"
 #include "menu.h"
 #include "globals.h"
+#include "ItemProperties.h"
 
 using namespace menu;
 using namespace config;
@@ -15,12 +16,34 @@ using namespace globals;
 using namespace protocol::engine::sdk;
 using namespace protocol::game::sdk;
 
-double melee_cast_time = 0.1;
-double melee_recover_time = 0.7;
-double melee_stun = 10.0;
-int melee_range = 1.3;
-int melee_cost = 15;
+std::unordered_map<std::string, ItemProperties> itemData;
 
+void InitializeItems() {
+    itemData["KNIFE"] = ItemProperties(0.1, 0.4, 0.4, 130, 20);
+    itemData["PACKAGE"] = ItemProperties(0.3, 1, -1, 180, 40);
+    itemData["GAZ BOTTLE"] = ItemProperties(0.3, 1, -1, 180, 40);
+    itemData["FUSE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+    itemData["SCREW DRIVER"] = ItemProperties(0.1, 0.4, 0.1, 130, 15);
+    itemData["CASSETTE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+    itemData["BATTERY"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+    itemData["VENT FILTER"] = ItemProperties(0.3, 1, -1, 180, 40);
+    itemData["FISH"] = ItemProperties(0.2, 0.7, 1, 130, 20);
+    itemData["RICE"] = ItemProperties(0.3, 1, -1, 180, 40);
+    itemData["CONTAINER"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+    itemData["C4"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+    itemData["NAME"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
+    itemData["SAMPLE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+}
+
+ItemProperties GetItemProperties(const std::string& itemName) {
+    if (itemData.find(itemName) != itemData.end()) {
+        return itemData[itemName];
+    }
+    else {
+        std::cerr << "Item not found: " << itemName << std::endl;
+        return ItemProperties(0.1, 0.4, 10.0, 130, 15);  // Default properties if not found
+    }
+}
 
 static void cache_useful() {
     while (true) {
@@ -42,6 +65,8 @@ static void cache_useful() {
 
         std::vector < mec_pawn* > temp_player_cache{};
         std::vector < world_item* > temp_world_item_cache{};
+
+        InitializeItems();
 
         auto levels = gworld->get_levels();
         for (auto level : levels.list()) {
@@ -97,8 +122,28 @@ static void render_callback() {
         living_state = !living_state;
     }
 
+    auto hand_item = local_mec->get_hand_item();
+    auto melee_item_data = (u_data_melee*)local_mec->get_hand_item();
+
+    //if (hand_item) {
+    //    auto mtype = melee_item_data->get_melee_type();
+    //    // Retrieve the properties
+    //    double castTime = mtype->get_cast_time();
+    //    double recoverTime = mtype->get_recover_time();
+    //    double stun = mtype->get_stun();
+    //    int cost = mtype->get_cost();
+    //    int range = mtype->get_range();
+
+    //    // Format and output the string to the console
+    //    std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
+    //    << "ItemProperties(" << castTime << ", "
+    //    << recoverTime << ", "
+    //    << stun << ", "
+    //    << range << ", "
+    //    << cost << ");" << std::endl;
+    //}
+
     if (infinite_ammo) {
-        auto hand_item = local_mec->get_hand_item();
         if (hand_item) {
             auto item_name = hand_item->get_name().read_string();
             if (item_name == "SHORTY" || item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHOTGUN" || item_name == "RIFLE" || item_name == "SMG") {
@@ -141,22 +186,8 @@ static void render_callback() {
     }
 
     if (fast_melee || infinite_melee_range) {
-        auto hand_item = (u_data_melee*)local_mec->get_hand_item();
         if (util::get_name_from_fname(hand_item->class_private()->fname_index()).find("Data_Melee_C") != std::string::npos) {
-            auto mtype = hand_item->get_melee_type();
-
-            if (set_fast_melee = false) {
-                set_fast_melee = true;
-                melee_cast_time = mtype->get_cast_time();
-                melee_recover_time = mtype->get_recover_time();
-                melee_stun = mtype->get_stun();
-                melee_cost = mtype->get_cost();
-            }
-
-            if (set_melee_range = false) {
-                set_melee_range = true;
-                melee_range = mtype->get_range();
-            }
+            auto mtype = melee_item_data->get_melee_type();
 
             if (fast_melee) {
                 mtype->set_cast_time(0.05);
@@ -169,26 +200,31 @@ static void render_callback() {
             }
         }
     }
-    else {
-        auto hand_item = (u_data_melee*)local_mec->get_hand_item();
-        if (util::get_name_from_fname(hand_item->class_private()->fname_index()).find("Data_Melee_C") != std::string::npos) {
-            auto mtype = hand_item->get_melee_type();
 
-            if (!fast_melee) {
-                set_fast_melee = false;
-                mtype->set_cast_time(melee_cast_time);
-                mtype->set_recover_time(melee_recover_time);
-                mtype->set_stun(melee_stun);
-                mtype->set_cost(melee_cost);
-            }
-            if (!infinite_melee_range) {
-                set_melee_range = false;
-                mtype->set_range(melee_range);
-            }
+    if (!fast_melee) {
+        auto mtype = melee_item_data->get_melee_type();
+        std::string item_name = hand_item->get_name().read_string();
+        ItemProperties itemprops = GetItemProperties(item_name);
+
+        if (!fast_melee) {
+            mtype->set_cast_time(itemprops.melee_cast_time);
+            mtype->set_recover_time(itemprops.melee_recover_time);
+            mtype->set_stun(itemprops.melee_stun);
+            mtype->set_cost(itemprops.melee_cost);
         }
     }
-    if (player_esp) {
 
+    if (!infinite_melee_range) {
+        auto mtype = melee_item_data->get_melee_type();
+        std::string item_name = hand_item->get_name().read_string();
+        ItemProperties itemprops = GetItemProperties(item_name);
+
+        if (!infinite_melee_range) {
+            mtype->set_range(itemprops.melee_range);
+        }
+    }
+
+    if (player_esp) {
         for (auto mec : player_cache) {
             auto state = mec->player_state();
             if (!state) continue;
@@ -209,11 +245,15 @@ static void render_callback() {
             }
         }
     }
+
     for (auto item : world_item_cache) {
         if (!item) continue;
 
         auto data = item->get_data();
         auto item_name = data->get_name().read_string();
+        auto item_state = item->get_item_state();
+        int item_value = item_state.Value_8;
+        int item_time = item_state.Time_15;
         auto distance = item->get_distance();
 
         if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
@@ -265,6 +305,9 @@ static void render_callback() {
                     else if (item_name == "SHOTGUN") {
                         overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SHOTGUN]", true);
                     }
+                    if (weapon_details) {
+                        overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(250, 92, 0, 255), ("[Ammo: " + std::to_string(item_value) + "]").c_str(), true);
+                    }
                 }
             }
         }
@@ -302,18 +345,80 @@ static void render_callback() {
                 if (util::w2s(position, last_frame_cached.pov, screen_position)) {
                     if (item_name == "GAZ BOTTLE") {
                         overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), "[GAZ BOTTLE]", true); // Blue
+
+                        if (primary_object_details) {
+                            if (item_value == 0) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(0, 83, 250, 255), "[Color: Yellow]", true);
+                            }
+                            else if (item_value == 1) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(0, 83, 250, 255), "[Color: Red]", true);
+                            }
+                            else if (item_value == 2) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(0, 83, 250, 255), "[Color: Blue]", true);
+                            }
+                        }
                     }
                     else if (item_name == "VENT FILTER") {
                         overlay->draw_text(screen_position, IM_COL32(65, 115, 217, 255), "[VENT FILTER]", true); // Light Blue
+
+                        if (primary_object_details) {
+                            overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(65, 115, 217, 255), ("[Clean %: " + std::to_string(item_value) + "]").c_str(), true);
+                        }
                     }
                     else if (item_name == "RICE") {
-                        overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[RICE]", true); // Tan-ish
+                        if (item_value == 1) {
+                            overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[WHITE RICE]", true);
+                        }
+                        else if (item_value == 2) {
+                            overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[BROWN RICE]", true);
+                        }
+                        else if (item_value == 3) {
+                            overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[BLACK RICE]", true);
+                        }
                     }
                     else if (item_name == "PACKAGE") {
                         overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[PACKAGE]", true); // Brown
+
+                        if (primary_object_details) {
+                            if (item_value == 1) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(87, 47, 24, 255), "[Security]", true);
+                            }
+                            else if (item_value == 2) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(87, 47, 24, 255), "[Computers]", true);
+                            }
+                            else if (item_value == 3) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(87, 47, 24, 255), "[Botanic]", true);
+                            }
+                            else if (item_value == 4) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(87, 47, 24, 255), "[Restaurant]", true);
+                            }
+                            else if (item_value == 5) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(87, 47, 24, 255), "[Medical]", true);
+                            }
+                            else if (item_value == 6) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(87, 47, 24, 255), "[Tutorial]", true);
+                            }
+                            else if (item_value == 7) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(87, 47, 24, 255), "[Machine]", true);
+                            }
+                        }
                     }
                     else if (item_name == "SAMPLE") {
-                        overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[SAMPLE]", true); // Purple
+                        if (item_value == 1) {
+                            overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[GREEN SAMPLE]", true);
+                        }
+                        else if (item_value == 2) {
+                            overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[YELLOW SAMPLE]", true);
+                        }
+                        else if (item_value == 3) {
+                            overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[BLUE SAMPLE]", true);
+                        }
+                        else if (item_value == 4) {
+                            overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[WHITE SAMPLE]", true);
+                        }
+                        else if (item_value == 5) {
+                            overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[RED SAMPLE]", true);
+                        }
                     }
                 }
             }
@@ -330,24 +435,75 @@ static void render_callback() {
                 if (util::w2s(position, last_frame_cached.pov, screen_position)) {
                     if (item_name == "FUSE") {
                         overlay->draw_text(screen_position, IM_COL32(105, 105, 105, 255), "[FUSE]", true); // Grey
+
+                        if (secondary_object_details) {
+                            const char* color_names[] = { "INVALID", "RED", "YELLOW", "BLUE" };
+
+                            int color_index_value = (item_value >= 1 && item_value <= 3) ? item_value : 0;
+                            int color_index_time = (item_time >= 1 && item_time <= 3) ? item_time : 0;
+
+                            std::string fuse_info = "[" + std::string(color_names[color_index_value]) + " | " + std::string(color_names[color_index_time]) + "]";
+
+                            overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(105, 105, 105, 255), fuse_info.c_str(), true);
+                        }
                     }
                     else if (item_name == "BATTERY") {
                         overlay->draw_text(screen_position, IM_COL32(189, 189, 189, 255), "[BATTERY]", true); // Light Grey
+
+                        if (secondary_object_details) {
+                            overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(189, 189, 189, 255), ("[Charge %: " + std::to_string(item_value) + "]").c_str(), true);
+                        }
                     }
                     else if (item_name == "SCREW DRIVER") {
                         overlay->draw_text(screen_position, IM_COL32(255, 255, 255, 255), "[SCREW DRIVER]", true); // Tan-ish
                     }
                     else if (item_name == "CONTAINER") {
                         overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[CONTAINER]", true); // Pink-sih purple
+
+                        if (secondary_object_details) {
+                            if (item_value == -1) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Dirty]", true);
+                            }
+                            if (item_value == 0) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Clean]", true);
+                            }
+                            else if (item_value == 1) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Green]", true);
+                            }
+                            else if (item_value == 2) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Yellow]", true);
+                            }
+                            else if (item_value == 3) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Blue", true);
+                            }
+                            else if (item_value == 4) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[White]", true);
+                            }
+                            else if (item_value == 5) {
+                                overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Red]", true);
+                            }
+                            else if (item_value == 6) {
+                                if (item_time == 1) {
+                                    overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[White Rice]", true);
+                                }
+                                else if (item_time == 2) {
+                                    overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Brown Rice]", true);
+                                }
+                                else if (item_time == 3) {
+                                    overlay->draw_text({ static_cast<float>(screen_position.x), static_cast<float>(screen_position.y) + 15 }, IM_COL32(136, 0, 145, 255), "[Black Rice]", true);
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
-
 }
 
 int main() {
+    InitializeItems();
+
     overlay = new c_overlay();
 
     if (mem::attach("LOCKDOWN Protocol  ") != 0) {
