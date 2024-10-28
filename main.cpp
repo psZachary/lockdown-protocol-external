@@ -201,26 +201,28 @@ static void render_callback() {
         }
     }
 
-    if (!fast_melee) {
-        auto mtype = melee_item_data->get_melee_type();
-        std::string item_name = hand_item->get_name().read_string();
-        ItemProperties itemprops = GetItemProperties(item_name);
-
+    if (hand_item) {
         if (!fast_melee) {
-            mtype->set_cast_time(itemprops.melee_cast_time);
-            mtype->set_recover_time(itemprops.melee_recover_time);
-            mtype->set_stun(itemprops.melee_stun);
-            mtype->set_cost(itemprops.melee_cost);
-        }
-    }
+            auto mtype = melee_item_data->get_melee_type();
+            std::string item_name = hand_item->get_name().read_string();
+            ItemProperties itemprops = GetItemProperties(item_name);
 
-    if (!infinite_melee_range) {
-        auto mtype = melee_item_data->get_melee_type();
-        std::string item_name = hand_item->get_name().read_string();
-        ItemProperties itemprops = GetItemProperties(item_name);
+            if (!fast_melee) {
+                mtype->set_cast_time(itemprops.melee_cast_time);
+                mtype->set_recover_time(itemprops.melee_recover_time);
+                mtype->set_stun(itemprops.melee_stun);
+                mtype->set_cost(itemprops.melee_cost);
+            }
+        }
 
         if (!infinite_melee_range) {
-            mtype->set_range(itemprops.melee_range);
+            auto mtype = melee_item_data->get_melee_type();
+            std::string item_name = hand_item->get_name().read_string();
+            ItemProperties itemprops = GetItemProperties(item_name);
+
+            if (!infinite_melee_range) {
+                mtype->set_range(itemprops.melee_range);
+            }
         }
     }
 
