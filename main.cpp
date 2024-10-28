@@ -84,7 +84,7 @@ static void render_callback() {
 
 	if (menu_open) { 
 		
-		ImGui::Begin("Hawk Tuah Protocol");
+		ImGui::Begin("Hawk Tuah Protocol", 0, ImGuiWindowFlags_AlwaysAutoResize);
 
 		// imvec4 - rbga - 1.0 = 100% (or 255) 
 		ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.1059f, 0.3765f, 0.6510f, 1.0f));
