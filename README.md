@@ -1,6 +1,4 @@
-# Game Enhancement Tool (Fork of Lockdown Protocol External)
-
-This project is a fork of the [Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external) by [psZachary](https://github.com/psZachary). This fork extends the original functionality by adding enhanced item data management, overlay improvements, and various player enhancement features.
+# Game Enhancement Tool
 
 ## Features
 - **Player Enhancements**: Toggle options for god mode, infinite ammo, infinite stamina, and more.
