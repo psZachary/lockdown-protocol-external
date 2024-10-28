@@ -67,6 +67,8 @@ static void cache_useful() {
 static void render_callback() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
+    menu::draw();
+
     f_camera_cache last_frame_cached = local_camera_manager->get_cached_frame_private();
     auto players = game_state->player_array();
 
