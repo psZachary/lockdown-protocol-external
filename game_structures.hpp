@@ -414,7 +414,6 @@ namespace protocol {
 	namespace game {
 		using namespace engine::sdk;
 		namespace sdk {
-			
 			class u_data_item : public u_object {
 			public:
 				GET_OFFSET(0x30, name, fstring);
@@ -482,6 +481,7 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x3B8, data, u_data_item*);
 				GET_OFFSET(0x448, distance, float);
+				OFFSET(0x3C8, item_state, FStr_ItemState);
 			};
 			class u_data_player : public u_object {
 			public:
@@ -509,6 +509,7 @@ namespace protocol {
 				OFFSET(0xC99, alive, bool);
 				OFFSET(0x4D4, onfloor, bool);
 				OFFSET(0xD72, can_play, bool);
+				OFFSET(0x1058, in_game, bool);
 				OFFSET(0x568, run, bool);
 				OFFSET(0x569, walk, bool);
 				OFFSET(0x0710, acceleration, vector2);
@@ -528,6 +529,8 @@ namespace protocol {
 				OFFSET(0x0B80, mec_speed, double);
 				OFFSET(0x0610, recovery, double);
 				OFFSET(0x0DD0, friction, double);
+				OFFSET(0x970, body_armor_color, double);
+				OFFSET(0x1134, skin_color, int32_t);
 				OFFSET(0x870, hand_state, FStr_ItemState);
 				OFFSET(0x880, bag_state, FStr_ItemState);
 				OFFSET(0x0A40, player_data, u_data_player*);

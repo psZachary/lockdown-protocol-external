@@ -110,6 +110,9 @@
     <ClInclude Include="globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ItemProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="overlay\imgui\imgui_impl_metal.mm">

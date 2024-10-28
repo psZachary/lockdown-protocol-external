@@ -144,6 +144,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="game_structures.hpp" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="ItemProperties.h" />
     <ClInclude Include="mem.hpp" />
     <ClInclude Include="game_math.hpp" />
     <ClInclude Include="menu.h" />
