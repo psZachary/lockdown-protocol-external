@@ -37,8 +37,5 @@ ItemProperties knifeProps = GetItemProperties("KNIFE");
 std::cout << "KNIFE cast time: " << knifeProps.melee_cast_time << std::endl;
 ```
 
-## Original Project
-This project is a fork of [psZachary's Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external), with additional enhancements focused on item properties and gameplay customization.
-
 ## Contributing
 Feel free to submit issues, fork the repository, and make pull requests to enhance features, fix bugs, or improve performance.
