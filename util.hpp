@@ -1,3 +1,5 @@
+#pragma once
+
 #include "game_math.hpp"
 #include "game_structures.hpp"
 #include <Windows.h>

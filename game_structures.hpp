@@ -3,6 +3,7 @@
 #include "game_math.hpp"
 #include <vector>
 #include <map>
+#include "mem.hpp"
 
 #define pthis (uintptr_t)this
 // Does not add get_##name to the front and uses the direct name

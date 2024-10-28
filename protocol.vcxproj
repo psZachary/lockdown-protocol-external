@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="menu.cpp" />
     <ClCompile Include="overlay\dx11\moverlay.cpp" />
     <ClCompile Include="overlay\imgui\imgui.cpp" />
     <ClCompile Include="overlay\imgui\imgui_demo.cpp" />
@@ -140,9 +141,12 @@
     <ClCompile Include="overlay\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
     <ClInclude Include="game_structures.hpp" />
+    <ClInclude Include="globals.h" />
     <ClInclude Include="mem.hpp" />
     <ClInclude Include="game_math.hpp" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="overlay\dx11\moverlay.h" />
     <ClInclude Include="overlay\imgui\imconfig.h" />
     <ClInclude Include="overlay\imgui\imgui.h" />
