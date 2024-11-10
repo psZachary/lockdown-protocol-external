@@ -16,4 +16,10 @@ namespace globals {
 
 	inline std::vector < mec_pawn* > player_cache{};
 	inline std::vector < world_item* > world_item_cache{};
+	inline std::vector < task_vents* > task_vents_cache{};
+	inline std::vector < task_machines* > task_machines_cache{};
+	inline std::vector < task_alimentations* > task_alims_cache{};
+	inline std::vector < task_deliveries* > task_delivery_cache{};
+	inline std::vector < task_pizzushis* > task_pizzushi_cache{};
+	inline std::vector < task_data* > task_data_cache{};
 }

@@ -199,6 +199,24 @@ namespace protocol {
 				}
 			};
 
+			struct FVector {
+				double X;  // Offset: 0x0
+				double Y;  // Offset: 0x8
+				double Z;  // Offset: 0x10
+			};
+
+			class FloatVector : public u_object {
+			public:
+				// Getter for FVector at offset
+				FVector get_net_location() {
+					return mem::rpm<FVector>(pthis + 0x588); 
+				}
+
+				// Setter for FVector at offset
+				void set_net_location(const FVector& value) {
+					mem::wpm<FVector>(pthis + 0x588, value); 
+				}
+			};
 
 			// fix later, fuk u bditt
 			class fstring : public t_array<wchar_t> {
@@ -414,10 +432,21 @@ namespace protocol {
 	namespace game {
 		using namespace engine::sdk;
 		namespace sdk {
+			class u_data_item_throwtype : public u_object {
+			public:
+				OFFSET(0x30, throw_force, int32_t);
+				OFFSET(0x34, vertical_force, int32_t);
+				OFFSET(0x38, vertical_offset, int32_t);
+				OFFSET(0x40, restitution, double);
+				OFFSET(0x48, gravity, double);
+				OFFSET(0x50, drag, double);
+				OFFSET(0x58, radius, double);
+			};
 			class u_data_item : public u_object {
 			public:
 				GET_OFFSET(0x30, name, fstring);
 				GET_OFFSET(0x120, use_name, fstring);
+				OFFSET(0x1A0, throw_type, u_data_item_throwtype*);
 				OFFSET(0x190, can_inventory, bool);
 			};
 			class u_data_meleetype : public u_object {
@@ -481,10 +510,109 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x3B8, data, u_data_item*);
 				GET_OFFSET(0x448, distance, float);
+				OFFSET(0x320, location, FVector);
 				OFFSET(0x3C8, item_state, FStr_ItemState);
+			};
+
+			class a_itemslot_c : public a_actor {
+			public:
+				GET_OFFSET(0x2D8, item_state, FStr_ItemState);
+			};
+			class a_vent_c : public a_actor {
+			public:
+				GET_OFFSET(0x348, task_vent, bool);
+				GET_OFFSET(0x308, filter, a_itemslot_c*);
+				GET_OFFSET(0x2E8, root, u_scene_component*);
+			};
+			class task_vents : public a_actor {
+			public:
+				GET_OFFSET(0x378, task_vents, t_array<a_vent_c*>);
+			};
+			class a_bottle_slot_c : public a_actor {
+			public:
+				GET_OFFSET(0x304, request_level, int32_t);
+				GET_OFFSET(0x2DC, level, int32_t);
+				GET_OFFSET(0x2D0, root, u_scene_component*);
+			};
+			class a_machine_pannel_c : public a_actor {
+			public:
+				GET_OFFSET(0x318, bottles, t_array<a_bottle_slot_c*>);
+			};
+			class task_machines : public a_actor {
+			public:
+				GET_OFFSET(0x380, machines, t_array<a_machine_pannel_c*>);
+			};
+			class u_text_block : public u_object {
+			public:
+				GET_OFFSET(0x170, text, FText*);
+			};
+			class uw_datapc_ui_c : public u_object {
+			public:
+				GET_OFFSET(0x288, head_text, u_text_block*);
+			};
+			class a_data_pc_c : public a_actor {
+			public:
+				GET_OFFSET(0x300, root, u_scene_component*);
+				GET_OFFSET(0x2C0, map_position, u_scene_component*);
+				GET_OFFSET(0x310, state, int);
+				GET_OFFSET(0x314, process, int32_t);
+				GET_OFFSET(0x330, room, int32_t);
+				GET_OFFSET(0x334, index_message, int32_t);
+				GET_OFFSET(0x348, other_pc, a_data_pc_c*);
+				GET_OFFSET(0x308, w_screen, uw_datapc_ui_c*);
+			};
+			class task_data : public a_actor {
+			public:
+				GET_OFFSET(0x358, source_pc, t_array<a_data_pc_c*>);
+				GET_OFFSET(0x368, target_pc, t_array<a_data_pc_c*>);
+				GET_OFFSET(0x378, task_source_pc, t_array<a_data_pc_c*>);
+				GET_OFFSET(0x388, task_target_pc, t_array<a_data_pc_c*>);
+			};
+			class a_alimbox_c : public a_actor {
+			public:
+				GET_OFFSET(0x300, root, u_scene_component*);
+				GET_OFFSET(0x344, battery_value, int32_t);
+				GET_OFFSET(0x338, in_color, int32_t);
+				GET_OFFSET(0x33C, out_color, int32_t);
+				GET_OFFSET(0x3B8, task_value, int32_t);
+				GET_OFFSET(0x408, finished, bool);
+				GET_OFFSET(0x350, alimented, bool);
+			};
+			class task_alimentations : public a_actor {
+			public:
+				GET_OFFSET(0x3A8, task_alims, t_array<a_alimbox_c*>);
+			};
+
+			class a_deliverycase_c : public a_actor {
+			public:
+				GET_OFFSET(0x2D8, root, u_scene_component*);
+				GET_OFFSET(0x330, good_package, uint8_t);
+			};
+			class task_deliveries : public a_actor {
+			public:
+				GET_OFFSET(0x368, task_cases, t_array<a_deliverycase_c*>);
+			};
+			class a_pizzushi_table_c : public a_actor {
+			public:
+				GET_OFFSET(0x300, root, u_scene_component*);
+				GET_OFFSET(0x30C, rice_type, int32_t);
+				GET_OFFSET(0x310, fish_type, int32_t);
+				GET_OFFSET(0x314, topping_type, int32_t);
+				GET_OFFSET(0x338, finished, bool);
+				GET_OFFSET(0x320, request_state, int32_t);
+			};
+			class task_pizzushis : public a_actor {
+			public:
+				GET_OFFSET(0x370, task_tables, t_array<a_pizzushi_table_c*>);
 			};
 			class u_data_player : public u_object {
 			public:
+				OFFSET(0x30, body_armor_1, int32_t);
+				OFFSET(0x34, body_armor_2, int32_t);
+				OFFSET(0x38, body_armor_3, int32_t);
+				OFFSET(0x3C, head_armor_1, int32_t);
+				OFFSET(0x40, head_armor_2, int32_t);
+				OFFSET(0x44, head_armor_3, int32_t);
 				OFFSET(0x1B8, regen_hp_speed, double);
 				OFFSET(0x1A8, min_regen, double);
 				OFFSET(0x1B0, max_regen, double);
@@ -530,6 +658,10 @@ namespace protocol {
 				OFFSET(0x0610, recovery, double);
 				OFFSET(0x0DD0, friction, double);
 				OFFSET(0x970, body_armor_color, double);
+				OFFSET(0x6A8, move_input, FVector);
+				OFFSET(0x6A1, MoveInputState, int);
+				OFFSET(0x6C0, net_move_input_state, int);
+				OFFSET(0x588, net_location, FVector);
 				OFFSET(0x1134, skin_color, int32_t);
 				OFFSET(0x870, hand_state, FStr_ItemState);
 				OFFSET(0x880, bag_state, FStr_ItemState);
@@ -539,7 +671,7 @@ namespace protocol {
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);
-				}
+				};
 			};
 		}
 	}
