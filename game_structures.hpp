@@ -146,6 +146,7 @@ namespace protocol {
 				float fov;
 				float desiredfov;
 			};
+
 			struct f_camera_cache
 			{
 				char pad_0x0[0x10];
@@ -203,6 +204,16 @@ namespace protocol {
 				double X;  // Offset: 0x0
 				double Y;  // Offset: 0x8
 				double Z;  // Offset: 0x10
+			};
+
+			struct ft_view_target {
+				f_minimal_view_info pov; // Offset 0x10
+			};
+
+			struct FRotator {
+				double Pitch;  // Offset: 0x0
+				double Yaw;  // Offset: 0x8
+				double Roll;  // Offset: 0x10
 			};
 
 			class FloatVector : public u_object {
@@ -324,6 +335,13 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x22B0, cached_frame_private, f_camera_cache);
 				GET_OFFSET(0x2A80, last_cached_frame_private, f_camera_cache);
+				OFFSET(0x12C0, view_target, ft_view_target);
+				OFFSET(0x3314, view_pitch_min, float);
+				OFFSET(0x3318, view_pitch_max, float);
+				OFFSET(0x331C, view_yaw_min, float);
+				OFFSET(0x3320, view_yaw_max, float);
+				OFFSET(0x3324, view_roll_min, float);
+				OFFSET(0x3328, view_roll_max, float);
 			};
 
 			class a_player_state : public a_actor {
@@ -347,6 +365,8 @@ namespace protocol {
 			class a_player_controller : public a_controller {
 			public:
 				GET_OFFSET(0x0348, camera_manager, a_player_camera_manager*);
+				GET_OFFSET(0x360, target_view_rotation, FRotator);
+				GET_OFFSET(0x390, smooth_target_view_rotation_speed, float);
 				GET_OFFSET(0x0338, pawn, a_pawn*);
 			};
 
@@ -646,6 +666,7 @@ namespace protocol {
 				OFFSET(0x980, aim_offset_smooth, FVector);
 				OFFSET(0x998, aim_offset, FVector);
 				OFFSET(0x9E8, aim_offset_target, FVector);
+				OFFSET(0x770, target_lock_rotation, FRotator);
 				OFFSET(0xA00, aim_oscilation_factor, double);
 				OFFSET(0x800, health, int);
 				OFFSET(0xC99, alive, bool);
@@ -682,6 +703,9 @@ namespace protocol {
 				OFFSET(0x0A40, player_data, u_data_player*);
 				OFFSET(0x0690, hand_item, u_data_item*);
 				OFFSET(0x878, bag_item, u_data_item*);
+				OFFSET(0x3A0, camera, u_camera_component*);
+				OFFSET(0x388, absolute_rotation, u_scene_component*);
+				OFFSET(0x420, orientation, u_scene_component*);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);

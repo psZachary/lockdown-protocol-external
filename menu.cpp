@@ -66,7 +66,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.6");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -128,6 +128,7 @@ void menu::draw()
 
 						if (ImGui::CollapsingHeader("Details##PlayerESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Distance##PlayerDistance", &player_distance);
+							ImGui::Checkbox("Box##PlayerBox", &player_box);
 						}
 						ImGui::EndChild();
 
@@ -230,7 +231,7 @@ void menu::draw()
 						ImGui::EndChild();
 
 						calculatedHeight += itemHeight * 8.5;
-						
+
 						ImGui::EndTabItem();
 					}
 
@@ -256,9 +257,9 @@ void menu::draw()
 							ImGui::ColorEdit4("Container Color", (float*)&container_color);
 						}
 						ImGui::EndChild();
-						
+
 						calculatedHeight += itemHeight * 7.5;
-						
+
 						ImGui::EndTabItem();
 					}
 
@@ -268,19 +269,44 @@ void menu::draw()
 		}
 		// PLAYER
 		else if (selected_tab == 2) {
-			ImGui::Checkbox("Speedhack", &speedhack);
-			ImGui::SameLine();
-			ImHotkey("##SpeedhackHotkey", &speedhack_hotkey);
+			// Begin custom side-by-side child sections
+			float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
+			ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
+			if (ImGui::CollapsingHeader("Toggle Hacks##PlayerToggleHacks", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Checkbox("Speedhack", &speedhack);
+				ImGui::SameLine();
+				ImHotkey("##SpeedhackHotkey", &speedhack_hotkey);
 
-			ImGui::Checkbox("God Mode", &god_mode);
-			ImGui::SameLine();
-			ImHotkey("##GodmodeHotkey", &god_mode_hotkey);
+				ImGui::Checkbox("God Mode", &god_mode);
+				ImGui::SameLine();
+				ImHotkey("##GodmodeHotkey", &god_mode_hotkey);
 
-			ImGui::Checkbox("Infinite Stamina", &infinite_stamina);
-			ImGui::SameLine();
-			ImHotkey("##InfstamHotkey", &infinite_stamina_hotkey);
+				ImGui::Checkbox("Infinite Stamina", &infinite_stamina);
+				ImGui::SameLine();
+				ImHotkey("##InfstamHotkey", &infinite_stamina_hotkey);
 
-			ImGui::Checkbox("Revive", &living_state); 
+				ImGui::BeginDisabled(true);
+				ImGui::Checkbox("Aimbot", &aimbot);
+				ImGui::SameLine();
+				ImHotkey("##AimbotHotkey", &aimbot_hotkey);
+				ImGui::EndDisabled();
+
+				ImGui::Checkbox("Revive", &living_state);
+			}
+			ImGui::EndChild();
+
+			ImGui::SameLine();
+
+			ImGui::BeginChild("OthersSection", ImVec2(halfWidth, 0), true);
+
+			if (ImGui::CollapsingHeader("Other##PlayerOtherHacks", ImGuiTreeNodeFlags_DefaultOpen)) {
+				int fov = local_mec->get_camera()->get_field_of_view();
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+				if (ImGui::SliderInt("##fov", &fov, 20, 150, "FOV: %d")) {
+					local_mec->get_camera()->set_field_of_view(fov);
+				}
+			}
+			ImGui::EndChild();
 		}
 		// WEAPON
 		else if (selected_tab == 3) {
@@ -294,23 +320,23 @@ void menu::draw()
 				ImHotkey("##InfMeleeRangeHotkey", &infinite_melee_range_hotkey);
 			}
 			if (ImGui::CollapsingHeader("GUN", ImGuiTreeNodeFlags_DefaultOpen)) {
-				ImGui::Checkbox("Auto Fire", &auto_fire); 
+				ImGui::Checkbox("Auto Fire", &auto_fire);
 				ImGui::SameLine();
 				ImHotkey("##AutoFireHotkey", &auto_fire_hotkey);
 
-				ImGui::Checkbox("Rapid Fire", &rapid_fire); 
+				ImGui::Checkbox("Rapid Fire", &rapid_fire);
 				ImGui::SameLine();
 				ImHotkey("##RapidFireHotkey", &rapid_fire_hotkey);
 
-				ImGui::Checkbox("No Recoil", &no_recoil); 
+				ImGui::Checkbox("No Recoil", &no_recoil);
 				ImGui::SameLine();
 				ImHotkey("##NoRecoilHotkey", &no_recoil_hotkey);
 
-				ImGui::Checkbox("Max Damage", &max_damage); 
+				ImGui::Checkbox("Max Damage", &max_damage);
 				ImGui::SameLine();
 				ImHotkey("##MaxDamageHotkey", &max_damage_hotkey);
 
-				ImGui::Checkbox("Infinite Ammo", &infinite_ammo); 
+				ImGui::Checkbox("Infinite Ammo", &infinite_ammo);
 			}
 			calculatedHeight += itemHeight * 10.5;
 		}

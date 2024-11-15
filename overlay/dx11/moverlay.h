@@ -65,7 +65,7 @@ public:
 
         draw_list->AddText(NULL, font_size, pos, col, text_begin);
     }
-    inline void draw_rect(const ImVec2& pos1, const ImVec2& pos2, ImU32 col, bool outline = false, float rounding = 0.0f, int rounding_corners_flags = 0x0F, float thickness = 1.0f) {
+    inline void draw_rect(const ImVec2& pos1, const ImVec2& pos2, ImU32 col, bool outline = false, float rounding = 0.0f, int rounding_corners_flags = 0x0F, float thickness = 0.1f) {
         if (outline) {
             draw_list->AddRect(ImVec2(pos1.x + 1, pos1.y + 1), ImVec2(pos2.x + 1, pos2.y
                 + 1), col, rounding, rounding_corners_flags, thickness);
@@ -75,6 +75,21 @@ public:
         }
 
         draw_list->AddRect(pos1, pos2, col, rounding, rounding_corners_flags, thickness);
+    }
+    inline void draw_rect_filled(const ImVec2& pos1, const ImVec2& pos2, ImU32 col, float rounding = 0.0f, int rounding_corners_flags = 0x0F) {
+        draw_list->AddRectFilled(pos1, pos2, col, rounding, rounding_corners_flags);
+    }
+
+    inline void draw_rect_with_fill(const ImVec2& pos1, const ImVec2& pos2, ImU32 fill_color, ImU32 outline_color, float thickness = 1.0f, float rounding = 0.0f, int rounding_corners_flags = 0x0F) {
+        // Draw filled rectangle if alpha in fill_color > 0
+        if ((fill_color >> 24) & 0xFF) { // Checks if the alpha component of fill_color is non-zero
+            draw_list->AddRectFilled(pos1, pos2, fill_color, rounding, rounding_corners_flags);
+        }
+
+        // Draw the outline
+        if (thickness > 0.0f) {
+            draw_list->AddRect(pos1, pos2, outline_color, rounding, rounding_corners_flags, thickness);
+        }
     }
 
     FLOAT window_width, window_height;

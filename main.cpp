@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include "data_cache.h"
 #include <algorithm>
+#include <limits>
+#include "game_math.hpp"
 
 using namespace menu;
 using namespace config;
@@ -66,6 +68,20 @@ std::string CalculateDistance(const FVector& location1, const vector3& location2
 	std::ostringstream stream;
 	stream << std::fixed << std::setprecision(2) << distance;
 	return stream.str();
+}
+
+// Function to convert FVector to vector3
+vector3 ConvertFVectorToVector3(const FVector& fvec) {
+	return vector3{ static_cast<float>(fvec.X), static_cast<float>(fvec.Y), static_cast<float>(fvec.Z) };
+}
+
+// Example CalculateDistance function (returns a float)
+float CalculateDistanceFloat(const vector3& player_pos, const vector3& enemy_pos) {
+	return sqrtf(
+		powf(enemy_pos.x - player_pos.x, 2.0f) +
+		powf(enemy_pos.y - player_pos.y, 2.0f) +
+		powf(enemy_pos.z - player_pos.z, 2.0f)
+	);
 }
 
 std::string TranslateRoomName(int roomNum) {
@@ -179,7 +195,7 @@ static void render_callback() {
 	f_camera_cache last_frame_cached = local_camera_manager->get_cached_frame_private();
 	auto players = game_state->player_array();
 
-	if (GetAsyncKeyState(config::esp_hotkey) & 1) {
+	if (GetAsyncKeyState(esp_hotkey) & 1) {
 		esp_enabled = !esp_enabled;
 		player_esp = esp_enabled;
 		weapon_esp = esp_enabled;
@@ -188,26 +204,29 @@ static void render_callback() {
 		secondary_object_esp = esp_enabled;
 		//std::cout << "Fire Spread:" << local_mec->get_fire_spread() << std::endl;
 	}
-	if (GetAsyncKeyState(config::speedhack_hotkey) & 1) {
+	if (GetAsyncKeyState(speedhack_hotkey) & 1) {
 		speedhack = !speedhack;
 	}
-	if (GetAsyncKeyState(config::god_mode_hotkey) & 1) {
+	if (GetAsyncKeyState(god_mode_hotkey) & 1) {
 		god_mode = !god_mode;
 	}
-	if (GetAsyncKeyState(config::infinite_stamina_hotkey) & 1) {
+	if (GetAsyncKeyState(infinite_stamina_hotkey) & 1) {
 		infinite_stamina = !infinite_stamina;
 	}
-	if (GetAsyncKeyState(config::fast_melee_hotkey) & 1) {
+	if (GetAsyncKeyState(fast_melee_hotkey) & 1) {
 		fast_melee = !fast_melee;
 	}
-	if (GetAsyncKeyState(config::infinite_melee_range_hotkey) & 1) {
+	if (GetAsyncKeyState(infinite_melee_range_hotkey) & 1) {
 		infinite_melee_range = !infinite_melee_range;
 	}
-	if (GetAsyncKeyState(config::auto_fire_hotkey) & 1) {
+	if (GetAsyncKeyState(auto_fire_hotkey) & 1) {
 		auto_fire = !auto_fire;
 	}
-	if (GetAsyncKeyState(config::rapid_fire_hotkey) & 1) {
+	if (GetAsyncKeyState(rapid_fire_hotkey) & 1) {
 		rapid_fire = !rapid_fire;
+	}
+	if (GetAsyncKeyState(aimbot_hotkey) & 1) {
+		aimbot = !aimbot;
 	}
 
 	auto hand_item = local_mec->get_hand_item();
@@ -230,6 +249,63 @@ static void render_callback() {
 	//    << range << ", "
 	//    << cost << ");" << std::endl;
 	//}
+
+	if (aimbot) {
+		auto player_position_fvector = local_mec->get_net_location();
+		auto player_position = ConvertFVectorToVector3(player_position_fvector);
+
+		mec_pawn* closest_enemy = nullptr;
+		float closest_distance = 999999.0f;
+
+		for (auto mec : player_cache) {
+			auto state = mec->player_state();
+			if (!state) continue;
+
+			if (mec != local_mec) {
+				auto enemy_position = mec->get_root_component()->get_relative_location();
+				auto distance = CalculateDistanceFloat(player_position, enemy_position);
+
+				if (distance < closest_distance) {
+					closest_distance = distance;
+					closest_enemy = mec;
+				}
+			}
+		}
+
+		// If a closest enemy was found, proceed with aiming
+		if (closest_enemy) {
+			a_player_camera_manager* camera_manager = local_controller->get_camera_manager();
+			if (!camera_manager) return;
+
+			// Get the view target directly
+			ft_view_target view_target = camera_manager->get_view_target();
+			f_minimal_view_info& camera_info = view_target.pov; // Get a reference to pov for easier manipulation
+
+			vector3 enemy_location = closest_enemy->get_root_component()->get_relative_location();
+			vector3 camera_location = camera_info.location;
+			vector3 direction = (enemy_location - camera_location).normalize();
+
+			// Calculate yaw and pitch (assume no roll adjustment needed)
+			float target_yaw = atan2f(direction.y, direction.x) * 180.0f / 3.14159265f;
+			float target_pitch = asinf(direction.z) * 180.0f / 3.14159265f;
+			std::cout << "Target Yaw: " << target_yaw << std::endl;
+			std::cout << "Target Pitch: " << target_pitch << std::endl;
+
+			// Modify the camera rotation
+			float smooth_factor = 0.5f;
+			camera_info.rotation.x = camera_info.rotation.x + (target_pitch - camera_info.rotation.x) * smooth_factor;
+			camera_info.rotation.y = camera_info.rotation.y + (target_yaw - camera_info.rotation.y) * smooth_factor;
+
+			std::cout << "Smoothed Pitch: " << camera_info.rotation.x << std::endl;
+			std::cout << "Smoothed Yaw: " << camera_info.rotation.y << std::endl;
+
+			// Update the modified camera info back to the view target
+			view_target.pov = camera_info; // Update pov in view_target
+
+			// Set the updated view target back to the camera manager
+			camera_manager->set_view_target(view_target);
+		}
+	}
 
 	if (infinite_ammo) {
 		if (hand_item) {
@@ -389,16 +465,53 @@ static void render_callback() {
 				auto name = state->get_player_name_private().read_string();
 				auto role = mec->get_player_role();
 
+				ImU32 color = (role == 4)
+					? ImGui::ColorConvertFloat4ToU32(dissident_color)
+					: ImGui::ColorConvertFloat4ToU32(employee_color);
+
+				// Temporary color with modified alpha
+				ImVec4 temp_color = (role == 4) ? dissident_color : employee_color;
+				temp_color.w = 0.1f;  // Set alpha to 20% (0.2)
+
+				// Convert to ImU32
+				ImU32 color_with_alpha = ImGui::ColorConvertFloat4ToU32(temp_color);
+
 				auto mec_root = mec->get_root_component();
 				if (!mec_root) continue;
 
 				auto position = mec_root->get_relative_location();
+
+				if (player_box) {
+					vector3 screen_position_top, screen_position_bottom;
+					bool top_visible = util::w2s(position + vector3{ 0, 0, 190 }, last_frame_cached.pov, screen_position_top); // Adjust for head height
+					bool bottom_visible = util::w2s(position, last_frame_cached.pov, screen_position_bottom); // Adjust for feet
+
+					if (top_visible && bottom_visible) {
+						// Add an offset to extend the bottom of the box
+						float bottom_offset = 15.0f;
+						screen_position_bottom.y += bottom_offset;
+
+						// Calculate box dimensions
+						float box_height = screen_position_bottom.y - screen_position_top.y;
+						float box_width = box_height * 0.6f; // Adjust width based on aspect ratio
+
+						// Define top-left and bottom-right corners
+						ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y); // Top-left
+						ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y); // Bottom-right
+
+						overlay->draw_rect_with_fill(
+							box_pos1,					// Top-left corner
+							box_pos2,					// Bottom-right corner
+							color_with_alpha,			// Semi-transparent fill (20% opacity)
+							IM_COL32(0, 0, 0, 255),		// Solid white outline
+							1.0f,                       // Outline thickness
+							2.0f                        // Optional corner rounding
+						);
+					}
+				}
+
 				vector3 screen_position{};
 				if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-					ImU32 color = (role == 4)
-						? ImGui::ColorConvertFloat4ToU32(config::dissident_color)
-						: ImGui::ColorConvertFloat4ToU32(config::employee_color);
-
 					std::string name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "");
 					overlay->draw_text(screen_position, color, name_norm.c_str(), true);
 
@@ -420,16 +533,16 @@ static void render_callback() {
 		auto item_state = item->get_item_state();
 		int item_value = item_state.Value_8;
 		int item_time = item_state.Time_15;
-		ImU32 weapon_esp_color = ImGui::ColorConvertFloat4ToU32(config::weapon_color);
-		ImU32 gaz_bottle_esp_color = ImGui::ColorConvertFloat4ToU32(config::gaz_bottle_color);
-		ImU32 vent_filter_esp_color = ImGui::ColorConvertFloat4ToU32(config::vent_filter_color);
-		ImU32 package_esp_color = ImGui::ColorConvertFloat4ToU32(config::package_color);
-		ImU32 rice_esp_color = ImGui::ColorConvertFloat4ToU32(config::rice_color);
-		ImU32 sample_esp_color = ImGui::ColorConvertFloat4ToU32(config::sample_color);
-		ImU32 fuse_esp_color = ImGui::ColorConvertFloat4ToU32(config::fuse_color);
-		ImU32 battery_esp_color = ImGui::ColorConvertFloat4ToU32(config::battery_color);
-		ImU32 screw_driver_esp_color = ImGui::ColorConvertFloat4ToU32(config::screw_driver_color);
-		ImU32 container_esp_color = ImGui::ColorConvertFloat4ToU32(config::container_color);
+		ImU32 weapon_esp_color = ImGui::ColorConvertFloat4ToU32(weapon_color);
+		ImU32 gaz_bottle_esp_color = ImGui::ColorConvertFloat4ToU32(gaz_bottle_color);
+		ImU32 vent_filter_esp_color = ImGui::ColorConvertFloat4ToU32(vent_filter_color);
+		ImU32 package_esp_color = ImGui::ColorConvertFloat4ToU32(package_color);
+		ImU32 rice_esp_color = ImGui::ColorConvertFloat4ToU32(rice_color);
+		ImU32 sample_esp_color = ImGui::ColorConvertFloat4ToU32(sample_color);
+		ImU32 fuse_esp_color = ImGui::ColorConvertFloat4ToU32(fuse_color);
+		ImU32 battery_esp_color = ImGui::ColorConvertFloat4ToU32(battery_color);
+		ImU32 screw_driver_esp_color = ImGui::ColorConvertFloat4ToU32(screw_driver_color);
+		ImU32 container_esp_color = ImGui::ColorConvertFloat4ToU32(container_color);
 
 
 		if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
@@ -733,7 +846,7 @@ static void render_callback() {
 				auto task_vents = task_vents_array.list();
 
 				if (task_vent) {
-					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_vent_color);
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(task_vent_color);
 
 					for (auto taskVent : task_vents) {
 						if (!taskVent) continue;
@@ -789,7 +902,7 @@ static void render_callback() {
 				auto task_machines = task_machines_array.list();
 
 				if (task_machine) {
-					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_machine_color);
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(task_machine_color);
 
 					for (auto taskMachine : task_machines) {
 						if (!taskMachine) continue;
@@ -851,7 +964,7 @@ static void render_callback() {
 				auto task_alims = task_alim_array.list();
 
 				if (task_alim) {
-					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_alim_color);
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(task_alim_color);
 
 					for (auto taskAlim : task_alims) {
 						if (!taskAlim) continue;
@@ -913,7 +1026,7 @@ static void render_callback() {
 				auto task_cases = task_delivery_array.list();
 
 				if (task_delivery) {
-					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_delivery_color);
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(task_delivery_color);
 
 					for (auto deliveryCase : task_cases) {
 						if (!deliveryCase) continue;
@@ -955,7 +1068,7 @@ static void render_callback() {
 				auto pizzushi_tables = pizzushi_tables_array.list();
 
 				if (task_pizzushi) {
-					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_pizzushi_color);
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(task_pizzushi_color);
 
 					for (auto table : pizzushi_tables) {
 						if (!table) continue;
@@ -1016,7 +1129,7 @@ static void render_callback() {
 				auto target_pcs = task_target_pcs.list();
 
 				if (task_computers) {
-					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_computer_color);
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(task_computer_color);
 
 					for (auto source : source_pcs) {
 						if (!source) continue;

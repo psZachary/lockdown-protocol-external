@@ -18,12 +18,14 @@ namespace config {
 	inline int rapid_fire_hotkey = VK_F9;
 	inline int no_recoil_hotkey = VK_INSERT;
 	inline int max_damage_hotkey = VK_DELETE;
+	inline int aimbot_hotkey = VK_PRIOR;
 
 	// Player
 	inline bool speedhack = false;
 	inline bool infinite_stamina = false;
 	inline bool god_mode = false;
 	inline bool living_state = false;
+	inline bool aimbot = false;
 
 	// Weapons
 	// Melee
@@ -44,6 +46,7 @@ namespace config {
 
 	inline bool player_esp = true;
 	inline bool player_distance = true;
+	inline bool player_box = true;
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
 
@@ -124,6 +127,7 @@ namespace config {
 		j["rapid_fire_hotkey"] = rapid_fire_hotkey;
 		j["no_recoil_hotkey"] = no_recoil_hotkey;
 		j["max_damage_hotkey"] = max_damage_hotkey;
+		j["aimbot_hotkey"] = aimbot_hotkey;
 		
 		// Save boolean settings
 		j["speedhack"] = speedhack;
@@ -138,11 +142,13 @@ namespace config {
 		j["no_recoil"] = no_recoil;
 		j["infinite_ammo"] = infinite_ammo;
 		j["can_inventory"] = can_inventory;
+		j["aimbot"] = aimbot;
 
 		// Save ESP-related settings
 		j["esp_enabled"] = esp_enabled;
 		j["player_esp"] = player_esp;
 		j["player_distance"] = player_distance;
+		j["player_box"] = player_box;
 		j["weapon_esp"] = weapon_esp;
 		j["weapon_item_state"] = weapon_item_state;
 		j["weapon_distance"] = weapon_distance;
@@ -219,6 +225,7 @@ namespace config {
 		j.at("rapid_fire_hotkey").get_to(rapid_fire_hotkey);
 		j.at("no_recoil_hotkey").get_to(no_recoil_hotkey);
 		j.at("max_damage_hotkey").get_to(max_damage_hotkey);
+		j.at("aimbot_hotkey").get_to(aimbot_hotkey);
 
 		// Load boolean settings
 		j.at("speedhack").get_to(speedhack);
@@ -233,11 +240,13 @@ namespace config {
 		j.at("no_recoil").get_to(no_recoil);
 		j.at("infinite_ammo").get_to(infinite_ammo);
 		j.at("can_inventory").get_to(can_inventory);
+		j.at("aimbot").get_to(aimbot);
 
 		// Load ESP-related settings
 		j.at("esp_enabled").get_to(esp_enabled);
 		j.at("player_esp").get_to(player_esp);
 		j.at("player_distance").get_to(player_distance);
+		j.at("player_box").get_to(player_box);
 		j.at("weapon_esp").get_to(weapon_esp);
 		j.at("weapon_item_state").get_to(weapon_item_state);
 		j.at("weapon_distance").get_to(weapon_distance);
