@@ -15,6 +15,7 @@
 #include <fstream>
 #include <unordered_map>
 #include "data_cache.h"
+#include <algorithm>
 
 using namespace menu;
 using namespace config;
@@ -394,9 +395,11 @@ static void render_callback() {
 				auto position = mec_root->get_relative_location();
 				vector3 screen_position{};
 				if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-					auto color = role == 4 ? IM_COL32(255, 0, 0, 255) : IM_COL32(0, 255, 0, 255);
-					auto name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "");
+					ImU32 color = (role == 4)
+						? ImGui::ColorConvertFloat4ToU32(config::dissident_color)
+						: ImGui::ColorConvertFloat4ToU32(config::employee_color);
 
+					std::string name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "");
 					overlay->draw_text(screen_position, color, name_norm.c_str(), true);
 
 					if (player_distance) {
@@ -417,6 +420,17 @@ static void render_callback() {
 		auto item_state = item->get_item_state();
 		int item_value = item_state.Value_8;
 		int item_time = item_state.Time_15;
+		ImU32 weapon_esp_color = ImGui::ColorConvertFloat4ToU32(config::weapon_color);
+		ImU32 gaz_bottle_esp_color = ImGui::ColorConvertFloat4ToU32(config::gaz_bottle_color);
+		ImU32 vent_filter_esp_color = ImGui::ColorConvertFloat4ToU32(config::vent_filter_color);
+		ImU32 package_esp_color = ImGui::ColorConvertFloat4ToU32(config::package_color);
+		ImU32 rice_esp_color = ImGui::ColorConvertFloat4ToU32(config::rice_color);
+		ImU32 sample_esp_color = ImGui::ColorConvertFloat4ToU32(config::sample_color);
+		ImU32 fuse_esp_color = ImGui::ColorConvertFloat4ToU32(config::fuse_color);
+		ImU32 battery_esp_color = ImGui::ColorConvertFloat4ToU32(config::battery_color);
+		ImU32 screw_driver_esp_color = ImGui::ColorConvertFloat4ToU32(config::screw_driver_color);
+		ImU32 container_esp_color = ImGui::ColorConvertFloat4ToU32(config::container_color);
+
 
 		if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
 			auto gun_data = (u_data_gun*)data;
@@ -428,31 +442,31 @@ static void render_callback() {
 				vector3 screen_position{};
 				if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 					if (item_name == "PISTOL") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[PISTOL]", true); // Orange
+						overlay->draw_text(screen_position, weapon_esp_color, "[PISTOL]", true); // Orange
 					}
 					else if (item_name == "REVOLVER") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[REVOLVER]", true);
+						overlay->draw_text(screen_position, weapon_esp_color, "[REVOLVER]", true);
 					}
 					else if (item_name == "SHORTY") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SHORTY]", true);
+						overlay->draw_text(screen_position, weapon_esp_color, "[SHORTY]", true);
 					}
 					else if (item_name == "SMG") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SMG]", true);
+						overlay->draw_text(screen_position, weapon_esp_color, "[SMG]", true);
 					}
 					else if (item_name == "RIFLE") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[RIFLE]", true);
+						overlay->draw_text(screen_position, weapon_esp_color, "[RIFLE]", true);
 					}
 					else if (item_name == "SHOTGUN") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[SHOTGUN]", true);
+						overlay->draw_text(screen_position, weapon_esp_color, "[SHOTGUN]", true);
 					}
 					if (weapon_item_state) {
 						screen_position.y += 15;
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), ("[Ammo: " + std::to_string(item_value) + "]").c_str(), true);
+						overlay->draw_text(screen_position, weapon_esp_color, ("[Ammo: " + std::to_string(item_value) + "]").c_str(), true);
 					}
 					if (weapon_distance) {
 						screen_position.y += 15;
 						auto distance = CalculateDistance(local_mec->get_net_location(), position);
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), ("[" + distance + "m]").c_str(), true);
+						overlay->draw_text(screen_position, weapon_esp_color, ("[" + distance + "m]").c_str(), true);
 					}
 				}
 			}
@@ -468,18 +482,18 @@ static void render_callback() {
 
 				if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 					if (item_name == "KNIFE") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[KNIFE]", true); // Orange
+						overlay->draw_text(screen_position, weapon_esp_color, "[KNIFE]", true); // Orange
 					}
 					else if (item_name == "C4") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[C4]", true);
+						overlay->draw_text(screen_position, weapon_esp_color, "[C4]", true);
 					}
 					else if (item_name == "DETONATOR") {
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), "[DETONATOR]", true);
+						overlay->draw_text(screen_position, weapon_esp_color, "[DETONATOR]", true);
 					}
 					if (weapon_distance) {
 						screen_position.y += 15;
 						auto distance = CalculateDistance(local_mec->get_net_location(), position);
-						overlay->draw_text(screen_position, IM_COL32(250, 92, 0, 255), ("[" + distance + "m]").c_str(), true);
+						overlay->draw_text(screen_position, weapon_esp_color, ("[" + distance + "m]").c_str(), true);
 					}
 				}
 			}
@@ -495,116 +509,116 @@ static void render_callback() {
 
 				if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 					if (item_name == "GAZ BOTTLE") {
-						overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), "[GAZ BOTTLE]", true); // Blue
+						overlay->draw_text(screen_position, gaz_bottle_esp_color, "[GAZ BOTTLE]", true); // Blue
 
 						if (primary_item_state) {
 							if (item_value == 0) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), "[Color: Yellow]", true);
+								overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Yellow]", true);
 							}
 							else if (item_value == 1) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), "[Color: Red]", true);
+								overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Red]", true);
 							}
 							else if (item_value == 2) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), "[Color: Blue]", true);
+								overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Blue]", true);
 							}
 						}
 						if (primary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(0, 83, 250, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, gaz_bottle_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 					else if (item_name == "VENT FILTER") {
-						overlay->draw_text(screen_position, IM_COL32(65, 115, 217, 255), "[VENT FILTER]", true); // Light Blue
+						overlay->draw_text(screen_position, vent_filter_esp_color, "[VENT FILTER]", true); // Light Blue
 
 						if (primary_item_state) {
 							screen_position.y += 15;
-							overlay->draw_text(screen_position, IM_COL32(65, 115, 217, 255), ("[Clean: " + std::to_string(item_value) + "%]").c_str(), true);
+							overlay->draw_text(screen_position, vent_filter_esp_color, ("[Clean: " + std::to_string(item_value) + "%]").c_str(), true);
 						}
 						if (primary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(65, 115, 217, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, vent_filter_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 					else if (item_name == "RICE") {
 						if (item_value == 1) {
-							overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[WHITE RICE]", true);
+							overlay->draw_text(screen_position, rice_esp_color, "[WHITE RICE]", true);
 						}
 						else if (item_value == 2) {
-							overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[BROWN RICE]", true);
+							overlay->draw_text(screen_position, rice_esp_color, "[BROWN RICE]", true);
 						}
 						else if (item_value == 3) {
-							overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), "[BLACK RICE]", true);
+							overlay->draw_text(screen_position, rice_esp_color, "[BLACK RICE]", true);
 						}
 						if (primary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(201, 169, 122, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, rice_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 					else if (item_name == "PACKAGE") {
-						overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[PACKAGE]", true); // Brown
+						overlay->draw_text(screen_position, package_esp_color, "[PACKAGE]", true); // Brown
 
 						if (primary_item_state) {
 							if (item_value == 1) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[Security]", true);
+								overlay->draw_text(screen_position, package_esp_color, "[Security]", true);
 							}
 							else if (item_value == 2) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[Computers]", true);
+								overlay->draw_text(screen_position, package_esp_color, "[Computers]", true);
 							}
 							else if (item_value == 3) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[Botanic]", true);
+								overlay->draw_text(screen_position, package_esp_color, "[Botanic]", true);
 							}
 							else if (item_value == 4) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[Restaurant]", true);
+								overlay->draw_text(screen_position, package_esp_color, "[Restaurant]", true);
 							}
 							else if (item_value == 5) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[Medical]", true);
+								overlay->draw_text(screen_position, package_esp_color, "[Medical]", true);
 							}
 							else if (item_value == 6) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[Tutorial]", true);
+								overlay->draw_text(screen_position, package_esp_color, "[Tutorial]", true);
 							}
 							else if (item_value == 7) {
 								screen_position.y += 15;
-								overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), "[Machine]", true);
+								overlay->draw_text(screen_position, package_esp_color, "[Machine]", true);
 							}
 						}
 						if (primary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(87, 47, 24, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, package_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 					else if (item_name == "SAMPLE") {
 						if (item_value == 1) {
-							overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[GREEN SAMPLE]", true);
+							overlay->draw_text(screen_position, sample_esp_color, "[GREEN SAMPLE]", true);
 						}
 						else if (item_value == 2) {
-							overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[YELLOW SAMPLE]", true);
+							overlay->draw_text(screen_position, sample_esp_color, "[YELLOW SAMPLE]", true);
 						}
 						else if (item_value == 3) {
-							overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[BLUE SAMPLE]", true);
+							overlay->draw_text(screen_position, sample_esp_color, "[BLUE SAMPLE]", true);
 						}
 						else if (item_value == 4) {
-							overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[WHITE SAMPLE]", true);
+							overlay->draw_text(screen_position, sample_esp_color, "[WHITE SAMPLE]", true);
 						}
 						else if (item_value == 5) {
-							overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), "[RED SAMPLE]", true);
+							overlay->draw_text(screen_position, sample_esp_color, "[RED SAMPLE]", true);
 						}
 						if (primary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(92, 6, 191, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, sample_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 				}
@@ -621,7 +635,7 @@ static void render_callback() {
 
 				if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 					if (item_name == "FUSE") {
-						overlay->draw_text(screen_position, IM_COL32(105, 105, 105, 255), "[FUSE]", true); // Grey
+						overlay->draw_text(screen_position, fuse_esp_color, "[FUSE]", true); // Grey
 
 						if (secondary_item_state) {
 							const char* color_names[] = { "INVALID", "RED", "YELLOW", "BLUE" };
@@ -632,77 +646,77 @@ static void render_callback() {
 							std::string fuse_info = "[" + std::string(color_names[color_index_value]) + " | " + std::string(color_names[color_index_time]) + "]";
 
 							screen_position.y += 15;
-							overlay->draw_text(screen_position, IM_COL32(105, 105, 105, 255), fuse_info.c_str(), true);
+							overlay->draw_text(screen_position, fuse_esp_color, fuse_info.c_str(), true);
 						}
 						if (secondary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(105, 105, 105, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, fuse_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 					else if (item_name == "BATTERY") {
-						overlay->draw_text(screen_position, IM_COL32(189, 189, 189, 255), "[BATTERY]", true); // Light Grey
+						overlay->draw_text(screen_position, battery_esp_color, "[BATTERY]", true); // Light Grey
 
 						if (secondary_item_state) {
 							screen_position.y += 15;
-							overlay->draw_text(screen_position, IM_COL32(189, 189, 189, 255), ("[Charge: " + std::to_string(item_value) + "%]").c_str(), true);
+							overlay->draw_text(screen_position, battery_esp_color, ("[Charge: " + std::to_string(item_value) + "%]").c_str(), true);
 						}
 						if (secondary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(189, 189, 189, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, battery_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 					else if (item_name == "SCREW DRIVER") {
-						overlay->draw_text(screen_position, IM_COL32(255, 255, 255, 255), "[SCREW DRIVER]", true); // Tan-ish
+						overlay->draw_text(screen_position, screw_driver_esp_color, "[SCREW DRIVER]", true); // White
 						if (secondary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(255, 255, 255, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, screw_driver_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 					else if (item_name == "CONTAINER") {
-						overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[CONTAINER]", true); // Pink-sih purple
+						overlay->draw_text(screen_position, container_esp_color, "[CONTAINER]", true); // Pink-sih purple
 
 						if (secondary_item_state) {
 							screen_position.y += 15;
 							if (item_value == -1) {
-								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Dirty]", true);
+								overlay->draw_text(screen_position, container_esp_color, "[Dirty]", true);
 							}
 							if (item_value == 0) {
-								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Clean]", true);
+								overlay->draw_text(screen_position, container_esp_color, "[Clean]", true);
 							}
 							else if (item_value == 1) {
-								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Green]", true);
+								overlay->draw_text(screen_position, container_esp_color, "[Green]", true);
 							}
 							else if (item_value == 2) {
-								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Yellow]", true);
+								overlay->draw_text(screen_position, container_esp_color, "[Yellow]", true);
 							}
 							else if (item_value == 3) {
-								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Blue", true);
+								overlay->draw_text(screen_position, container_esp_color, "[Blue", true);
 							}
 							else if (item_value == 4) {
-								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[White]", true);
+								overlay->draw_text(screen_position, container_esp_color, "[White]", true);
 							}
 							else if (item_value == 5) {
-								overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Red]", true);
+								overlay->draw_text(screen_position, container_esp_color, "[Red]", true);
 							}
 							else if (item_value == 6) {
 								if (item_time == 1) {
-									overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[White Rice]", true);
+									overlay->draw_text(screen_position, container_esp_color, "[White Rice]", true);
 								}
 								else if (item_time == 2) {
-									overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Brown Rice]", true);
+									overlay->draw_text(screen_position, container_esp_color, "[Brown Rice]", true);
 								}
 								else if (item_time == 3) {
-									overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), "[Black Rice]", true);
+									overlay->draw_text(screen_position, container_esp_color, "[Black Rice]", true);
 								}
 							}
 						}
 						if (secondary_distance) {
 							screen_position.y += 15;
 							auto distance = CalculateDistance(local_mec->get_net_location(), position);
-							overlay->draw_text(screen_position, IM_COL32(136, 0, 145, 255), ("[" + distance + "m]").c_str(), true);
+							overlay->draw_text(screen_position, container_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 				}
@@ -719,6 +733,8 @@ static void render_callback() {
 				auto task_vents = task_vents_array.list();
 
 				if (task_vent) {
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_vent_color);
+
 					for (auto taskVent : task_vents) {
 						if (!taskVent) continue;
 						auto ventRoot = taskVent->get_root();
@@ -740,19 +756,19 @@ static void render_callback() {
 
 							if (util::w2s(ventLocation, last_frame_cached.pov, screen_position)) {
 								if (filterState.Value_8 != 100) {
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), "[VENT TASK]", true);
+									overlay->draw_text(screen_position, task_color, "[VENT TASK]", true);
 
 									// Clean percentage display
 									if (task_object_state) {
 										screen_position.y += 15;
-										overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[Clean: " + std::to_string(filterState.Value_8) + "%]").c_str(), true);
+										overlay->draw_text(screen_position, task_color, ("[Clean: " + std::to_string(filterState.Value_8) + "%]").c_str(), true);
 									}
 
 									// Distance calculation
 									if (task_object_distance) {
 										screen_position.y += 15;
 										auto distance = CalculateDistance(local_mec->get_net_location(), ventLocation);
-										overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + distance + "m]").c_str(), true);
+										overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 									}
 								}
 							}
@@ -773,6 +789,8 @@ static void render_callback() {
 				auto task_machines = task_machines_array.list();
 
 				if (task_machine) {
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_machine_color);
+
 					for (auto taskMachine : task_machines) {
 						if (!taskMachine) continue;
 
@@ -791,7 +809,7 @@ static void render_callback() {
 								auto bottleLocation = bottleRoot->get_relative_location();
 
 								if (util::w2s(bottleLocation, last_frame_cached.pov, screen_position)) {
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), "[BOTTLE]", true);
+									overlay->draw_text(screen_position, task_color, "[BOTTLE]", true);
 
 									// Display requested color
 									if (task_object_state) {
@@ -805,14 +823,14 @@ static void render_callback() {
 
 										screen_position.y += 15;
 										std::string text = "[Color: " + bottleColor + "]";
-										overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), text.c_str(), true);
+										overlay->draw_text(screen_position, task_color, text.c_str(), true);
 									}
 
 									// Distance calculation
 									if (task_object_distance) {
 										screen_position.y += 15;
 										auto distance = CalculateDistance(local_mec->get_net_location(), bottleLocation);
-										overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + distance + "m]").c_str(), true);
+										overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 									}
 								}
 							}
@@ -833,6 +851,8 @@ static void render_callback() {
 				auto task_alims = task_alim_array.list();
 
 				if (task_alim) {
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_alim_color);
+
 					for (auto taskAlim : task_alims) {
 						if (!taskAlim) continue;
 						auto alimRoot = taskAlim->get_root();
@@ -853,11 +873,11 @@ static void render_callback() {
 
 						if (util::w2s(alimLocation, last_frame_cached.pov, screen_position)) {
 							if (alimValue != 100) {
-								overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), "[ALIMENTATION]", true);
+								overlay->draw_text(screen_position, task_color, "[ALIMENTATION]", true);
 
 								if (task_object_state) {
 									screen_position.y += 15;
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[Battery: " + std::to_string(alimBatteryLevel) + "%]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[Battery: " + std::to_string(alimBatteryLevel) + "%]").c_str(), true);
 
 									// Define the colors corresponding to each value
 									const char* fuse_colors[] = { "Invalid", "Red", "Yellow", "Blue" };
@@ -867,13 +887,13 @@ static void render_callback() {
 									std::string fuse_out_color = (alimFuseOut >= 1 && alimFuseOut <= 3) ? fuse_colors[alimFuseOut] : "Invalid";
 
 									screen_position.y += 15;
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + fuse_in_color + " | " + fuse_out_color + "]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[" + fuse_in_color + " | " + fuse_out_color + "]").c_str(), true);
 								}
 								// Distance calculation
 								if (task_object_distance) {
 									screen_position.y += 15;
 									auto distance = CalculateDistance(local_mec->get_net_location(), alimLocation);
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + distance + "m]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 								}
 							}
 						}
@@ -893,6 +913,8 @@ static void render_callback() {
 				auto task_cases = task_delivery_array.list();
 
 				if (task_delivery) {
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_delivery_color);
+
 					for (auto deliveryCase : task_cases) {
 						if (!deliveryCase) continue;
 						auto caseRoot = deliveryCase->get_root();
@@ -907,13 +929,13 @@ static void render_callback() {
 
 						if (util::w2s(deliveryLocation, last_frame_cached.pov, screen_position)) {
 							if (goodPackage != 2) {  // Display only if not in good condition
-								overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), "[DELIVERY TASK]", true);
+								overlay->draw_text(screen_position, task_color, "[DELIVERY TASK]", true);
 
 								// Distance calculation
 								if (task_object_distance) {
 									screen_position.y += 15;
 									auto distance = CalculateDistance(local_mec->get_net_location(), deliveryLocation);
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + distance + "m]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 								}
 							}
 						}
@@ -933,6 +955,8 @@ static void render_callback() {
 				auto pizzushi_tables = pizzushi_tables_array.list();
 
 				if (task_pizzushi) {
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_pizzushi_color);
+
 					for (auto table : pizzushi_tables) {
 						if (!table) continue;
 						auto tableRoot = table->get_root();
@@ -948,7 +972,7 @@ static void render_callback() {
 
 						if (util::w2s(tableLocation, last_frame_cached.pov, screen_position)) {
 							if (tableFinished != true) {
-								overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), "[PIZZUSHI]", true);
+								overlay->draw_text(screen_position, task_color, "[PIZZUSHI]", true);
 
 								if (task_object_state) {
 									auto tableRice = table->get_rice_type();
@@ -964,13 +988,13 @@ static void render_callback() {
 									std::string toppingType = (tableTopping >= 1 && tableTopping <= 4) ? topping_types[tableTopping] : "Invalid";
 
 									screen_position.y += 15;
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + riceType + " | " + fishType + " | " + toppingType + "]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[" + riceType + " | " + fishType + " | " + toppingType + "]").c_str(), true);
 								}
 								// Distance calculation
 								if (task_object_distance) {
 									screen_position.y += 15;
 									auto distance = CalculateDistance(local_mec->get_net_location(), tableLocation);
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + distance + "m]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 								}
 							}
 						}
@@ -992,6 +1016,8 @@ static void render_callback() {
 				auto target_pcs = task_target_pcs.list();
 
 				if (task_computers) {
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(config::task_computer_color);
+
 					for (auto source : source_pcs) {
 						if (!source) continue;
 						auto sourceRoot = source->get_root();
@@ -1007,19 +1033,19 @@ static void render_callback() {
 							if (sourceState != 3) {
 								auto sourceRoom = source->get_room();
 
-								overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[Source: " + TranslateRoomName(sourceRoom) + "]").c_str(), true);
+								overlay->draw_text(screen_position, task_color, ("[Source: " + TranslateRoomName(sourceRoom) + "]").c_str(), true);
 
 								if (task_object_state) {
 									auto targetPC = source->get_other_pc();
 									screen_position.y += 15;
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[Target: " + TranslateRoomName(targetPC->get_room()) + "]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[Target: " + TranslateRoomName(targetPC->get_room()) + "]").c_str(), true);
 
 								}
 								// Distance calculation
 								if (task_object_distance) {
 									screen_position.y += 15;
 									auto distance = CalculateDistance(local_mec->get_net_location(), sourceLocation);
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + distance + "m]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 								}
 							}
 						}
@@ -1039,19 +1065,19 @@ static void render_callback() {
 							if (target->get_other_pc()->get_state() != 3) {
 								auto targetRoom = target->get_room();
 
-								overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[Target: " + TranslateRoomName(targetRoom) + "]").c_str(), true);
+								overlay->draw_text(screen_position, task_color, ("[Target: " + TranslateRoomName(targetRoom) + "]").c_str(), true);
 
 								if (task_object_state) {
 									auto sourcePC = target->get_other_pc();
 									screen_position.y += 15;
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[Source: " + TranslateRoomName(sourcePC->get_room()) + "]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[Source: " + TranslateRoomName(sourcePC->get_room()) + "]").c_str(), true);
 
 								}
 								// Distance calculation
 								if (task_object_distance) {
 									screen_position.y += 15;
 									auto distance = CalculateDistance(local_mec->get_net_location(), targetLocation);
-									overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), ("[" + distance + "m]").c_str(), true);
+									overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 								}
 							}
 						}
@@ -1104,6 +1130,7 @@ static void render_callback() {
 int main() {
 	InitializeItems();
 	PopulateUniqueItems();
+	LoadConfig();
 
 	overlay = new c_overlay();
 

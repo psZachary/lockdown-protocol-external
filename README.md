@@ -1,48 +1,11 @@
-# Game Enhancement Tool
+# Game Enhancement Tool (Fork of Lockdown Protocol External)
+
+This project is a fork of the [Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external) by [psZachary](https://github.com/psZachary). This fork extends the original functionality by adding enhanced item data management, overlay improvements, and various player enhancement features.
 
 ## Features
-- **ESP**
-   - Player ESP (employee / dissident)
-   - Weapon ESP (guns, knife, c4, etc.)
-   - Primary Object ESP (vent filters, etc.)
-   - Secondary Object ESP (screw driver, etc.)
-   - Task ESP (deliveries, alimentations, vents, pressure) ONLY WORKS IF HOSTING!
-- **ESP Details**
-   - Distance between player and object/player
-   - Item state (gun ammo, fuse color, etc.)
-   - Task state (pressure bottle color, etc.)
-- **Player Hacks**
-   - Speed Hack
-   - God Mode
-   - Infinite Stamina
-   - Self Revive (invisible)
-- **Weapon Hacks**
-   - Fast Melee
-   - Infinite Melee Range
-   - Auto Fire
-   - Rapid Fire
-   - No Recoil
-   - Max Damage
-   - Infinite Ammo
-- **Inventory Hacks**
-   - Change Hand Item
-   - Change Hand Item State (battery charge, container color, etc.)
-   - Change Bag Item
-   - Change Bag Item State (battery charge, container color, etc.)
-   - Toggle Items "can inventory" (rice, pizzushi, etc.)
-
-- **Default Hotkeys:**
-   - `F1` : Open/Close Menu
-   - `F2` : Toggle ESP
-   - `F3` : Toggle Speedhack
-   - `F4` : Toggle God Mode
-   - `F5` : Toggle Infinite Stamina
-   - `F6` : Toggle Fast Melee
-   - `F7` : Toggle Infinite Melee Range
-   - `F8` : Toggle Auto Fire
-   - `F9` : Toggle Rapid Fire
-   - `Insert` : Toggle No Recoil
-   - `Del` : Toggle Max Damage
+- **Player Enhancements**: Toggle options for god mode, infinite ammo, infinite stamina, and more.
+- **Overlay and ESP**: Visual overlay that displays information about players and items in the game.
+- **Fast Melee and Infinite Melee Range**: Modify melee properties for faster actions or extended range.
 
 ## File Structure
 - `main.cpp`: Core logic and main game loop with memory and overlay management.
@@ -75,6 +38,9 @@
 ItemProperties knifeProps = GetItemProperties("KNIFE");
 std::cout << "KNIFE cast time: " << knifeProps.melee_cast_time << std::endl;
 ```
+
+## Original Project
+This project is a fork of [psZachary's Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external), with additional enhancements focused on item properties and gameplay customization.
 
 ## Contributing
 Feel free to submit issues, fork the repository, and make pull requests to enhance features, fix bugs, or improve performance.

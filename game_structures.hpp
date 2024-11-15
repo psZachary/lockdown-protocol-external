@@ -432,6 +432,12 @@ namespace protocol {
 	namespace game {
 		using namespace engine::sdk;
 		namespace sdk {
+			class u_camera_component : public u_object {
+			public:
+				OFFSET(0x2A0, field_of_view, float);
+				OFFSET(0x2A4, ortho_width, float);
+				OFFSET(0x2B0, aspect_ratio, float);
+			};
 			class u_data_item_throwtype : public u_object {
 			public:
 				OFFSET(0x30, throw_force, int32_t);
@@ -633,6 +639,14 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x0C09, player_role, int);
 				OFFSET(0x0C38, stamina, double);
+				OFFSET(0x570, aim_location, FVector);
+				OFFSET(0x5B8, net_aim_target, FVector);
+				OFFSET(0x5D8, net_aim, FVector);
+				OFFSET(0x858, interaction_aim, FVector);
+				OFFSET(0x980, aim_offset_smooth, FVector);
+				OFFSET(0x998, aim_offset, FVector);
+				OFFSET(0x9E8, aim_offset_target, FVector);
+				OFFSET(0xA00, aim_oscilation_factor, double);
 				OFFSET(0x800, health, int);
 				OFFSET(0xC99, alive, bool);
 				OFFSET(0x4D4, onfloor, bool);

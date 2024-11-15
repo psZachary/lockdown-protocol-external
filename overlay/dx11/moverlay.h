@@ -67,30 +67,14 @@ public:
     }
     inline void draw_rect(const ImVec2& pos1, const ImVec2& pos2, ImU32 col, bool outline = false, float rounding = 0.0f, int rounding_corners_flags = 0x0F, float thickness = 1.0f) {
         if (outline) {
-            draw_list->AddRect(ImVec2(pos1.x + 1, pos1.y + 1), ImVec2(pos2.x + 1, pos2.y + 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
-            draw_list->AddRect(ImVec2(pos1.x - 1, pos1.y - 1), ImVec2(pos2.x - 1, pos2.y - 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
-            draw_list->AddRect(ImVec2(pos1.x + 1, pos1.y - 1), ImVec2(pos2.x + 1, pos2.y - 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
-            draw_list->AddRect(ImVec2(pos1.x - 1, pos1.y + 1), ImVec2(pos2.x - 1, pos2.y + 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
+            draw_list->AddRect(ImVec2(pos1.x + 1, pos1.y + 1), ImVec2(pos2.x + 1, pos2.y
+                + 1), col, rounding, rounding_corners_flags, thickness);
+            draw_list->AddRect(ImVec2(pos1.x - 1, pos1.y - 1), ImVec2(pos2.x - 1, pos2.y - 1), col, rounding, rounding_corners_flags, thickness);
+            draw_list->AddRect(ImVec2(pos1.x + 1, pos1.y - 1), ImVec2(pos2.x + 1, pos2.y - 1), col, rounding, rounding_corners_flags, thickness);
+            draw_list->AddRect(ImVec2(pos1.x - 1, pos1.y + 1), ImVec2(pos2.x - 1, pos2.y + 1), col, rounding, rounding_corners_flags, thickness);
         }
 
         draw_list->AddRect(pos1, pos2, col, rounding, rounding_corners_flags, thickness);
-    }
-    inline void draw_rect(const ImVec2& pos, float width, float height, ImU32 col, bool outline = false, bool fill = false, float rounding = 0.0f, int rounding_corners_flags = 0x0F, float thickness = 1.0f) {
-        ImVec2 pos1 = pos;
-        ImVec2 pos2 = ImVec2(pos.x + width, pos.y + height);
-
-        if (outline) {
-            draw_list->AddRect(ImVec2(pos1.x + 1, pos1.y + 1), ImVec2(pos2.x + 1, pos2.y + 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
-            draw_list->AddRect(ImVec2(pos1.x - 1, pos1.y - 1), ImVec2(pos2.x - 1, pos2.y - 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
-            draw_list->AddRect(ImVec2(pos1.x + 1, pos1.y - 1), ImVec2(pos2.x + 1, pos2.y - 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
-            draw_list->AddRect(ImVec2(pos1.x - 1, pos1.y + 1), ImVec2(pos2.x - 1, pos2.y + 1), IM_COL32_BLACK, rounding, rounding_corners_flags, thickness);
-        }
-
-        if (fill) {
-            draw_list->AddRectFilled(pos1, pos2, col, rounding, rounding_corners_flags);
-        } else {
-            draw_list->AddRect(pos1, pos2, col, rounding, rounding_corners_flags, thickness);
-        }
     }
 
     FLOAT window_width, window_height;

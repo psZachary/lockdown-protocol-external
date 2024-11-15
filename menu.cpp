@@ -57,7 +57,7 @@ void menu::draw()
 
 	static bool menu_open = true;
 
-	if (GetAsyncKeyState(config::menu_hotkey) & 1) {
+	if (GetAsyncKeyState(menu_hotkey) & 1) {
 		menu_open = !menu_open;
 	}
 
@@ -84,6 +84,14 @@ void menu::draw()
 		if (ImGui::Selectable("PLAYER", selected_tab == 2)) selected_tab = 2;
 		if (ImGui::Selectable("WEAPON", selected_tab == 3)) selected_tab = 3;
 		if (ImGui::Selectable("ITEMS", selected_tab == 4)) selected_tab = 4;
+		ImGui::Separator();
+		ImGui::Text("SETTINGS");
+		if (ImGui::Button("Save")) {
+			SaveConfig();
+		}
+		if (ImGui::Button("Reload")) {
+			LoadConfig();
+		}
 		ImGui::EndChild();
 
 		ImGui::SameLine();
@@ -101,7 +109,7 @@ void menu::draw()
 				secondary_object_esp = esp_enabled;
 			}
 			ImGui::SameLine();
-			ImHotkey("##ESPHotkey", &config::esp_hotkey);
+			ImHotkey("##ESPHotkey", &esp_hotkey);
 
 			calculatedHeight += itemHeight;
 
@@ -113,10 +121,23 @@ void menu::draw()
 					// Player ESP Tab
 					if (ImGui::BeginTabItem("Player")) {
 						ImGui::Checkbox("Enabled##PlayerESP", &player_esp);
+
+						// Begin custom side-by-side child sections
+						float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
+						ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
+
 						if (ImGui::CollapsingHeader("Details##PlayerESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Distance##PlayerDistance", &player_distance);
-							calculatedHeight += itemHeight;
 						}
+						ImGui::EndChild();
+
+						ImGui::SameLine();
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						if (ImGui::CollapsingHeader("Colors##PlayerESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
+							ImGui::ColorEdit4("Employee Color", (float*)&employee_color);
+							ImGui::ColorEdit4("Dissident Color", (float*)&dissident_color);
+						}
+						ImGui::EndChild();
 						ImGui::EndTabItem();
 					}
 
@@ -124,7 +145,6 @@ void menu::draw()
 					if (ImGui::BeginTabItem("World")) {
 						ImGui::Checkbox("Enabled##WorldESP", &task_object_esp);
 						ImGui::SameLine(); MenuTooltip("Only works in self hosted lobbies.");
-						calculatedHeight += itemHeight;
 
 						// Begin custom side-by-side child sections
 						float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
@@ -133,9 +153,15 @@ void menu::draw()
 						ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Details##WorldESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Task State##TaskItemState", &task_object_state);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Distance##TaskDistance", &task_object_distance);
-							calculatedHeight += itemHeight;
+						}
+						if (ImGui::CollapsingHeader("Colors##WorldESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
+							ImGui::ColorEdit4("Delivery Color", (float*)&task_delivery_color);
+							ImGui::ColorEdit4("Pressure Color", (float*)&task_machine_color);
+							ImGui::ColorEdit4("Vent Color", (float*)&task_vent_color);
+							ImGui::ColorEdit4("Alimentation Color", (float*)&task_alim_color);
+							ImGui::ColorEdit4("Pizzushi Color", (float*)&task_pizzushi_color);
+							ImGui::ColorEdit4("Computers Color", (float*)&task_computer_color);
 						}
 						ImGui::EndChild();
 
@@ -145,57 +171,94 @@ void menu::draw()
 						ImGui::BeginChild("TaskLocationsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Task Locations##WorldESPTasks", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Delivery##TaskLocation", &task_delivery);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Pressure##TaskLocation", &task_machine);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Vents##TaskLocation", &task_vent);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Alimentations##TaskLocation", &task_alim);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Pizzushi##TaskLocation", &task_pizzushi);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Computers##TaskLocation", &task_computers);
-							calculatedHeight += itemHeight;
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight;
+						calculatedHeight += itemHeight * 12.5;
+
 						ImGui::EndTabItem();
 					}
 
 					// Weapon ESP Tab
 					if (ImGui::BeginTabItem("Weapon")) {
 						ImGui::Checkbox("Enabled##WeaponESP", &weapon_esp);
+						// Begin custom side-by-side child sections
+						float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
+						ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Details##WeaponESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Item State##WeaponItemState", &weapon_item_state);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Distance##WeaponDistance", &weapon_distance);
-							calculatedHeight += itemHeight;
 						}
+						ImGui::EndChild();
+
+						ImGui::SameLine();
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						if (ImGui::CollapsingHeader("Color##WeaponESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
+							ImGui::ColorEdit4("Weapon Color", (float*)&weapon_color);
+						}
+						ImGui::EndChild();
 						ImGui::EndTabItem();
 					}
 
 					// Primary Object ESP Tab
 					if (ImGui::BeginTabItem("Object")) {
 						ImGui::Checkbox("Enabled##PrimaryObjectESP", &primary_object_esp);
+
+						// Begin custom side-by-side child sections
+						float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
+						ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Details##PrimaryObjectDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Item State##PrimaryItemState", &primary_item_state);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Distance##PrimaryDistance", &primary_distance);
-							calculatedHeight += itemHeight;
 						}
+						ImGui::EndChild();
+
+						ImGui::SameLine();
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						if (ImGui::CollapsingHeader("Colors##PrimaryObjectESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
+							ImGui::ColorEdit4("Gaz Bottle Color", (float*)&gaz_bottle_color);
+							ImGui::ColorEdit4("Vent Filter Color", (float*)&vent_filter_color);
+							ImGui::ColorEdit4("Rice Color", (float*)&rice_color);
+							ImGui::ColorEdit4("Package Color", (float*)&package_color);
+							ImGui::ColorEdit4("Sample Color", (float*)&sample_color);
+						}
+						ImGui::EndChild();
+
+						calculatedHeight += itemHeight * 8.5;
+						
 						ImGui::EndTabItem();
 					}
 
 					// Secondary Object ESP Tab
 					if (ImGui::BeginTabItem("Other Object")) {
 						ImGui::Checkbox("Enabled##SecondaryObjectESP", &secondary_object_esp);
+
+						// Begin custom side-by-side child sections
+						float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
+						ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Details##SecondaryObjectDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Item State##SecondaryItemState", &secondary_item_state);
-							calculatedHeight += itemHeight;
 							ImGui::Checkbox("Distance##SecondaryDistance", &secondary_distance);
-							calculatedHeight += itemHeight;
 						}
+						ImGui::EndChild();
+
+						ImGui::SameLine();
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						if (ImGui::CollapsingHeader("Colors##SecondaryObjectESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
+							ImGui::ColorEdit4("Fuse Color", (float*)&fuse_color);
+							ImGui::ColorEdit4("Battery Color", (float*)&battery_color);
+							ImGui::ColorEdit4("Screw Driver Color", (float*)&screw_driver_color);
+							ImGui::ColorEdit4("Container Color", (float*)&container_color);
+						}
+						ImGui::EndChild();
+						
+						calculatedHeight += itemHeight * 7.5;
+						
 						ImGui::EndTabItem();
 					}
 
@@ -205,54 +268,51 @@ void menu::draw()
 		}
 		// PLAYER
 		else if (selected_tab == 2) {
-			calculatedHeight += itemHeight + headerPadding;
-			ImGui::Checkbox("Speedhack", &speedhack); calculatedHeight += itemHeight;
+			ImGui::Checkbox("Speedhack", &speedhack);
 			ImGui::SameLine();
-			ImHotkey("##SpeedhackHotkey", &config::speedhack_hotkey);
+			ImHotkey("##SpeedhackHotkey", &speedhack_hotkey);
 
-			ImGui::Checkbox("God Mode", &god_mode); calculatedHeight += itemHeight;
+			ImGui::Checkbox("God Mode", &god_mode);
 			ImGui::SameLine();
-			ImHotkey("##GodmodeHotkey", &config::god_mode_hotkey);
+			ImHotkey("##GodmodeHotkey", &god_mode_hotkey);
 
-			ImGui::Checkbox("Infinite Stamina", &infinite_stamina); calculatedHeight += itemHeight;
+			ImGui::Checkbox("Infinite Stamina", &infinite_stamina);
 			ImGui::SameLine();
-			ImHotkey("##InfstamHotkey", &config::infinite_stamina_hotkey);
+			ImHotkey("##InfstamHotkey", &infinite_stamina_hotkey);
 
-			ImGui::Checkbox("Revive", &living_state); calculatedHeight += itemHeight;
+			ImGui::Checkbox("Revive", &living_state); 
 		}
 		// WEAPON
 		else if (selected_tab == 3) {
 			if (ImGui::CollapsingHeader("MELEE", ImGuiTreeNodeFlags_DefaultOpen)) {
-				calculatedHeight += itemHeight + headerPadding;
-				ImGui::Checkbox("Fast Melee", &fast_melee); calculatedHeight += itemHeight;
+				ImGui::Checkbox("Fast Melee", &fast_melee);
 				ImGui::SameLine();
-				ImHotkey("##FastMeleeHotkey", &config::fast_melee_hotkey);
+				ImHotkey("##FastMeleeHotkey", &fast_melee_hotkey);
 
-				ImGui::Checkbox("Infinite Melee Range", &infinite_melee_range); calculatedHeight += itemHeight;
+				ImGui::Checkbox("Infinite Melee Range", &infinite_melee_range);
 				ImGui::SameLine();
-				ImHotkey("##InfMeleeRangeHotkey", &config::infinite_melee_range_hotkey);
+				ImHotkey("##InfMeleeRangeHotkey", &infinite_melee_range_hotkey);
 			}
-			calculatedHeight += itemHeight;
 			if (ImGui::CollapsingHeader("GUN", ImGuiTreeNodeFlags_DefaultOpen)) {
-				ImGui::Checkbox("Auto Fire", &auto_fire); calculatedHeight += itemHeight;
+				ImGui::Checkbox("Auto Fire", &auto_fire); 
 				ImGui::SameLine();
-				ImHotkey("##AutoFireHotkey", &config::auto_fire_hotkey);
+				ImHotkey("##AutoFireHotkey", &auto_fire_hotkey);
 
-				ImGui::Checkbox("Rapid Fire", &rapid_fire); calculatedHeight += itemHeight;
+				ImGui::Checkbox("Rapid Fire", &rapid_fire); 
 				ImGui::SameLine();
-				ImHotkey("##RapidFireHotkey", &config::rapid_fire_hotkey);
+				ImHotkey("##RapidFireHotkey", &rapid_fire_hotkey);
 
-				ImGui::Checkbox("No Recoil", &no_recoil); calculatedHeight += itemHeight;
+				ImGui::Checkbox("No Recoil", &no_recoil); 
 				ImGui::SameLine();
-				ImHotkey("##NoRecoilHotkey", &config::no_recoil_hotkey);
+				ImHotkey("##NoRecoilHotkey", &no_recoil_hotkey);
 
-				ImGui::Checkbox("Max Damage", &max_damage); calculatedHeight += itemHeight;
+				ImGui::Checkbox("Max Damage", &max_damage); 
 				ImGui::SameLine();
-				ImHotkey("##MaxDamageHotkey", &config::max_damage_hotkey);
+				ImHotkey("##MaxDamageHotkey", &max_damage_hotkey);
 
-				ImGui::Checkbox("Infinite Ammo", &infinite_ammo); calculatedHeight += itemHeight;
+				ImGui::Checkbox("Infinite Ammo", &infinite_ammo); 
 			}
-			calculatedHeight += itemHeight;
+			calculatedHeight += itemHeight * 10.5;
 		}
 		// ITEMS
 		else if (selected_tab == 4) {
@@ -290,7 +350,6 @@ void menu::draw()
 						}
 						ImGui::EndCombo();
 					}
-					calculatedHeight += itemHeight;
 					auto hand_state = local_mec->get_hand_state();
 					if (hand_item_name == "GAZ BOTTLE") {
 						const char* colors[] = { "Yellow", "Red", "Blue" };
@@ -301,7 +360,6 @@ void menu::draw()
 							hand_state.Value_8 = current_value;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "PACKAGE") {
 						const char* package_types[] = { "Security", "Computers", "Botanic", "Restaurant", "Medical", "Tutorial" , "Machine" };
@@ -312,7 +370,6 @@ void menu::draw()
 							hand_state.Value_8 = package_value + 1;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "FISH") {
 						const char* fish_types[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
@@ -323,7 +380,6 @@ void menu::draw()
 							hand_state.Value_8 = fish_value + 1;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "RICE") {
 						const char* rice_types[] = { "White", "Brown", "Black" };
@@ -334,7 +390,6 @@ void menu::draw()
 							hand_state.Value_8 = rice_value + 1;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "CONTAINER") {
 						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "White Rice", "Brown Rice", "Black Rice" };
@@ -357,7 +412,6 @@ void menu::draw()
 							}
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "SAMPLE") {
 						const char* colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
@@ -368,7 +422,6 @@ void menu::draw()
 							hand_state.Value_8 = current_index + 1;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "FUSE") {
 						const char* fuse_colors[] = { "Red", "Yellow", "Blue" };
@@ -382,7 +435,6 @@ void menu::draw()
 							hand_state.Value_8 = value_color + 1;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 
 						ImGui::SameLine();
 						ImGui::SetNextItemWidth(half_width);
@@ -390,7 +442,6 @@ void menu::draw()
 							hand_state.Time_15 = time_color + 1;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "NAME") {
 						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
@@ -410,17 +461,14 @@ void menu::draw()
 						if (ImGui::Combo("##Rice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
 							rice_value = rice_index + 1;
 						}
-						calculatedHeight += itemHeight;
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##Fish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
 							fish_value = fish_index + 1;
 						}
-						calculatedHeight += itemHeight;
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##Container Color", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
 							container_value = container_index + 1;
 						}
-						calculatedHeight += itemHeight;
 
 						hand_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
 						local_mec->set_hand_state(hand_state);
@@ -433,7 +481,6 @@ void menu::draw()
 							hand_state.Value_8 = clean_percentage;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "BATTERY") {
 						int charge_percentage = hand_state.Value_8;
@@ -443,7 +490,6 @@ void menu::draw()
 							hand_state.Value_8 = charge_percentage;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (hand_item_name == "REVOLVER" || hand_item_name == "PISTOL" || hand_item_name == "SHORTY" || hand_item_name == "SMG" || hand_item_name == "RIFLE" || hand_item_name == "SHOTGUN") {
 						int ammo = hand_state.Value_8;
@@ -453,7 +499,6 @@ void menu::draw()
 							hand_state.Value_8 = ammo;
 							local_mec->set_hand_state(hand_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 				}
 				else {
@@ -476,7 +521,6 @@ void menu::draw()
 						}
 						ImGui::EndCombo();
 					}
-					calculatedHeight += itemHeight;
 				}
 				ImGui::Separator();
 				if (bag_item) {
@@ -507,7 +551,6 @@ void menu::draw()
 						}
 						ImGui::EndCombo();
 					}
-					calculatedHeight += itemHeight;
 
 					auto bag_state = local_mec->get_bag_state();
 					if (bag_item_name == "GAZ BOTTLE") {
@@ -519,7 +562,6 @@ void menu::draw()
 							bag_state.Value_8 = current_value;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "PACKAGE") {
 						const char* package_types[] = { "Security", "Computers", "Botanic", "Restaurant", "Medical", "Tutorial" , "Machine" };
@@ -530,7 +572,6 @@ void menu::draw()
 							bag_state.Value_8 = package_value + 1;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "FISH") {
 						const char* fish_types[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
@@ -541,7 +582,6 @@ void menu::draw()
 							bag_state.Value_8 = fish_value + 1;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "RICE") {
 						const char* rice_types[] = { "White", "Brown", "Black" };
@@ -552,7 +592,6 @@ void menu::draw()
 							bag_state.Value_8 = rice_value + 1;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "CONTAINER") {
 						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "White Rice", "Brown Rice", "Black Rice" };
@@ -575,7 +614,6 @@ void menu::draw()
 							}
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "SAMPLE") {
 						const char* colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
@@ -586,7 +624,6 @@ void menu::draw()
 							bag_state.Value_8 = current_index + 1;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "FUSE") {
 						const char* fuse_colors[] = { "Red", "Yellow", "Blue" };
@@ -600,7 +637,6 @@ void menu::draw()
 							bag_state.Value_8 = value_color + 1;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 
 						ImGui::SameLine();
 						ImGui::SetNextItemWidth(half_width);
@@ -608,7 +644,6 @@ void menu::draw()
 							bag_state.Time_15 = time_color + 1;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "NAME") { // Pizzushi
 						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
@@ -628,17 +663,14 @@ void menu::draw()
 						if (ImGui::Combo("##Rice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
 							rice_value = rice_index + 1;
 						}
-						calculatedHeight += itemHeight;
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##Fish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
 							fish_value = fish_index + 1;
 						}
-						calculatedHeight += itemHeight;
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##Container Color", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
 							container_value = container_index + 1;
 						}
-						calculatedHeight += itemHeight;
 
 						bag_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
 						local_mec->set_bag_state(bag_state);
@@ -651,8 +683,7 @@ void menu::draw()
 							bag_state.Value_8 = clean_percentage;
 							local_mec->set_bag_state(bag_state);
 						}
-						if (!ImGui::IsItemDeactivatedAfterEdit())
-							calculatedHeight += itemHeight;
+						if (!ImGui::IsItemDeactivatedAfterEdit());
 					}
 					else if (bag_item_name == "BATTERY") {
 						int charge_percentage = bag_state.Value_8;
@@ -662,7 +693,6 @@ void menu::draw()
 							bag_state.Value_8 = charge_percentage;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 					else if (bag_item_name == "REVOLVER" || bag_item_name == "PISTOL" || bag_item_name == "SHORTY" || bag_item_name == "SMG" || bag_item_name == "RIFLE" || bag_item_name == "SHOTGUN") {
 						int ammo = bag_state.Value_8;
@@ -672,7 +702,6 @@ void menu::draw()
 							bag_state.Value_8 = ammo;
 							local_mec->set_bag_state(bag_state);
 						}
-						calculatedHeight += itemHeight;
 					}
 				}
 				else {
@@ -694,11 +723,8 @@ void menu::draw()
 						}
 						ImGui::EndCombo();
 					}
-					calculatedHeight += itemHeight + 10;
 				}
-				calculatedHeight += itemHeight;
 			}
-			calculatedHeight += itemHeight;
 
 			if (hand_item) {
 				if (!hand_inventory) {
@@ -708,7 +734,6 @@ void menu::draw()
 							hand_item->set_can_inventory(!hand_inventory);
 						}
 					}
-					calculatedHeight += itemHeight;
 				}
 				else {
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -717,12 +742,10 @@ void menu::draw()
 							hand_item->set_can_inventory(!hand_inventory);
 						}
 					}
-					calculatedHeight += itemHeight;
 				}
 			}
 
 			if (ImGui::CollapsingHeader("ITEM THROW DATA")) {
-				calculatedHeight += itemHeight;
 				auto itemThrow = hand_item->get_throw_type();
 				auto itemThrowForce = itemThrow->get_throw_force();
 				auto itemVerticalForce = itemThrow->get_vertical_force();
@@ -743,7 +766,6 @@ void menu::draw()
 					itemRestitution = intRestitution / 100.0; // Convert back to double
 					itemThrow->set_restitution(itemRestitution);
 				}
-				calculatedHeight += itemHeight;
 
 				if (ImGui::SliderInt("##VerticalForce", &itemVerticalForce, 0, 10000, "Vertical Force: %d%")) {
 					itemThrow->set_vertical_force(itemVerticalForce);
@@ -754,7 +776,6 @@ void menu::draw()
 					itemGravity = intGravity / 100.0; // Convert back to double
 					itemThrow->set_gravity(itemGravity);
 				}
-				calculatedHeight += itemHeight;
 
 				if (ImGui::SliderInt("##VerticalOffset", &itemVerticalOffset, -100, 100, "Vertical Offset: %d%")) {
 					itemThrow->set_vertical_offset(itemVerticalOffset);
@@ -765,17 +786,17 @@ void menu::draw()
 					itemDrag = intDrag / 100.0; // Convert back to double
 					itemThrow->set_drag(itemDrag);
 				}
-				calculatedHeight += itemHeight;
 
 				int intRadius = static_cast<int>(itemRadius * 100); // Scale double to int representation
 				if (ImGui::SliderInt("##Radius", &intRadius, -1000, 1000, "Radius: %d")) {
 					itemRadius = intRadius / 100.0; // Convert back to double
 					itemThrow->set_radius(itemRadius);
 				}
-				calculatedHeight += itemHeight;
 				// Restore original width
 				ImGui::PopItemWidth();
 			} ImGui::SameLine(); MenuTooltip("Only works in self hosted lobbies.");
+
+			calculatedHeight += itemHeight * 16.75;
 		}
 
 		ImGui::EndChild();
