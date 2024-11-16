@@ -22,20 +22,33 @@ namespace config {
 
 	// Player
 	inline bool speedhack = false;
+	inline double max_speed = 2000.00; // 800.0 is default value run speed
+	inline double friction = 100000.00; // 0.0 is default value friction
 	inline bool infinite_stamina = false;
 	inline bool god_mode = false;
-	inline bool living_state = false;
 	inline bool aimbot = false;
 
 	// Weapons
 	// Melee
 	inline bool fast_melee = false;
+	inline double cast_time = 0.0; // avg is 0.1 : 0.5
+	inline double recover_time = 0.0; // avg is 0.4 : 1.0
+	inline double stun = 1.0; // avg is -1 : 0.4
+	inline int cost = 0; // avg is 20 : 40
 	inline bool infinite_melee_range = false;
+	inline int range = 10000; // avg is 130 : 180
 	// Guns
 	inline bool max_damage = false;
 	inline bool auto_fire = false;
 	inline bool rapid_fire = false;
+	inline double rapid_fire_rate = 0.02; // avg 0.07 : 0.3
 	inline bool no_recoil = false;
+	inline double movement_osc = 0.0; // avg 0.3 : 20
+	inline double osc_reactivity = 0.0; // avg 4 : 100
+	inline double movement_prec = 0.0; // avg 0.5 : 40
+	inline double recoil_react = 0.0; // avg 1 : 40
+	inline double shake_intensity = 0.0; // avg 0.5 : 5
+	inline double fire_spread = 0.0;
 	inline bool infinite_ammo = false;
 
 	// Inventory
@@ -43,6 +56,7 @@ namespace config {
 
 	// ESP
 	inline bool esp_enabled = true;
+	inline double esp_max_distance = 70.0;
 
 	inline bool player_esp = true;
 	inline bool player_distance = true;
@@ -131,21 +145,31 @@ namespace config {
 		
 		// Save boolean settings
 		j["speedhack"] = speedhack;
+		j["max_speed"] = max_speed;
+		j["friction"] = friction;
 		j["infinite_stamina"] = infinite_stamina;
 		j["god_mode"] = god_mode;
-		j["living_state"] = living_state;
 		j["fast_melee"] = fast_melee;
+		j["cast_time"] = cast_time;
+		j["recover_time"] = recover_time;
+		j["stun"] = stun;
+		j["cost"] = cost;
 		j["infinite_melee_range"] = infinite_melee_range;
+		j["range"] = range;
 		j["max_damage"] = max_damage;
 		j["auto_fire"] = auto_fire;
 		j["rapid_fire"] = rapid_fire;
+		j["rapid_fire_rate"] = rapid_fire_rate;
 		j["no_recoil"] = no_recoil;
+		j["movement_osc"] = movement_osc;
+		j["osc_reactivity"] = osc_reactivity;
 		j["infinite_ammo"] = infinite_ammo;
 		j["can_inventory"] = can_inventory;
 		j["aimbot"] = aimbot;
 
 		// Save ESP-related settings
 		j["esp_enabled"] = esp_enabled;
+		j["esp_max_distance"] = esp_max_distance;
 		j["player_esp"] = player_esp;
 		j["player_distance"] = player_distance;
 		j["player_box"] = player_box;
@@ -229,21 +253,31 @@ namespace config {
 
 		// Load boolean settings
 		j.at("speedhack").get_to(speedhack);
+		j.at("max_speed").get_to(max_speed);
+		j.at("friction").get_to(friction);
 		j.at("infinite_stamina").get_to(infinite_stamina);
 		j.at("god_mode").get_to(god_mode);
-		j.at("living_state").get_to(living_state);
 		j.at("fast_melee").get_to(fast_melee);
+		j.at("cast_time").get_to(cast_time);
+		j.at("recover_time").get_to(recover_time);
+		j.at("stun").get_to(stun);
+		j.at("cost").get_to(cost);
 		j.at("infinite_melee_range").get_to(infinite_melee_range);
+		j.at("range").get_to(range);
 		j.at("max_damage").get_to(max_damage);
 		j.at("auto_fire").get_to(auto_fire);
 		j.at("rapid_fire").get_to(rapid_fire);
+		j.at("rapid_fire_rate").get_to(rapid_fire_rate);
 		j.at("no_recoil").get_to(no_recoil);
+		j.at("movement_osc").get_to(movement_osc);
+		j.at("osc_reactivity").get_to(osc_reactivity);
 		j.at("infinite_ammo").get_to(infinite_ammo);
 		j.at("can_inventory").get_to(can_inventory);
 		j.at("aimbot").get_to(aimbot);
 
 		// Load ESP-related settings
 		j.at("esp_enabled").get_to(esp_enabled);
+		j.at("esp_max_distance").get_to(esp_max_distance);
 		j.at("player_esp").get_to(player_esp);
 		j.at("player_distance").get_to(player_distance);
 		j.at("player_box").get_to(player_box);

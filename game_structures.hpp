@@ -22,6 +22,7 @@ namespace protocol {
 
 		constexpr uintptr_t GWORLD = 110318928;
 		constexpr uintptr_t GNAMES = 108238592;
+		constexpr uintptr_t GOBJECTS = 116784608;
 
 		namespace sdk {
 			struct fname {
@@ -52,6 +53,20 @@ namespace protocol {
 				}
 			};
 
+			class g_object {
+			public:
+				static g_object* get_gobjects(uintptr_t process_base) {
+					return mem::rpm<g_object*>(process_base + 0x67DF760);
+				}
+
+				GET_OFFSET(0x10, num_objects, int);
+
+				u_object* get_object_by_index(int index) {
+					uintptr_t objects_array = mem::rpm<uintptr_t>(reinterpret_cast<uintptr_t>(this) + 0x8);
+					return mem::rpm<u_object*>(objects_array + index * sizeof(uintptr_t));
+				}
+			};
+
 			struct f_bone_node {
 				fname name;
 				int32_t parent_idx;
@@ -59,8 +74,12 @@ namespace protocol {
 			};
 
 			struct FStr_ItemState {
-				int32_t Value_8;        
-				int32_t Time_15;       
+				int32_t Value_8;
+				int32_t Time_15;
+			};
+
+			struct FStr_SkinSet {
+
 			};
 
 			template <typename T>
@@ -220,12 +239,12 @@ namespace protocol {
 			public:
 				// Getter for FVector at offset
 				FVector get_net_location() {
-					return mem::rpm<FVector>(pthis + 0x588); 
+					return mem::rpm<FVector>(pthis + 0x588);
 				}
 
 				// Setter for FVector at offset
 				void set_net_location(const FVector& value) {
-					mem::wpm<FVector>(pthis + 0x588, value); 
+					mem::wpm<FVector>(pthis + 0x588, value);
 				}
 			};
 
@@ -458,6 +477,19 @@ namespace protocol {
 				OFFSET(0x2A4, ortho_width, float);
 				OFFSET(0x2B0, aspect_ratio, float);
 			};
+			class u_static_mesh : public u_object {
+			public:
+				// tbd
+			};
+			class u_data_skin_ghost : public u_object {
+			public:
+				OFFSET(0x50, mesh_h, u_static_mesh*);
+				OFFSET(0x58, mesh_v, u_static_mesh*);
+			};
+			class u_save_skin : public u_object {
+			public:
+
+			};
 			class u_data_item_throwtype : public u_object {
 			public:
 				OFFSET(0x30, throw_force, int32_t);
@@ -494,7 +526,7 @@ namespace protocol {
 			};
 			class u_data_gun : public u_data_item {
 			public:
-				GET_OFFSET(0x2B8, am_hand_fire, uintptr_t);   
+				GET_OFFSET(0x2B8, am_hand_fire, uintptr_t);
 				GET_OFFSET(0x2C0, am_body_fire, uintptr_t);
 				OFFSET(0x2C8, damage, int32_t);
 				OFFSET(0x2CC, crit, int32_t);
@@ -503,7 +535,7 @@ namespace protocol {
 				OFFSET(0x2D8, fire_rate, double);
 				OFFSET(0x2E0, auto_fire, bool);
 				GET_OFFSET(0x2E4, impact_type, int32_t);
-				OFFSET(0x2E8, recoil_spread, double);         
+				OFFSET(0x2E8, recoil_spread, double);
 				OFFSET(0x2F0, recoil_interp, double);
 				OFFSET(0x2F8, recoil_recover, double);
 				OFFSET(0x300, offset_vertical, double);
@@ -693,6 +725,7 @@ namespace protocol {
 				OFFSET(0x0610, recovery, double);
 				OFFSET(0x0DD0, friction, double);
 				OFFSET(0x970, body_armor_color, double);
+				OFFSET(0xC9B, request_fly, bool);
 				OFFSET(0x6A8, move_input, FVector);
 				OFFSET(0x6A1, MoveInputState, int);
 				OFFSET(0x6C0, net_move_input_state, int);
@@ -706,6 +739,8 @@ namespace protocol {
 				OFFSET(0x3A0, camera, u_camera_component*);
 				OFFSET(0x388, absolute_rotation, u_scene_component*);
 				OFFSET(0x420, orientation, u_scene_component*);
+				OFFSET(0x1228, skin_save, u_save_skin*);
+				OFFSET(0x11D8, skin_set, FStr_SkinSet);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);

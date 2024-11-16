@@ -15,24 +15,27 @@ namespace mem {
     inline std::uint64_t get_module_base(const char* name, ULONG pid)
     {
         HANDLE Module = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
+        if (Module == INVALID_HANDLE_VALUE) {
+            std::cerr << "Failed to create snapshot for modules." << std::endl;
+            return 0;
+        }
+
         MODULEENTRY32 Entry;
         Entry.dwSize = sizeof(Entry);
 
-        WCHAR* ModuleNameChar;
         int Chars = MultiByteToWideChar(CP_ACP, 0, name, -1, NULL, 0);
-        ModuleNameChar = new WCHAR[Chars];
-        MultiByteToWideChar(CP_ACP, 0, name, -1, (LPWSTR)ModuleNameChar, Chars);
+        std::unique_ptr<WCHAR[]> ModuleNameChar(new WCHAR[Chars]);
+        MultiByteToWideChar(CP_ACP, 0, name, -1, ModuleNameChar.get(), Chars);
 
         while (Module32Next(Module, &Entry)) {
-            if (!wcscmp((wchar_t*)Entry.szModule, ModuleNameChar)) {
+            if (!wcscmp((wchar_t*)Entry.szModule, ModuleNameChar.get())) {
                 CloseHandle(Module);
                 return std::uint64_t(Entry.modBaseAddr);
             }
         }
 
         CloseHandle(Module);
-        Entry.modBaseAddr = 0x0;
-        return std::uint64_t(Entry.modBaseAddr);
+        return 0;
     }
 
     inline std::uint64_t get_module_size(const char* name, ULONG pid)

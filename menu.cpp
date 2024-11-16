@@ -1,4 +1,4 @@
-#include "menu.h"
+﻿#include "menu.h"
 #include <string>
 #include <vector>
 #include <Windows.h>
@@ -34,7 +34,7 @@ void MenuTooltip(const char* text) {
 }
 
 void PopulateUniqueItems() {
-	std::unordered_set<std::string> seen_names;
+	static std::unordered_set<std::string> seen_names;
 
 	// Loop through cached world items
 	for (auto& item : world_item_cache) {
@@ -43,11 +43,15 @@ void PopulateUniqueItems() {
 		auto item_data = item->get_data();
 		std::string name = item_data->get_name().read_string();
 
-		// If name is unique, store in the map
-		if (seen_names.insert(name).second) {  // Insert and check uniqueness
-			unique_item_data[name] = item_data;
-			item_names.push_back(name);
+		// If the item is already in the set, skip adding
+		if (seen_names.find(name) != seen_names.end()) {
+			continue;
 		}
+
+		// Mark the name as seen and add to the data structures
+		seen_names.insert(name);
+		unique_item_data[name] = item_data;
+		item_names.push_back(name);
 	}
 }
 
@@ -110,6 +114,12 @@ void menu::draw()
 			}
 			ImGui::SameLine();
 			ImHotkey("##ESPHotkey", &esp_hotkey);
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+			double min_distance = 0.0;       // Minimum value
+			double max_distance = 200.0;   // Maximum value
+
+			ImGui::SliderScalar("##esp_range", ImGuiDataType_Double, &esp_max_distance, &min_distance, &max_distance, "Distance: %.2f");
 
 			calculatedHeight += itemHeight;
 
@@ -291,7 +301,10 @@ void menu::draw()
 				ImHotkey("##AimbotHotkey", &aimbot_hotkey);
 				ImGui::EndDisabled();
 
-				ImGui::Checkbox("Revive", &living_state);
+				if (ImGui::Button("Revive")) {
+					local_mec->set_alive(true);
+					local_mec->set_health(100);
+				}
 			}
 			ImGui::EndChild();
 
@@ -299,7 +312,23 @@ void menu::draw()
 
 			ImGui::BeginChild("OthersSection", ImVec2(halfWidth, 0), true);
 
-			if (ImGui::CollapsingHeader("Other##PlayerOtherHacks", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (ImGui::CollapsingHeader("Details##PlayerHackDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (speedhack) {
+					float max_speed_float = static_cast<float>(max_speed);
+					float friction_float = static_cast<float>(friction);
+
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##max_speed", &max_speed_float, 0.0f, 5000.0f, "Max Speed: %.1f")) {
+						max_speed = static_cast<double>(max_speed_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##friction", &friction_float, 0.0f, 100000.0f, "Friction: %.1f")) {
+						friction = static_cast<double>(friction_float);
+					}
+				}
+
+				ImGui::Separator();
+
 				int fov = local_mec->get_camera()->get_field_of_view();
 				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 				if (ImGui::SliderInt("##fov", &fov, 20, 150, "FOV: %d")) {
@@ -310,12 +339,15 @@ void menu::draw()
 		}
 		// WEAPON
 		else if (selected_tab == 3) {
+			// Begin custom side-by-side child sections
+			float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
+			ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
 			if (ImGui::CollapsingHeader("MELEE", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Checkbox("Fast Melee", &fast_melee);
 				ImGui::SameLine();
 				ImHotkey("##FastMeleeHotkey", &fast_melee_hotkey);
 
-				ImGui::Checkbox("Infinite Melee Range", &infinite_melee_range);
+				ImGui::Checkbox("Long Melee Range", &infinite_melee_range);
 				ImGui::SameLine();
 				ImHotkey("##InfMeleeRangeHotkey", &infinite_melee_range_hotkey);
 			}
@@ -338,7 +370,80 @@ void menu::draw()
 
 				ImGui::Checkbox("Infinite Ammo", &infinite_ammo);
 			}
-			calculatedHeight += itemHeight * 10.5;
+			ImGui::EndChild();
+
+			ImGui::SameLine();
+
+			ImGui::BeginChild("OthersSection", ImVec2(halfWidth, 0), true);
+			if (ImGui::CollapsingHeader("Details##PlayerHackDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (fast_melee) {
+					float cast_time_float = static_cast<float>(cast_time);
+					float recover_time_float = static_cast<float>(recover_time);
+					float stun_float = static_cast<float>(stun);
+
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##cast_time", &cast_time_float, 0.0f, 0.5f, "Cast Time: %.02f")) {
+						cast_time = static_cast<double>(cast_time_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##recover_time", &recover_time_float, 0.0f, 1.0f, "Recover Time: %.02f")) {
+						recover_time = static_cast<double>(recover_time_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##stun", &stun_float, 0.0f, 1.0f, "Stun: %.02f")) {
+						stun = static_cast<double>(stun_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderInt("##cost", &cost, 0, 40, "Cost: %d");
+				}
+				if (infinite_melee_range) {
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderInt("##range", &range, 0, 10000, "Range: %d");
+				}
+				if (rapid_fire) {
+					float rapid_fire_rate_float = static_cast<float>(rapid_fire_rate);
+
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##rapid_fire_rate", &rapid_fire_rate_float, 0.0f, 1.0f, "Fire Rate: %.02f")) {
+						rapid_fire_rate = static_cast<double>(rapid_fire_rate_float);
+					}
+				}
+				if (no_recoil) {
+					float movement_osc_float = static_cast<float>(movement_osc);
+					float osc_reactivity_float = static_cast<float>(osc_reactivity);
+					float movement_prec_float = static_cast<float>(movement_prec);
+					float recoil_react_float = static_cast<float>(recoil_react);
+					float shake_intensity_float = static_cast<float>(shake_intensity);
+					float fire_spread_float = static_cast<float>(fire_spread);
+
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##movement_osc", &movement_osc_float, 0.0f, 20.0f, "Oscillation: %.02f")) {
+						movement_osc = static_cast<double>(movement_osc_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##osc_reactivity", &osc_reactivity_float, 0.0f, 100.0f, "Osc. Reactivity: %.02f")) {
+						osc_reactivity = static_cast<double>(osc_reactivity_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##movement_prec", &movement_prec_float, 0.0f, 40.0f, "Move Precision: %.02f")) {
+						movement_prec = static_cast<double>(movement_prec_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##recoil_react", &recoil_react_float, 0.0f, 50.0f, "Recoil: %.02f")) {
+						recoil_react = static_cast<double>(recoil_react_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##shake_intensity", &shake_intensity_float, 0.0f, 10.0f, "Shake Intensity: %.02f")) {
+						shake_intensity = static_cast<double>(shake_intensity_float);
+					}
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderFloat("##fire_spread", &fire_spread_float, 0.0f, 20.0f, "Fire Spread: %.02f")) {
+						fire_spread = static_cast<double>(fire_spread_float);
+					}
+				}
+			}
+			ImGui::EndChild();
+			calculatedHeight += itemHeight * 11;
 		}
 		// ITEMS
 		else if (selected_tab == 4) {
@@ -360,6 +465,7 @@ void menu::draw()
 					ImGui::Text("Hand Item: %s", display_name.c_str());
 					ImGui::SameLine();
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						PopulateUniqueItems();
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
@@ -531,6 +637,7 @@ void menu::draw()
 					ImGui::Text("Hand Item: AIR");
 					ImGui::SameLine();
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						PopulateUniqueItems();
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
@@ -562,6 +669,7 @@ void menu::draw()
 					ImGui::Text("Bag Item: %s", display_name.c_str());
 					ImGui::SameLine();
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						PopulateUniqueItems();
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
@@ -734,6 +842,7 @@ void menu::draw()
 					ImGui::Text("Bag Item: EMPTY");
 					ImGui::SameLine();
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						PopulateUniqueItems();
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
