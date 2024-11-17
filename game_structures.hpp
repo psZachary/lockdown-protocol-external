@@ -592,13 +592,17 @@ namespace protocol {
 
 			class a_itemslot_c : public a_actor {
 			public:
-				GET_OFFSET(0x2D8, item_state, FStr_ItemState);
+				OFFSET(0x2D8, item_state, FStr_ItemState);
 			};
 			class a_vent_c : public a_actor {
 			public:
 				GET_OFFSET(0x348, task_vent, bool);
 				GET_OFFSET(0x308, filter, a_itemslot_c*);
 				GET_OFFSET(0x2E8, root, u_scene_component*);
+				OFFSET(0x338, lock_state, int); 
+				OFFSET(0x35D, sector, int); 
+				OFFSET(0x33C, clean_request, int32_t);
+				OFFSET(0x330, energy, int32_t);
 			};
 			class task_vents : public a_actor {
 			public:

@@ -228,7 +228,7 @@ static void render_callback() {
 		rapid_fire = !rapid_fire;
 	}
 	if (GetAsyncKeyState(VK_PRIOR) & 1) {
-
+		
 	}
 
 	//if (GetAsyncKeyState(aimbot_hotkey) & 1) {
@@ -511,7 +511,7 @@ static void render_callback() {
 					}
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-						std::string name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "") + (player_distance ? " [" + distance + "m]" : "");
+						std::string name_norm = "[" + name + "]" + (role == 4 ? "[D]" : "") + (player_distance ? "[" + distance + "m]" : "");
 
 						// Calculate text width based on character count and font size
 						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
@@ -557,7 +557,7 @@ static void render_callback() {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						// Calculate text width based on character count and font size
-						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? " [" + distance + "m]" : "");
+						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? "[" + distance + "m]" : "");
 						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 						screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -585,7 +585,7 @@ static void render_callback() {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						// Calculate text width based on character count and font size
-						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? " [" + distance + "m]" : "");
+						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? "[" + distance + "m]" : "");
 						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 						screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -607,107 +607,149 @@ static void render_callback() {
 				if (distanceDouble <= esp_max_distance) {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-						// Calculate text width based on character count and font size
-						std::string name_norm = "[" + item_name + "]" + (primary_distance ? " [" + distance + "m]" : "");
-						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
-						screen_position.x -= text_width / 2; // Shift the position left by half the text width
+						\
 
-						if (item_name == "GAZ BOTTLE") {
-							overlay->draw_text(screen_position, gaz_bottle_esp_color, name_norm.c_str(), true); // Blue
+							if (item_name == "GAZ BOTTLE") {
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
+								int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
-							if (primary_item_state) {
-								if (item_value == 0) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Yellow]", true);
+								overlay->draw_text(screen_position, gaz_bottle_esp_color, name_norm.c_str(), true); // Blue
+
+								if (primary_item_state) {
+									if (item_value == 0) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Yellow]", true);
+									}
+									else if (item_value == 1) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Red]", true);
+									}
+									else if (item_value == 2) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Blue]", true);
+									}
 								}
-								else if (item_value == 1) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Red]", true);
-								}
-								else if (item_value == 2) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Blue]", true);
-								}
 							}
-						}
-						else if (item_name == "VENT FILTER") {
-							overlay->draw_text(screen_position, vent_filter_esp_color, name_norm.c_str(), true); // Light Blue
+							else if (item_name == "VENT FILTER") {
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
+								int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
-							if (primary_item_state) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, vent_filter_esp_color, ("[Clean: " + std::to_string(item_value) + "%]").c_str(), true);
-							}
-						}
-						else if (item_name == "RICE") {
-							if (item_value == 1) {
-								name_norm = "[WHITE RICE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
-							}
-							else if (item_value == 2) {
-								name_norm = "[BROWN RICE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
-							}
-							else if (item_value == 3) {
-								name_norm = "[BLACK RICE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
-							}
-						}
-						else if (item_name == "PACKAGE") {
-							overlay->draw_text(screen_position, package_esp_color, name_norm.c_str(), true); // Brown
+								overlay->draw_text(screen_position, vent_filter_esp_color, name_norm.c_str(), true); // Light Blue
 
-							if (primary_item_state) {
+								if (primary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, vent_filter_esp_color, ("[Clean: " + std::to_string(item_value) + "%]").c_str(), true);
+								}
+							}
+							else if (item_name == "RICE") {
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
+
 								if (item_value == 1) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, package_esp_color, "[Security]", true);
+									name_norm = "[WHITE RICE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
 								}
 								else if (item_value == 2) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, package_esp_color, "[Computers]", true);
+									name_norm = "[BROWN RICE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
 								}
 								else if (item_value == 3) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, package_esp_color, "[Botanic]", true);
+									name_norm = "[BLACK RICE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
+								}
+							}
+							else if (item_name == "PACKAGE") {
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
+								int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+								screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+								overlay->draw_text(screen_position, package_esp_color, name_norm.c_str(), true); // Brown
+
+								if (primary_item_state) {
+									if (item_value == 1) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, package_esp_color, "[Security]", true);
+									}
+									else if (item_value == 2) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, package_esp_color, "[Computers]", true);
+									}
+									else if (item_value == 3) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, package_esp_color, "[Botanic]", true);
+									}
+									else if (item_value == 4) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, package_esp_color, "[Restaurant]", true);
+									}
+									else if (item_value == 5) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, package_esp_color, "[Medical]", true);
+									}
+									else if (item_value == 6) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, package_esp_color, "[Tutorial]", true);
+									}
+									else if (item_value == 7) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, package_esp_color, "[Machine]", true);
+									}
+								}
+							}
+							else if (item_name == "SAMPLE") {
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
+
+								if (item_value == 1) {
+									name_norm = "[GREEN SAMPLE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
+								}
+								else if (item_value == 2) {
+									name_norm = "[YELLOW SAMPLE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
+								}
+								else if (item_value == 3) {
+									name_norm = "[BLUE SAMPLE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 								}
 								else if (item_value == 4) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, package_esp_color, "[Restaurant]", true);
+									name_norm = "[WHITE SAMPLE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 								}
 								else if (item_value == 5) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, package_esp_color, "[Medical]", true);
-								}
-								else if (item_value == 6) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, package_esp_color, "[Tutorial]", true);
-								}
-								else if (item_value == 7) {
-									screen_position.y += 15;
-									overlay->draw_text(screen_position, package_esp_color, "[Machine]", true);
+									name_norm = "[RED SAMPLE]" + (primary_distance ? "[" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 								}
 							}
-						}
-						else if (item_name == "SAMPLE") {
-							if (item_value == 1) {
-								name_norm = "[GREEN SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
-							}
-							else if (item_value == 2) {
-								name_norm = "[YELLOW SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
-							}
-							else if (item_value == 3) {
-								name_norm = "[BLUE SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
-							}
-							else if (item_value == 4) {
-								name_norm = "[WHITE SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
-							}
-							else if (item_value == 5) {
-								name_norm = "[RED SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
-								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
-							}
-						}
 					}
 				}
 			}
@@ -726,7 +768,7 @@ static void render_callback() {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						// Calculate text width based on character count and font size
-						std::string name_norm = "[" + item_name + "]" + (secondary_distance ? " [" + distance + "m]" : "");
+						std::string name_norm = "[" + item_name + "]" + (secondary_distance ? "[" + distance + "m]" : "");
 						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 						screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -836,7 +878,7 @@ static void render_callback() {
 								vector3 screen_position{};
 								if (util::w2s(ventLocation, last_frame_cached.pov, screen_position)) {
 									// Calculate text width based on character count and font size
-									std::string name_norm = "[VENT TASK]" + (task_object_distance ? " [" + distance + "m]" : "");
+									std::string name_norm = "[VENT TASK]" + (task_object_distance ? "[" + distance + "m]" : "");
 									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 									screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -892,7 +934,7 @@ static void render_callback() {
 									vector3 screen_position{};
 									if (util::w2s(bottleLocation, last_frame_cached.pov, screen_position)) {
 										// Calculate text width based on character count and font size
-										std::string name_norm = "[BOTTLE]" + (task_object_distance ? " [" + distance + "m]" : "");
+										std::string name_norm = "[BOTTLE]" + (task_object_distance ? "[" + distance + "m]" : "");
 										int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 										screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -957,7 +999,7 @@ static void render_callback() {
 							vector3 screen_position{};
 							if (util::w2s(alimLocation, last_frame_cached.pov, screen_position)) {
 								// Calculate text width based on character count and font size
-								std::string name_norm = "[ALIMENTATION]" + (task_object_distance ? " [" + distance + "m]" : "");
+								std::string name_norm = "[ALIMENTATION]" + (task_object_distance ? "[" + distance + "m]" : "");
 
 								if (alimValue != 100) {
 									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
@@ -1015,7 +1057,7 @@ static void render_callback() {
 							vector3 screen_position{};
 							if (util::w2s(deliveryLocation, last_frame_cached.pov, screen_position)) {
 								// Calculate text width based on character count and font size
-								std::string name_norm = "[DELIVERY TASK]" + (task_object_distance ? " [" + distance + "m]" : "");
+								std::string name_norm = "[DELIVERY TASK]" + (task_object_distance ? "[" + distance + "m]" : "");
 								int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -1061,7 +1103,7 @@ static void render_callback() {
 							vector3 screen_position{};
 							if (util::w2s(tableLocation, last_frame_cached.pov, screen_position)) {
 								// Calculate text width based on character count and font size
-								std::string name_norm = "[PIZZUSHI]" + (task_object_distance ? " [" + distance + "m]" : "");
+								std::string name_norm = "[PIZZUSHI]" + (task_object_distance ? "[" + distance + "m]" : "");
 								int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -1127,7 +1169,7 @@ static void render_callback() {
 									auto sourceRoom = source->get_room();
 
 									// Calculate text width based on character count and font size
-									std::string name_norm = "[SOURCE: " + TranslateRoomName(sourceRoom) + "]" + (task_object_distance ? " [" + distance + "m]" : "");
+									std::string name_norm = "[SOURCE: " + TranslateRoomName(sourceRoom) + "]" + (task_object_distance ? "[" + distance + "m]" : "");
 									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 									screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
@@ -1164,7 +1206,7 @@ static void render_callback() {
 									auto targetRoom = target->get_room();
 
 									// Calculate text width based on character count and font size
-									std::string name_norm = "[TARGET: " + TranslateRoomName(targetRoom) + "]" + (task_object_distance ? " [" + distance + "m]" : "");
+									std::string name_norm = "[TARGET: " + TranslateRoomName(targetRoom) + "]" + (task_object_distance ? "[" + distance + "m]" : "");
 									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
 									screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
