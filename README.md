@@ -1,6 +1,6 @@
 # Game Enhancement Tool (Fork of Lockdown Protocol External)
 
-This project is a fork of the [Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external) by [psZachary](https://github.com/psZachary). This fork extends the original functionality by adding enhanced item data management, overlay improvements, and various player enhancement features.
+This project has enhanced item data management, overlay improvements, and various player enhancement features.
 
 ## Features
 - **ESP**
@@ -60,7 +60,7 @@ This project is a fork of the [Lockdown Protocol External](https://github.com/ps
 ## Setup and Usage
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/OniSensei/lockdown-protocol-external.git
+   git clone https://github.com/psZachary/lockdown-internal.git
    cd lockdown-protocol-external
    ```
 
@@ -82,9 +82,6 @@ This project is a fork of the [Lockdown Protocol External](https://github.com/ps
 ItemProperties knifeProps = GetItemProperties("KNIFE");
 std::cout << "KNIFE cast time: " << knifeProps.melee_cast_time << std::endl;
 ```
-
-## Original Project
-This project is a fork of [psZachary's Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external), with additional enhancements focused on item properties and gameplay customization.
 
 ## Contributing
 Feel free to submit issues, fork the repository, and make pull requests to enhance features, fix bugs, or improve performance.
