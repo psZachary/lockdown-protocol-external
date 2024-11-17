@@ -14,9 +14,13 @@ using namespace protocol::engine;
 
 // Global item class mapping
 inline std::unordered_map<std::string, std::string> item_class_map = {
+	{"REVOLVER", "DA_RevolverDefault"},
+	{"PISTOL", "DA_PistolDefault"},
 	{"SHOTGUN", "DA_Shotgun"},
+	{"SHORTY", "DA_ShortyDefault"},
 	{"SMG", "DA_SMG"},
 	{"RIFLE", "DA_Rifle"},
+	{"C4", "DA_C4"},
 };
 
 std::vector<uintptr_t> find_objects(const std::string& name_find);

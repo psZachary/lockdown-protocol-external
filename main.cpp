@@ -228,7 +228,7 @@ static void render_callback() {
 		rapid_fire = !rapid_fire;
 	}
 	if (GetAsyncKeyState(VK_PRIOR) & 1) {
-		
+
 	}
 
 	//if (GetAsyncKeyState(aimbot_hotkey) & 1) {
@@ -556,31 +556,16 @@ static void render_callback() {
 				if (distanceDouble <= esp_max_distance) {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-						if (item_name == "PISTOL") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[PISTOL]", true); // Orange
-						}
-						else if (item_name == "REVOLVER") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[REVOLVER]", true);
-						}
-						else if (item_name == "SHORTY") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[SHORTY]", true);
-						}
-						else if (item_name == "SMG") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[SMG]", true);
-						}
-						else if (item_name == "RIFLE") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[RIFLE]", true);
-						}
-						else if (item_name == "SHOTGUN") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[SHOTGUN]", true);
-						}
+						// Calculate text width based on character count and font size
+						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? " [" + distance + "m]" : "");
+						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+						screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+						overlay->draw_text(screen_position, weapon_esp_color, name_norm.c_str(), true); // Orange
+
 						if (weapon_item_state) {
 							screen_position.y += 15;
 							overlay->draw_text(screen_position, weapon_esp_color, ("[Ammo: " + std::to_string(item_value) + "]").c_str(), true);
-						}
-						if (weapon_distance) {
-							screen_position.y += 15;
-							overlay->draw_text(screen_position, weapon_esp_color, ("[" + distance + "m]").c_str(), true);
 						}
 					}
 				}
@@ -599,19 +584,12 @@ static void render_callback() {
 				if (distanceDouble <= esp_max_distance) {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-						if (item_name == "KNIFE") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[KNIFE]", true); // Orange
-						}
-						else if (item_name == "C4") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[C4]", true);
-						}
-						else if (item_name == "DETONATOR") {
-							overlay->draw_text(screen_position, weapon_esp_color, "[DETONATOR]", true);
-						}
-						if (weapon_distance) {
-							screen_position.y += 15;
-							overlay->draw_text(screen_position, weapon_esp_color, ("[" + distance + "m]").c_str(), true);
-						}
+						// Calculate text width based on character count and font size
+						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? " [" + distance + "m]" : "");
+						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+						screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+						overlay->draw_text(screen_position, weapon_esp_color, name_norm.c_str(), true); // Orange
 					}
 				}
 			}
@@ -629,8 +607,13 @@ static void render_callback() {
 				if (distanceDouble <= esp_max_distance) {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+						// Calculate text width based on character count and font size
+						std::string name_norm = "[" + item_name + "]" + (primary_distance ? " [" + distance + "m]" : "");
+						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+						screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
 						if (item_name == "GAZ BOTTLE") {
-							overlay->draw_text(screen_position, gaz_bottle_esp_color, "[GAZ BOTTLE]", true); // Blue
+							overlay->draw_text(screen_position, gaz_bottle_esp_color, name_norm.c_str(), true); // Blue
 
 							if (primary_item_state) {
 								if (item_value == 0) {
@@ -646,40 +629,31 @@ static void render_callback() {
 									overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Blue]", true);
 								}
 							}
-							if (primary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, gaz_bottle_esp_color, ("[" + distance + "m]").c_str(), true);
-							}
 						}
 						else if (item_name == "VENT FILTER") {
-							overlay->draw_text(screen_position, vent_filter_esp_color, "[VENT FILTER]", true); // Light Blue
+							overlay->draw_text(screen_position, vent_filter_esp_color, name_norm.c_str(), true); // Light Blue
 
 							if (primary_item_state) {
 								screen_position.y += 15;
 								overlay->draw_text(screen_position, vent_filter_esp_color, ("[Clean: " + std::to_string(item_value) + "%]").c_str(), true);
 							}
-							if (primary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, vent_filter_esp_color, ("[" + distance + "m]").c_str(), true);
-							}
 						}
 						else if (item_name == "RICE") {
 							if (item_value == 1) {
-								overlay->draw_text(screen_position, rice_esp_color, "[WHITE RICE]", true);
+								name_norm = "[WHITE RICE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 2) {
-								overlay->draw_text(screen_position, rice_esp_color, "[BROWN RICE]", true);
+								name_norm = "[BROWN RICE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 3) {
-								overlay->draw_text(screen_position, rice_esp_color, "[BLACK RICE]", true);
-							}
-							if (primary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, rice_esp_color, ("[" + distance + "m]").c_str(), true);
+								name_norm = "[BLACK RICE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
 							}
 						}
 						else if (item_name == "PACKAGE") {
-							overlay->draw_text(screen_position, package_esp_color, "[PACKAGE]", true); // Brown
+							overlay->draw_text(screen_position, package_esp_color, name_norm.c_str(), true); // Brown
 
 							if (primary_item_state) {
 								if (item_value == 1) {
@@ -711,30 +685,27 @@ static void render_callback() {
 									overlay->draw_text(screen_position, package_esp_color, "[Machine]", true);
 								}
 							}
-							if (primary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, package_esp_color, ("[" + distance + "m]").c_str(), true);
-							}
 						}
 						else if (item_name == "SAMPLE") {
 							if (item_value == 1) {
-								overlay->draw_text(screen_position, sample_esp_color, "[GREEN SAMPLE]", true);
+								name_norm = "[GREEN SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 2) {
-								overlay->draw_text(screen_position, sample_esp_color, "[YELLOW SAMPLE]", true);
+								name_norm = "[YELLOW SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 3) {
-								overlay->draw_text(screen_position, sample_esp_color, "[BLUE SAMPLE]", true);
+								name_norm = "[BLUE SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 4) {
-								overlay->draw_text(screen_position, sample_esp_color, "[WHITE SAMPLE]", true);
+								name_norm = "[WHITE SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 5) {
-								overlay->draw_text(screen_position, sample_esp_color, "[RED SAMPLE]", true);
-							}
-							if (primary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, sample_esp_color, ("[" + distance + "m]").c_str(), true);
+								name_norm = "[RED SAMPLE]" + (primary_distance ? " [" + distance + "m]" : "");
+								overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
 							}
 						}
 					}
@@ -754,8 +725,13 @@ static void render_callback() {
 				if (distanceDouble <= esp_max_distance) {
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+						// Calculate text width based on character count and font size
+						std::string name_norm = "[" + item_name + "]" + (secondary_distance ? " [" + distance + "m]" : "");
+						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+						screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
 						if (item_name == "FUSE") {
-							overlay->draw_text(screen_position, fuse_esp_color, "[FUSE]", true); // Grey
+							overlay->draw_text(screen_position, fuse_esp_color, name_norm.c_str(), true); // Grey
 
 							if (secondary_item_state) {
 								const char* color_names[] = { "INVALID", "RED", "YELLOW", "BLUE" };
@@ -768,32 +744,20 @@ static void render_callback() {
 								screen_position.y += 15;
 								overlay->draw_text(screen_position, fuse_esp_color, fuse_info.c_str(), true);
 							}
-							if (secondary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, fuse_esp_color, ("[" + distance + "m]").c_str(), true);
-							}
 						}
 						else if (item_name == "BATTERY") {
-							overlay->draw_text(screen_position, battery_esp_color, "[BATTERY]", true); // Light Grey
+							overlay->draw_text(screen_position, battery_esp_color, name_norm.c_str(), true); // Light Grey
 
 							if (secondary_item_state) {
 								screen_position.y += 15;
 								overlay->draw_text(screen_position, battery_esp_color, ("[Charge: " + std::to_string(item_value) + "%]").c_str(), true);
 							}
-							if (secondary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, battery_esp_color, ("[" + distance + "m]").c_str(), true);
-							}
 						}
 						else if (item_name == "SCREW DRIVER") {
-							overlay->draw_text(screen_position, screw_driver_esp_color, "[SCREW DRIVER]", true); // White
-							if (secondary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, screw_driver_esp_color, ("[" + distance + "m]").c_str(), true);
-							}
+							overlay->draw_text(screen_position, screw_driver_esp_color, name_norm.c_str(), true); // White
 						}
 						else if (item_name == "CONTAINER") {
-							overlay->draw_text(screen_position, container_esp_color, "[CONTAINER]", true); // Pink-sih purple
+							overlay->draw_text(screen_position, container_esp_color, name_norm.c_str(), true); // Pink-sih purple
 
 							if (secondary_item_state) {
 								screen_position.y += 15;
@@ -829,10 +793,6 @@ static void render_callback() {
 										overlay->draw_text(screen_position, container_esp_color, "[Black Rice]", true);
 									}
 								}
-							}
-							if (secondary_distance) {
-								screen_position.y += 15;
-								overlay->draw_text(screen_position, container_esp_color, ("[" + distance + "m]").c_str(), true);
 							}
 						}
 					}
@@ -875,19 +835,18 @@ static void render_callback() {
 							if (distanceDouble <= esp_max_distance) {
 								vector3 screen_position{};
 								if (util::w2s(ventLocation, last_frame_cached.pov, screen_position)) {
+									// Calculate text width based on character count and font size
+									std::string name_norm = "[VENT TASK]" + (task_object_distance ? " [" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
 									if (filterState.Value_8 != 100) {
-										overlay->draw_text(screen_position, task_color, "[VENT TASK]", true);
+										overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 
 										// Clean percentage display
 										if (task_object_state) {
 											screen_position.y += 15;
 											overlay->draw_text(screen_position, task_color, ("[Clean: " + std::to_string(filterState.Value_8) + "%]").c_str(), true);
-										}
-
-										// Distance calculation
-										if (task_object_distance) {
-											screen_position.y += 15;
-											overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 										}
 									}
 								}
@@ -932,7 +891,12 @@ static void render_callback() {
 								if (distanceDouble <= esp_max_distance) {
 									vector3 screen_position{};
 									if (util::w2s(bottleLocation, last_frame_cached.pov, screen_position)) {
-										overlay->draw_text(screen_position, task_color, "[BOTTLE]", true);
+										// Calculate text width based on character count and font size
+										std::string name_norm = "[BOTTLE]" + (task_object_distance ? " [" + distance + "m]" : "");
+										int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+										screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+										overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 
 										// Display requested color
 										if (task_object_state) {
@@ -947,12 +911,6 @@ static void render_callback() {
 											screen_position.y += 15;
 											std::string text = "[Color: " + bottleColor + "]";
 											overlay->draw_text(screen_position, task_color, text.c_str(), true);
-										}
-
-										// Distance calculation
-										if (task_object_distance) {
-											screen_position.y += 15;
-											overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 										}
 									}
 								}
@@ -991,7 +949,6 @@ static void render_callback() {
 
 						auto alimLocation = alimRoot->get_relative_location();
 						alimLocation.z += 200;
-						alimLocation.x -= 25;
 
 						auto distance = CalculateDistance(local_mec->get_net_location(), alimLocation);
 						double distanceDouble = std::stod(distance);
@@ -999,8 +956,11 @@ static void render_callback() {
 						if (distanceDouble <= esp_max_distance) {
 							vector3 screen_position{};
 							if (util::w2s(alimLocation, last_frame_cached.pov, screen_position)) {
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[ALIMENTATION]" + (task_object_distance ? " [" + distance + "m]" : "");
+
 								if (alimValue != 100) {
-									overlay->draw_text(screen_position, task_color, "[ALIMENTATION]", true);
+									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 
 									if (task_object_state) {
 										screen_position.y += 15;
@@ -1015,11 +975,6 @@ static void render_callback() {
 
 										screen_position.y += 15;
 										overlay->draw_text(screen_position, task_color, ("[" + fuse_in_color + " | " + fuse_out_color + "]").c_str(), true);
-									}
-									// Distance calculation
-									if (task_object_distance) {
-										screen_position.y += 15;
-										overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 									}
 								}
 							}
@@ -1059,14 +1014,13 @@ static void render_callback() {
 						if (distanceDouble <= esp_max_distance) {
 							vector3 screen_position{};
 							if (util::w2s(deliveryLocation, last_frame_cached.pov, screen_position)) {
-								if (goodPackage != 2) {  // Display only if not in good condition
-									overlay->draw_text(screen_position, task_color, "[DELIVERY TASK]", true);
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[DELIVERY TASK]" + (task_object_distance ? " [" + distance + "m]" : "");
+								int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
-									// Distance calculation
-									if (task_object_distance) {
-										screen_position.y += 15;
-										overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
-									}
+								if (goodPackage != 2) {  // Display only if not in good condition
+									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 								}
 							}
 						}
@@ -1106,8 +1060,13 @@ static void render_callback() {
 						if (distanceDouble <= esp_max_distance) {
 							vector3 screen_position{};
 							if (util::w2s(tableLocation, last_frame_cached.pov, screen_position)) {
+								// Calculate text width based on character count and font size
+								std::string name_norm = "[PIZZUSHI]" + (task_object_distance ? " [" + distance + "m]" : "");
+								int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+								screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
 								if (tableFinished != true) {
-									overlay->draw_text(screen_position, task_color, "[PIZZUSHI]", true);
+									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 
 									if (task_object_state) {
 										auto tableRice = table->get_rice_type();
@@ -1124,11 +1083,6 @@ static void render_callback() {
 
 										screen_position.y += 15;
 										overlay->draw_text(screen_position, task_color, ("[" + riceType + " | " + fishType + " | " + toppingType + "]").c_str(), true);
-									}
-									// Distance calculation
-									if (task_object_distance) {
-										screen_position.y += 15;
-										overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 									}
 								}
 							}
@@ -1172,18 +1126,18 @@ static void render_callback() {
 								if (sourceState != 3) {
 									auto sourceRoom = source->get_room();
 
-									overlay->draw_text(screen_position, task_color, ("[Source: " + TranslateRoomName(sourceRoom) + "]").c_str(), true);
+									// Calculate text width based on character count and font size
+									std::string name_norm = "[SOURCE: " + TranslateRoomName(sourceRoom) + "]" + (task_object_distance ? " [" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 
 									if (task_object_state) {
 										auto targetPC = source->get_other_pc();
 										screen_position.y += 15;
-										overlay->draw_text(screen_position, task_color, ("[Target: " + TranslateRoomName(targetPC->get_room()) + "]").c_str(), true);
+										overlay->draw_text(screen_position, task_color, ("[TARGET: " + TranslateRoomName(targetPC->get_room()) + "]").c_str(), true);
 
-									}
-									// Distance calculation
-									if (task_object_distance) {
-										screen_position.y += 15;
-										overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 									}
 								}
 							}
@@ -1209,19 +1163,18 @@ static void render_callback() {
 								if (target->get_other_pc()->get_state() != 3) {
 									auto targetRoom = target->get_room();
 
-									overlay->draw_text(screen_position, task_color, ("[Target: " + TranslateRoomName(targetRoom) + "]").c_str(), true);
+									// Calculate text width based on character count and font size
+									std::string name_norm = "[TARGET: " + TranslateRoomName(targetRoom) + "]" + (task_object_distance ? " [" + distance + "m]" : "");
+									int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+									screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 
 									if (task_object_state) {
 										auto sourcePC = target->get_other_pc();
 										screen_position.y += 15;
-										overlay->draw_text(screen_position, task_color, ("[Source: " + TranslateRoomName(sourcePC->get_room()) + "]").c_str(), true);
+										overlay->draw_text(screen_position, task_color, ("[SOURCE: " + TranslateRoomName(sourcePC->get_room()) + "]").c_str(), true);
 
-									}
-									// Distance calculation
-									if (task_object_distance) {
-										screen_position.y += 15;
-										auto distance = CalculateDistance(local_mec->get_net_location(), targetLocation);
-										overlay->draw_text(screen_position, task_color, ("[" + distance + "m]").c_str(), true);
 									}
 								}
 							}

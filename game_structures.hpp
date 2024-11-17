@@ -648,6 +648,7 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x300, root, u_scene_component*);
 				GET_OFFSET(0x344, battery_value, int32_t);
+				GET_OFFSET(0x380, batteries_count, int32_t);
 				GET_OFFSET(0x338, in_color, int32_t);
 				GET_OFFSET(0x33C, out_color, int32_t);
 				GET_OFFSET(0x3B8, task_value, int32_t);
