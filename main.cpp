@@ -18,12 +18,14 @@
 #include <algorithm>
 #include <limits>
 #include "game_math.hpp"
+#include "game_function.hpp"
 
 using namespace menu;
 using namespace config;
 using namespace globals;
 using namespace protocol::engine::sdk;
 using namespace protocol::game::sdk;
+using namespace protocol::engine;
 
 std::unordered_map<std::string, ItemProperties> itemData;
 
@@ -54,33 +56,6 @@ ItemProperties GetItemProperties(const std::string& itemName) {
 	if (itemData.find(itemName) != itemData.end()) {
 		return itemData[itemName];
 	}
-}
-
-u_object* find_object_by_name(const std::string& name, uintptr_t process_base) {
-	g_object* gobjects = g_object::get_gobjects(process_base);
-	if (!gobjects) return nullptr;
-
-	int num_objects = gobjects->get_num_objects();
-	for (int i = 0; i < num_objects; i++) {
-		u_object* obj = gobjects->get_object_by_index(i);
-		if (!obj) continue;
-
-		// Get the object's full name
-		std::string object_name = util::get_name_from_fname(obj->fname_index());
-		if (object_name.find(name) != std::string::npos) {
-			return obj;
-		}
-	}
-	return nullptr; // Not found
-}
-
-u_data_item* get_item_data(const std::string& item_name, uintptr_t process_base) {
-	u_object* obj = find_object_by_name(item_name, process_base);
-	if (!obj) return nullptr;
-
-	// Cast to your specific item class, e.g., u_data_item
-	u_data_item* item_data = static_cast<u_data_item*>(obj);
-	return item_data;
 }
 
 std::string CalculateDistance(const FVector& location1, const vector3& location2) {
@@ -253,7 +228,7 @@ static void render_callback() {
 		rapid_fire = !rapid_fire;
 	}
 	if (GetAsyncKeyState(VK_PRIOR) & 1) {
-
+		
 	}
 
 	//if (GetAsyncKeyState(aimbot_hotkey) & 1) {
@@ -340,7 +315,7 @@ static void render_callback() {
 			auto item_name = hand_item->get_name().read_string();
 			if (item_name == "SHORTY" || item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHOTGUN" || item_name == "RIFLE" || item_name == "SMG") {
 				auto hand_state = local_mec->get_hand_state();
-				hand_state.Value_8 = 99;
+				hand_state.Value_8 = ammo_count;
 				local_mec->set_hand_state(hand_state);
 			}
 			else {
@@ -536,13 +511,13 @@ static void render_callback() {
 					}
 					vector3 screen_position{};
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-						std::string name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "");
-						overlay->draw_text(screen_position, color, name_norm.c_str(), true);
+						std::string name_norm = "[" + name + "]" + (role == 4 ? " [D]" : "") + (player_distance ? " [" + distance + "m]" : "");
 
-						if (player_distance) {
-							screen_position.y += 15;
-							overlay->draw_text(screen_position, color, ("[" + distance + "m]").c_str(), true);
-						}
+						// Calculate text width based on character count and font size
+						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+						screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+						overlay->draw_text(screen_position, color, name_norm.c_str(), true);
 					}
 				}
 			}
@@ -1332,6 +1307,15 @@ int main() {
 
 	std::thread cache_thread(cache_useful);
 	cache_thread.detach();
+
+	/*
+	uintptr_t baseAddress = mem::module_base;
+	uintptr_t offset = 0x67DF760;
+
+	uintptr_t absoluteAddress = baseAddress + offset;
+
+	std::cout << "Absolute Address: 0x" << std::hex << absoluteAddress << std::endl;
+		*/
 
 	while (true) {
 		overlay->msg_loop();

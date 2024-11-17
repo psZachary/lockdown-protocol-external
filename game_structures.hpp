@@ -22,9 +22,30 @@ namespace protocol {
 
 		constexpr uintptr_t GWORLD = 110318928;
 		constexpr uintptr_t GNAMES = 108238592;
-		constexpr uintptr_t GOBJECTS = 116784608;
+		constexpr uintptr_t GOBJECTS = 0x67DF760;
 
 		namespace sdk {
+			struct fuobjectitem
+			{
+				// Pointer to the allocated object
+				uintptr_t object;
+				// Internal flags
+				int32_t flags;
+				// UObject Owner Cluster Index
+				int32_t cluster_root_index;
+				int32_t serial_number;
+			};
+
+			class fuobjectarray {
+			public:
+				uintptr_t chunk_table;
+				uintptr_t allocated;
+				int32_t max_elem;
+				int32_t num_elem;
+				int32_t max_chunk;
+				int32_t num_chunk;
+			};
+
 			struct fname {
 				int index;
 				int number;
@@ -38,32 +59,29 @@ namespace protocol {
 			class u_object
 			{
 			public:
+				virtual ~u_object() {} // Virtual destructor for polymorphism
+
+				static u_object* get_object(uintptr_t process_base) {
+					return mem::rpm<u_object*>(process_base + GOBJECTS);
+				}
 				int fname_index() {
-					return mem::rpm<int>(pthis + 0x18);
+					return mem::rpm<int>(pthis + 0x18); // name private FName
 				}
 				u_object* super() {
 					// 0x30
-					return mem::rpm<u_object*>(pthis + 0x40);
+					return mem::rpm<u_object*>(pthis + 0x40); // ??
 				}
 				u_object* class_private() {
-					return mem::rpm<u_object*>(pthis + 0x10);
+					return mem::rpm<u_object*>(pthis + 0x10); // class private UClass
 				}
 				u_object* outer() {
-					return mem::rpm<u_object*>(pthis + 0x20);
+					return mem::rpm<u_object*>(pthis + 0x20); // outer private UObject
 				}
-			};
-
-			class g_object {
-			public:
-				static g_object* get_gobjects(uintptr_t process_base) {
-					return mem::rpm<g_object*>(process_base + 0x67DF760);
+				uint64_t vtable() {
+					return mem::rpm<uint64_t>(pthis + 0x00); // vtable uint64_t
 				}
-
-				GET_OFFSET(0x10, num_objects, int);
-
-				u_object* get_object_by_index(int index) {
-					uintptr_t objects_array = mem::rpm<uintptr_t>(reinterpret_cast<uintptr_t>(this) + 0x8);
-					return mem::rpm<u_object*>(objects_array + index * sizeof(uintptr_t));
+				int internal_index() {
+					return mem::rpm<int>(pthis + 0xC); // index int
 				}
 			};
 
@@ -749,7 +767,5 @@ namespace protocol {
 		}
 	}
 }
-
-
 
 #undef pthis

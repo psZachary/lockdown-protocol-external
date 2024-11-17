@@ -50,6 +50,7 @@ namespace config {
 	inline double shake_intensity = 0.0; // avg 0.5 : 5
 	inline double fire_spread = 0.0;
 	inline bool infinite_ammo = false;
+	inline int ammo_count = 12;
 
 	// Inventory
 	inline bool can_inventory = false;
@@ -164,6 +165,7 @@ namespace config {
 		j["movement_osc"] = movement_osc;
 		j["osc_reactivity"] = osc_reactivity;
 		j["infinite_ammo"] = infinite_ammo;
+		j["ammo_count"] = ammo_count;
 		j["can_inventory"] = can_inventory;
 		j["aimbot"] = aimbot;
 
@@ -272,6 +274,7 @@ namespace config {
 		j.at("movement_osc").get_to(movement_osc);
 		j.at("osc_reactivity").get_to(osc_reactivity);
 		j.at("infinite_ammo").get_to(infinite_ammo);
+		j.at("ammo_count").get_to(ammo_count);
 		j.at("can_inventory").get_to(can_inventory);
 		j.at("aimbot").get_to(aimbot);
 

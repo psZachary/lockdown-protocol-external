@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include "util.hpp"
 #include <iomanip>
+#include "game_function.hpp"
 
 using namespace globals;
 using namespace config;
@@ -36,19 +37,16 @@ void MenuTooltip(const char* text) {
 void PopulateUniqueItems() {
 	static std::unordered_set<std::string> seen_names;
 
-	// Loop through cached world items
 	for (auto& item : world_item_cache) {
 		if (!item) continue;
 
 		auto item_data = item->get_data();
 		std::string name = item_data->get_name().read_string();
 
-		// If the item is already in the set, skip adding
 		if (seen_names.find(name) != seen_names.end()) {
 			continue;
 		}
 
-		// Mark the name as seen and add to the data structures
 		seen_names.insert(name);
 		unique_item_data[name] = item_data;
 		item_names.push_back(name);
@@ -375,75 +373,86 @@ void menu::draw()
 			ImGui::SameLine();
 
 			ImGui::BeginChild("OthersSection", ImVec2(halfWidth, 0), true);
-			if (ImGui::CollapsingHeader("Details##PlayerHackDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
-				if (fast_melee) {
-					float cast_time_float = static_cast<float>(cast_time);
-					float recover_time_float = static_cast<float>(recover_time);
-					float stun_float = static_cast<float>(stun);
+			if (fast_melee || infinite_melee_range) {
+				if (ImGui::CollapsingHeader("Melee Details##MeleeDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
+					if (fast_melee) {
+						float cast_time_float = static_cast<float>(cast_time);
+						float recover_time_float = static_cast<float>(recover_time);
+						float stun_float = static_cast<float>(stun);
 
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##cast_time", &cast_time_float, 0.0f, 0.5f, "Cast Time: %.02f")) {
-						cast_time = static_cast<double>(cast_time_float);
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##cast_time", &cast_time_float, 0.0f, 0.5f, "Cast Time: %.02f")) {
+							cast_time = static_cast<double>(cast_time_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##recover_time", &recover_time_float, 0.0f, 1.0f, "Recover Time: %.02f")) {
+							recover_time = static_cast<double>(recover_time_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##stun", &stun_float, 0.0f, 1.0f, "Stun: %.02f")) {
+							stun = static_cast<double>(stun_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						ImGui::SliderInt("##cost", &cost, 0, 40, "Cost: %d");
 					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##recover_time", &recover_time_float, 0.0f, 1.0f, "Recover Time: %.02f")) {
-						recover_time = static_cast<double>(recover_time_float);
+					if (infinite_melee_range) {
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						ImGui::SliderInt("##range", &range, 0, 10000, "Range: %d");
 					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##stun", &stun_float, 0.0f, 1.0f, "Stun: %.02f")) {
-						stun = static_cast<double>(stun_float);
-					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					ImGui::SliderInt("##cost", &cost, 0, 40, "Cost: %d");
-				}
-				if (infinite_melee_range) {
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					ImGui::SliderInt("##range", &range, 0, 10000, "Range: %d");
-				}
-				if (rapid_fire) {
-					float rapid_fire_rate_float = static_cast<float>(rapid_fire_rate);
 
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##rapid_fire_rate", &rapid_fire_rate_float, 0.0f, 1.0f, "Fire Rate: %.02f")) {
-						rapid_fire_rate = static_cast<double>(rapid_fire_rate_float);
-					}
 				}
-				if (no_recoil) {
-					float movement_osc_float = static_cast<float>(movement_osc);
-					float osc_reactivity_float = static_cast<float>(osc_reactivity);
-					float movement_prec_float = static_cast<float>(movement_prec);
-					float recoil_react_float = static_cast<float>(recoil_react);
-					float shake_intensity_float = static_cast<float>(shake_intensity);
-					float fire_spread_float = static_cast<float>(fire_spread);
+			}
+			if (rapid_fire || no_recoil || infinite_ammo) {
+				if (ImGui::CollapsingHeader("Gun Details##GunDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
+					if (rapid_fire) {
+						float rapid_fire_rate_float = static_cast<float>(rapid_fire_rate);
 
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##movement_osc", &movement_osc_float, 0.0f, 20.0f, "Oscillation: %.02f")) {
-						movement_osc = static_cast<double>(movement_osc_float);
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##rapid_fire_rate", &rapid_fire_rate_float, 0.0f, 1.0f, "Fire Rate: %.02f")) {
+							rapid_fire_rate = static_cast<double>(rapid_fire_rate_float);
+						}
 					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##osc_reactivity", &osc_reactivity_float, 0.0f, 100.0f, "Osc. Reactivity: %.02f")) {
-						osc_reactivity = static_cast<double>(osc_reactivity_float);
+					if (no_recoil) {
+						float movement_osc_float = static_cast<float>(movement_osc);
+						float osc_reactivity_float = static_cast<float>(osc_reactivity);
+						float movement_prec_float = static_cast<float>(movement_prec);
+						float recoil_react_float = static_cast<float>(recoil_react);
+						float shake_intensity_float = static_cast<float>(shake_intensity);
+						float fire_spread_float = static_cast<float>(fire_spread);
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##movement_osc", &movement_osc_float, 0.0f, 20.0f, "Oscillation: %.02f")) {
+							movement_osc = static_cast<double>(movement_osc_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##osc_reactivity", &osc_reactivity_float, 0.0f, 100.0f, "Osc. Reactivity: %.02f")) {
+							osc_reactivity = static_cast<double>(osc_reactivity_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##movement_prec", &movement_prec_float, 0.0f, 40.0f, "Move Precision: %.02f")) {
+							movement_prec = static_cast<double>(movement_prec_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##recoil_react", &recoil_react_float, 0.0f, 50.0f, "Recoil: %.02f")) {
+							recoil_react = static_cast<double>(recoil_react_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##shake_intensity", &shake_intensity_float, 0.0f, 10.0f, "Shake Intensity: %.02f")) {
+							shake_intensity = static_cast<double>(shake_intensity_float);
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderFloat("##fire_spread", &fire_spread_float, 0.0f, 20.0f, "Fire Spread: %.02f")) {
+							fire_spread = static_cast<double>(fire_spread_float);
+						}
 					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##movement_prec", &movement_prec_float, 0.0f, 40.0f, "Move Precision: %.02f")) {
-						movement_prec = static_cast<double>(movement_prec_float);
-					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##recoil_react", &recoil_react_float, 0.0f, 50.0f, "Recoil: %.02f")) {
-						recoil_react = static_cast<double>(recoil_react_float);
-					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##shake_intensity", &shake_intensity_float, 0.0f, 10.0f, "Shake Intensity: %.02f")) {
-						shake_intensity = static_cast<double>(shake_intensity_float);
-					}
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					if (ImGui::SliderFloat("##fire_spread", &fire_spread_float, 0.0f, 20.0f, "Fire Spread: %.02f")) {
-						fire_spread = static_cast<double>(fire_spread_float);
+					if (infinite_ammo) {
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						ImGui::SliderInt("##ammo", &ammo_count, 0, 12, "Ammo: %d");
 					}
 				}
 			}
 			ImGui::EndChild();
-			calculatedHeight += itemHeight * 11;
+			calculatedHeight += itemHeight * 12;
 		}
 		// ITEMS
 		else if (selected_tab == 4) {
@@ -464,22 +473,61 @@ void menu::draw()
 					}
 					ImGui::Text("Hand Item: %s", display_name.c_str());
 					ImGui::SameLine();
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
 						PopulateUniqueItems();
+
+						// List of items that require AssignToItemData
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Set the hand item based on the selected item name
-								auto item_data = unique_item_data[item_name];
-								if (item_data) {
-									local_mec->set_hand_item(item_data);
+								// Check if the item is one of the special ones
+								if (special_items.find(item_name) != special_items.end()) {
+									// Use AssignToItemData for these items
+									auto item_data = AssignToItemData(item_name);
+									if (item_data) {
+										local_mec->set_hand_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << item_name << std::endl;
+									}
+								}
+								else {
+									// Use unique_item_data for regular items
+									auto item_data = unique_item_data[item_name];
+									if (item_data) {
+										local_mec->set_hand_item(item_data);
+									}
 								}
 
 								// Reset combo box selection after changing the item
 								selected_item_name = "";
 							}
 						}
+
+						// Manually add the special items to the list if they aren't already populated
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
+									selected_item_name = special_item;
+
+									auto item_data = AssignToItemData(special_item);
+									if (item_data) {
+										local_mec->set_hand_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << special_item << std::endl;
+									}
+
+									// Reset combo box selection after changing the item
+									selected_item_name = "";
+								}
+							}
+						}
+
 						ImGui::EndCombo();
 					}
 					auto hand_state = local_mec->get_hand_state();
@@ -636,22 +684,61 @@ void menu::draw()
 				else {
 					ImGui::Text("Hand Item: AIR");
 					ImGui::SameLine();
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
 						PopulateUniqueItems();
+
+						// List of items that require AssignToItemData
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Set the hand item based on the selected item name
-								auto item_data = unique_item_data[item_name];
-								if (item_data) {
-									local_mec->set_hand_item(item_data);
+								// Check if the item is one of the special ones
+								if (special_items.find(item_name) != special_items.end()) {
+									// Use AssignToItemData for these items
+									auto item_data = AssignToItemData(item_name);
+									if (item_data) {
+										local_mec->set_hand_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << item_name << std::endl;
+									}
+								}
+								else {
+									// Use unique_item_data for regular items
+									auto item_data = unique_item_data[item_name];
+									if (item_data) {
+										local_mec->set_hand_item(item_data);
+									}
 								}
 
 								// Reset combo box selection after changing the item
 								selected_item_name = "";
 							}
 						}
+
+						// Manually add the special items to the list if they aren't already populated
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
+									selected_item_name = special_item;
+
+									auto item_data = AssignToItemData(special_item);
+									if (item_data) {
+										local_mec->set_hand_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << special_item << std::endl;
+									}
+
+									// Reset combo box selection after changing the item
+									selected_item_name = "";
+								}
+							}
+						}
+
 						ImGui::EndCombo();
 					}
 				}
@@ -668,21 +755,61 @@ void menu::draw()
 					}
 					ImGui::Text("Bag Item: %s", display_name.c_str());
 					ImGui::SameLine();
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
 						PopulateUniqueItems();
+
+						// List of items that require AssignToItemData
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Set the hand item based on the selected item name
-								auto item_data = unique_item_data[item_name];
-								if (item_data) {
-									local_mec->set_bag_item(item_data);
+								// Check if the item is one of the special ones
+								if (special_items.find(item_name) != special_items.end()) {
+									// Use AssignToItemData for these items
+									auto item_data = AssignToItemData(item_name);
+									if (item_data) {
+										local_mec->set_bag_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << item_name << std::endl;
+									}
+								}
+								else {
+									// Use unique_item_data for regular items
+									auto item_data = unique_item_data[item_name];
+									if (item_data) {
+										local_mec->set_bag_item(item_data);
+									}
+								}
+
+								// Reset combo box selection after changing the item
+								selected_item_name = "";
+							}
+						}
+
+						// Manually add the special items to the list if they aren't already populated
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
+									selected_item_name = special_item;
+
+									auto item_data = AssignToItemData(special_item);
+									if (item_data) {
+										local_mec->set_bag_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << special_item << std::endl;
+									}
+
+									// Reset combo box selection after changing the item
+									selected_item_name = "";
 								}
 							}
-							// Reset combo box selection after changing the item
-							selected_item_name = "";
 						}
+
 						ImGui::EndCombo();
 					}
 
@@ -841,21 +968,61 @@ void menu::draw()
 				else {
 					ImGui::Text("Bag Item: EMPTY");
 					ImGui::SameLine();
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
 						PopulateUniqueItems();
+
+						// List of items that require AssignToItemData
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Set the hand item based on the selected item name
-								auto item_data = unique_item_data[item_name];
-								if (item_data) {
-									local_mec->set_bag_item(item_data);
+								// Check if the item is one of the special ones
+								if (special_items.find(item_name) != special_items.end()) {
+									// Use AssignToItemData for these items
+									auto item_data = AssignToItemData(item_name);
+									if (item_data) {
+										local_mec->set_bag_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << item_name << std::endl;
+									}
 								}
+								else {
+									// Use unique_item_data for regular items
+									auto item_data = unique_item_data[item_name];
+									if (item_data) {
+										local_mec->set_bag_item(item_data);
+									}
+								}
+
 								// Reset combo box selection after changing the item
 								selected_item_name = "";
 							}
 						}
+
+						// Manually add the special items to the list if they aren't already populated
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
+									selected_item_name = special_item;
+
+									auto item_data = AssignToItemData(special_item);
+									if (item_data) {
+										local_mec->set_bag_item(item_data);
+									}
+									else {
+										std::cout << "Failed to assign item data for: " << special_item << std::endl;
+									}
+
+									// Reset combo box selection after changing the item
+									selected_item_name = "";
+								}
+							}
+						}
+
 						ImGui::EndCombo();
 					}
 				}

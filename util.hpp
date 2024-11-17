@@ -1,9 +1,9 @@
 #pragma once
 
 #include "game_math.hpp"
-#include "game_structures.hpp"
 #include <Windows.h>
 #include "mem.hpp"
+#include "game_structures.hpp"
 
 namespace util {
 	using namespace protocol::engine::sdk;
@@ -121,4 +121,23 @@ namespace util {
 		}
 		else return "";
 	}
+
+	/*
+	std::vector<uintptr_t> find_objects(std::string name_find) {
+		std::vector<uintptr_t> objs{};
+		constexpr auto elements_per_chunk = 64 * 1024;
+		auto gobjects = drv->rpm<fuobjectarray>(mem::module_base + GOBJECTS);
+		for (int i = 0; i < gobjects.num_chunk; i++) {
+			auto chunk_start = drv->rpm<uintptr_t>(gobjects.chunk_table + (i * 0x8));
+			for (int i = 0; i < elements_per_chunk; i++) {
+				auto item = drv->rpm<fuobjectitem>(chunk_start + (i * sizeof(fuobjectitem)));
+				auto name = get_name_from_fname(GNAMES, ((u_object*)item.object)->fname_index());
+				if (isa(item.object, name_find, false)) {
+					objs.push_back(item.object);
+				}
+			}
+		}
+		return objs;
+	}
+*/
 }
