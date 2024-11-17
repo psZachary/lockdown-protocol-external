@@ -45,6 +45,12 @@ This project is a fork of the [Lockdown Protocol External](https://github.com/ps
    - `Insert` : Toggle No Recoil
    - `Del` : Toggle Max Damage
 
+![Screenshot_198](https://github.com/user-attachments/assets/39572eb4-af6c-49cd-8c8f-5a9896c34094)
+![Screenshot_199](https://github.com/user-attachments/assets/9479a3b0-292d-44b9-b4e1-cf1829e32cdf)
+![Screenshot_200](https://github.com/user-attachments/assets/f062258b-cdcd-4698-a5cb-4da18fd2b93b)
+![Screenshot_201](https://github.com/user-attachments/assets/8e468c15-9dc5-4574-85c7-90e95787202a)
+![Screenshot_202](https://github.com/user-attachments/assets/729e1127-f681-4fad-be11-3ff53d9a7428)
+
 ## File Structure
 - `main.cpp`: Core logic and main game loop with memory and overlay management.
 - `ItemProperties.h`: Defines item properties structure and initializes game item data for quick lookups.
