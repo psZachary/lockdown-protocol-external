@@ -3,13 +3,14 @@
 #include <math.h>
 #include <cstdint>
 #include <iostream>
+#include "overlay/imgui/imgui.h"
 
 struct color_m {
 	double r, g, b, a;
 	color_m(double rgba) : r(rgba), g(rgba), b(rgba), a(rgba) {}
 	color_m() : r(0.f), g(0.f), b(0.f), a(0.f) {}
 	color_m(double r, double g, double b, double a) : r(r), g(g), b(b), a(a) {}
-	
+
 	operator double* () { return &r; }
 	// add static white and black
 	static color_m white() { return color_m{ 255.f, 255.f, 255.f, 255.f }; }
@@ -108,8 +109,8 @@ public:
 		res.y = this->y - other.y;
 		return res;
 	}
-	vector2 operator+ (vector2 other) {
-		auto res = vector2();
+	vector2 operator+(const vector2& other) const {
+		vector2 res;
 		res.x = this->x + other.x;
 		res.y = this->y + other.y;
 		return res;

@@ -68,7 +68,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.7");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.8 [UNRELEASED]");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -109,6 +109,7 @@ void menu::draw()
 				task_object_esp = esp_enabled;
 				primary_object_esp = esp_enabled;
 				secondary_object_esp = esp_enabled;
+				esp_radar = esp_enabled;
 			}
 			ImGui::SameLine();
 			ImHotkey("##ESPHotkey", &esp_hotkey);
@@ -137,6 +138,7 @@ void menu::draw()
 						if (ImGui::CollapsingHeader("Details##PlayerESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Distance##PlayerDistance", &player_distance);
 							ImGui::Checkbox("Box##PlayerBox", &player_box);
+							ImGui::Checkbox("Show on Radar##PlayerRadar", &player_radar);
 						}
 						ImGui::EndChild();
 
@@ -147,6 +149,9 @@ void menu::draw()
 							ImGui::ColorEdit4("Dissident Color", (float*)&dissident_color);
 						}
 						ImGui::EndChild();
+
+						calculatedHeight += itemHeight * 6.5;
+
 						ImGui::EndTabItem();
 					}
 
@@ -202,6 +207,7 @@ void menu::draw()
 						if (ImGui::CollapsingHeader("Details##WeaponESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Item State##WeaponItemState", &weapon_item_state);
 							ImGui::Checkbox("Distance##WeaponDistance", &weapon_distance);
+							ImGui::Checkbox("Show on Radar##WeaponRadar", &weapon_radar);
 						}
 						ImGui::EndChild();
 
@@ -211,6 +217,9 @@ void menu::draw()
 							ImGui::ColorEdit4("Weapon Color", (float*)&weapon_color);
 						}
 						ImGui::EndChild();
+
+						calculatedHeight += itemHeight * 6.5;
+
 						ImGui::EndTabItem();
 					}
 
@@ -224,6 +233,7 @@ void menu::draw()
 						if (ImGui::CollapsingHeader("Details##PrimaryObjectDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Item State##PrimaryItemState", &primary_item_state);
 							ImGui::Checkbox("Distance##PrimaryDistance", &primary_distance);
+							ImGui::Checkbox("Show on Radar##PrimaryRadar", &primary_radar);
 						}
 						ImGui::EndChild();
 
@@ -253,6 +263,7 @@ void menu::draw()
 						if (ImGui::CollapsingHeader("Details##SecondaryObjectDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Item State##SecondaryItemState", &secondary_item_state);
 							ImGui::Checkbox("Distance##SecondaryDistance", &secondary_distance);
+							ImGui::Checkbox("Show on Radar##SecondaryRadar", &secondary_radar);
 						}
 						ImGui::EndChild();
 
@@ -267,6 +278,43 @@ void menu::draw()
 						ImGui::EndChild();
 
 						calculatedHeight += itemHeight * 7.5;
+
+						ImGui::EndTabItem();
+					}
+
+					// Radar
+					if (ImGui::BeginTabItem("Radar")) {
+						ImGui::Checkbox("Radar##ESPRadar", &esp_radar);
+
+						if (ImGui::CollapsingHeader("Options##RadarOptions", ImGuiTreeNodeFlags_DefaultOpen)) {
+							// Add radar position combo box here
+							static const char* positionOptions[] = {
+								"Top Left", "Top Middle", "Top Right",
+								"Middle Left", "Middle Right",
+								"Bottom Left", "Bottom Middle", "Bottom Right"
+							};
+
+							// Find the current index of the radar position
+							int currentRadarPositionIndex = 0;
+							for (int i = 0; i < IM_ARRAYSIZE(positionOptions); ++i) {
+								if (esp_radar_position == positionOptions[i]) {
+									currentRadarPositionIndex = i;
+									break;
+								}
+							}
+
+							// Create combo box
+							ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+							if (ImGui::Combo("##RadarPosition", &currentRadarPositionIndex, positionOptions, IM_ARRAYSIZE(positionOptions))) {
+								esp_radar_position = positionOptions[currentRadarPositionIndex]; // Update string on selection
+							}
+
+							float esp_radar_scale_float = static_cast<float>(esp_radar_scale);
+							ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+							if (ImGui::SliderFloat("##esp_radar_scale", &esp_radar_scale_float, 0.05f, 0.25f, "Scale: %.02f")) {
+								esp_radar_scale = static_cast<double>(esp_radar_scale_float);
+							}
+						}
 
 						ImGui::EndTabItem();
 					}
@@ -475,6 +523,11 @@ void menu::draw()
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_hand_item(nullptr); // Clear the hand item
+						}
+
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
@@ -572,13 +625,17 @@ void menu::draw()
 						}
 					}
 					else if (hand_item_name == "CONTAINER") {
-						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "White Rice", "Brown Rice", "Black Rice" };
-						int current_value = hand_state.Value_8;
+						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "White Rice", "Brown Rice", "Black Rice", "Dirty" };
+						int current_value = (hand_state.Value_8 == -1) ? 9 : hand_state.Value_8; // Map -1 (Dirty) to the new index
 						int selected_index = current_value;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##Color", &selected_index, colors, IM_ARRAYSIZE(colors))) {
-							if (selected_index >= 6) {
+							if (selected_index == 9) {
+								// Handle "Dirty" selection
+								hand_state.Value_8 = -1;
+							}
+							else if (selected_index >= 6) {
 								hand_state.Value_8 = 6;
 								switch (selected_index) {
 								case 6: hand_state.Time_15 = 1; break;
@@ -588,18 +645,40 @@ void menu::draw()
 							}
 							else {
 								hand_state.Value_8 = selected_index;
-								hand_state.Time_15 = 0;
+
+								if (selected_index == 5) {
+									hand_state.Time_15 = 1; // Set Time_15 to 1 for Red
+								}
+								else {
+									hand_state.Time_15 = 0;
+								}
 							}
 							local_mec->set_hand_state(hand_state);
 						}
 					}
 					else if (hand_item_name == "SAMPLE") {
-						const char* colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
-						int current_index = hand_state.Value_8 - 1;
+						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "Green Mix", "Yellow Mix", "Blue Mix", "White Mix" };
+						int current_index = (hand_state.Value_8 == 0) ? 0 :
+							(hand_state.Time_15 == 1 ? hand_state.Value_8 + 5 : hand_state.Value_8);
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##SampleColor", &current_index, colors, IM_ARRAYSIZE(colors))) {
-							hand_state.Value_8 = current_index + 1;
+							if (current_index == 0) { // Empty
+								hand_state.Value_8 = 0;
+								hand_state.Time_15 = 0;
+							}
+							else if (current_index == 5) { // Red
+								hand_state.Value_8 = 5;
+								hand_state.Time_15 = 1;
+							}
+							else if (current_index >= 6) { // Mixes
+								hand_state.Value_8 = current_index - 5; // Map mix index back to unmixed Value_8
+								hand_state.Time_15 = 1; // Mixes have Time_15 of 1
+							}
+							else { // Standard colors
+								hand_state.Value_8 = current_index;
+								hand_state.Time_15 = 0; // Standard colors have Time_15 of 0
+							}
 							local_mec->set_hand_state(hand_state);
 						}
 					}
@@ -653,6 +732,30 @@ void menu::draw()
 						hand_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
 						local_mec->set_hand_state(hand_state);
 					} // Pizzushi
+					else if (hand_item_name == "CASSETTE") {
+						const char* cassette_titles[] = {
+							"On And On",
+							"C U Again",
+							"KHARMA",
+							"Who Am I",
+							"Burning Wish",
+							"Cake",
+							"Puzzle",
+							"Sun",
+							"Worship",
+							"Royalty (Instrumental)",
+							"Grave",
+						};
+
+						int current_value = hand_state.Value_8;
+						int selected_index = current_value;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##Cassette", &selected_index, cassette_titles, IM_ARRAYSIZE(cassette_titles))) {
+							hand_state.Value_8 = selected_index; 
+							local_mec->set_hand_state(hand_state);
+						}
+					}
 					else if (hand_item_name == "VENT FILTER") {
 						int clean_percentage = hand_state.Value_8;
 
@@ -757,6 +860,11 @@ void menu::draw()
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_bag_item(nullptr); // Clear the bag item
+						}
+
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
@@ -855,13 +963,17 @@ void menu::draw()
 						}
 					}
 					else if (bag_item_name == "CONTAINER") {
-						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "White Rice", "Brown Rice", "Black Rice" };
-						int current_value = bag_state.Value_8;
+						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "White Rice", "Brown Rice", "Black Rice", "Dirty" };
+						int current_value = (bag_state.Value_8 == -1) ? 9 : bag_state.Value_8; // Map -1 (Dirty) to the new index
 						int selected_index = current_value;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##Color", &selected_index, colors, IM_ARRAYSIZE(colors))) {
-							if (selected_index >= 6) {
+							if (selected_index == 9) {
+								// Handle "Dirty" selection
+								bag_state.Value_8 = -1;
+							}
+							else if (selected_index >= 6) {
 								bag_state.Value_8 = 6;
 								switch (selected_index) {
 								case 6: bag_state.Time_15 = 1; break;
@@ -871,18 +983,40 @@ void menu::draw()
 							}
 							else {
 								bag_state.Value_8 = selected_index;
-								bag_state.Time_15 = 0;
+
+								if (selected_index == 5) {
+									bag_state.Time_15 = 1; // Set Time_15 to 1 for Red
+								}
+								else {
+									bag_state.Time_15 = 0;
+								}
 							}
 							local_mec->set_bag_state(bag_state);
 						}
 					}
 					else if (bag_item_name == "SAMPLE") {
-						const char* colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
-						int current_index = bag_state.Value_8 - 1;
+						const char* colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "Green Mix", "Yellow Mix", "Blue Mix", "White Mix" };
+						int current_index = (bag_state.Value_8 == 0) ? 0 :
+							(bag_state.Time_15 == 1 ? bag_state.Value_8 + 5 : bag_state.Value_8);
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##SampleColor", &current_index, colors, IM_ARRAYSIZE(colors))) {
-							bag_state.Value_8 = current_index + 1;
+							if (current_index == 0) { // Empty
+								bag_state.Value_8 = 0;
+								bag_state.Time_15 = 0;
+							}
+							else if (current_index == 5) { // Red
+								bag_state.Value_8 = 5;
+								bag_state.Time_15 = 1;
+							}
+							else if (current_index >= 6) { // Mixes
+								bag_state.Value_8 = current_index - 5; // Map mix index back to unmixed Value_8
+								bag_state.Time_15 = 1; // Mixes have Time_15 of 1
+							}
+							else { // Standard colors
+								bag_state.Value_8 = current_index;
+								bag_state.Time_15 = 0; // Standard colors have Time_15 of 0
+							}
 							local_mec->set_bag_state(bag_state);
 						}
 					}
@@ -936,6 +1070,30 @@ void menu::draw()
 						bag_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
 						local_mec->set_bag_state(bag_state);
 					}
+					else if (bag_item_name == "CASSETTE") {
+						const char* cassette_titles[] = {
+							"On And On",
+							"C U Again",
+							"KHARMA",
+							"Who Am I",
+							"Burning Wish",
+							"Cake",
+							"Puzzle",
+							"Sun",
+							"Worship",
+							"Royalty (Instrumental)",
+							"Grave",
+						};
+
+						int current_value = bag_state.Value_8;
+						int selected_index = current_value;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##Cassette", &selected_index, cassette_titles, IM_ARRAYSIZE(cassette_titles))) {
+							bag_state.Value_8 = selected_index;
+							local_mec->set_bag_state(bag_state);
+						}
+						}
 					else if (bag_item_name == "VENT FILTER") {
 						int clean_percentage = bag_state.Value_8;
 

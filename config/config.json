@@ -34,6 +34,9 @@
     "esp_enabled": true,
     "esp_hotkey": 113,
     "esp_max_distance": 70.0,
+    "esp_radar": true,
+    "esp_radar_position": "Middle Right",
+    "esp_radar_scale": 0.07000000029802322,
     "fast_melee": false,
     "fast_melee_hotkey": 117,
     "friction": 100000.0,
@@ -70,12 +73,14 @@
         "g": 0.18431372940540314,
         "r": 0.34117648005485535
     },
-    "player_box": false,
+    "player_box": true,
     "player_distance": true,
     "player_esp": true,
-    "primary_distance": true,
+    "player_radar": true,
+    "primary_distance": false,
     "primary_item_state": false,
     "primary_object_esp": true,
+    "primary_radar": false,
     "range": 10000,
     "rapid_fire": false,
     "rapid_fire_hotkey": 120,
@@ -102,6 +107,7 @@
     "secondary_distance": false,
     "secondary_item_state": false,
     "secondary_object_esp": true,
+    "secondary_radar": false,
     "speedhack": false,
     "speedhack_hotkey": 114,
     "stun": 1.0,
@@ -118,8 +124,8 @@
         "g": 1.0,
         "r": 1.0
     },
-    "task_computers": true,
-    "task_delivery": true,
+    "task_computers": false,
+    "task_delivery": false,
     "task_delivery_color": {
         "a": 1.0,
         "b": 0.0,
@@ -136,7 +142,7 @@
     "task_object_distance": true,
     "task_object_esp": false,
     "task_object_state": true,
-    "task_pizzushi": true,
+    "task_pizzushi": false,
     "task_pizzushi_color": {
         "a": 1.0,
         "b": 0.0,
@@ -164,5 +170,6 @@
     },
     "weapon_distance": true,
     "weapon_esp": true,
-    "weapon_item_state": true
+    "weapon_item_state": true,
+    "weapon_radar": true
 }

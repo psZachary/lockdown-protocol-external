@@ -1,6 +1,6 @@
 # Game Enhancement Tool (Fork of Lockdown Protocol External)
 
-This project has enhanced item data management, overlay improvements, and various player enhancement features.
+This project is a fork of the [Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external) by [psZachary](https://github.com/psZachary). This fork extends the original functionality by adding enhanced item data management, overlay improvements, and various player enhancement features.
 
 ## Features
 - **ESP**
@@ -45,12 +45,6 @@ This project has enhanced item data management, overlay improvements, and variou
    - `Insert` : Toggle No Recoil
    - `Del` : Toggle Max Damage
 
-![Screenshot_198](https://github.com/user-attachments/assets/39572eb4-af6c-49cd-8c8f-5a9896c34094)
-![Screenshot_199](https://github.com/user-attachments/assets/9479a3b0-292d-44b9-b4e1-cf1829e32cdf)
-![Screenshot_200](https://github.com/user-attachments/assets/f062258b-cdcd-4698-a5cb-4da18fd2b93b)
-![Screenshot_201](https://github.com/user-attachments/assets/8e468c15-9dc5-4574-85c7-90e95787202a)
-![Screenshot_202](https://github.com/user-attachments/assets/729e1127-f681-4fad-be11-3ff53d9a7428)
-
 ## File Structure
 - `main.cpp`: Core logic and main game loop with memory and overlay management.
 - `ItemProperties.h`: Defines item properties structure and initializes game item data for quick lookups.
@@ -60,7 +54,7 @@ This project has enhanced item data management, overlay improvements, and variou
 ## Setup and Usage
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/psZachary/lockdown-internal.git
+   git clone https://github.com/OniSensei/lockdown-protocol-external.git
    cd lockdown-protocol-external
    ```
 
@@ -82,6 +76,9 @@ This project has enhanced item data management, overlay improvements, and variou
 ItemProperties knifeProps = GetItemProperties("KNIFE");
 std::cout << "KNIFE cast time: " << knifeProps.melee_cast_time << std::endl;
 ```
+
+## Original Project
+This project is a fork of [psZachary's Lockdown Protocol External](https://github.com/psZachary/lockdown-protocol-external), with additional enhancements focused on item properties and gameplay customization.
 
 ## Contributing
 Feel free to submit issues, fork the repository, and make pull requests to enhance features, fix bugs, or improve performance.

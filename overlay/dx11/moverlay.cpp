@@ -188,17 +188,17 @@ VOID c_overlay::dest_render_target() {
 c_overlay::c_overlay() :
     exit_ready(false),
     window_handle(nullptr),
-    window_class( {}),
-              window_width((FLOAT)GetSystemMetrics(SM_CXSCREEN)),
-              window_height((FLOAT)GetSystemMetrics(SM_CYSCREEN)),
-              font(nullptr),
-              d3d_device(nullptr),
-              device_context(nullptr),
-              swap_chain(nullptr),
-              render_target_view(nullptr),
-              draw_list(nullptr),
-              breath(NULL),
-menu_ticks(NULL) {
+    window_class({}),
+    window_width((FLOAT)GetSystemMetrics(SM_CXSCREEN)),
+    window_height((FLOAT)GetSystemMetrics(SM_CYSCREEN)),
+    font(nullptr),
+    d3d_device(nullptr),
+    device_context(nullptr),
+    swap_chain(nullptr),
+    render_target_view(nullptr),
+    draw_list(nullptr),
+    breath(NULL),
+    menu_ticks(NULL) {
     //window_handle = FindWindowW(L"HudSight 2Mirror2DesktopWindowClass", L"HudSight 2Mirror2DesktopWindowClass1");
     window_handle = FindWindowW(L"MedalOverlayClass", L"MedalOverlay");
 
@@ -225,7 +225,8 @@ menu_ticks(NULL) {
 
         if (!SetWindowPos(window_handle, HWND_TOPMOST, 0, 0, static_cast<int>(x), static_cast<int>(y), 0))
             return;
-    } else
+    }
+    else
         window_handle = FindWindowA(("0"), ("0"));
 
     font = new s_font();
@@ -273,7 +274,7 @@ void c_overlay::end_frame() {
 }
 
 MSG c_overlay::begin_frame() {
-    MSG msg { 0 };
+    MSG msg{ 0 };
 
     if (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
         ::TranslateMessage(&msg);
@@ -299,7 +300,8 @@ BOOL c_overlay::msg_loop() {
         end_frame();
 
         return msg.message != WM_QUIT;
-    } else if (clear_screen) {
+    }
+    else if (clear_screen) {
         auto msg = begin_frame();
         end_frame();
 
@@ -316,7 +318,7 @@ void c_overlay::input_handler() {
     for (; !exit_ready; Sleep(1)) {
         ImGuiIO& io = ImGui::GetIO();
 
-        POINT p {};
+        POINT p{};
         GetCursorPos(&p);
         io.MousePos = ImVec2((float)p.x, (float)p.y);
 

@@ -370,8 +370,8 @@ namespace protocol {
 
 			class a_player_camera_manager {
 			public:
-				GET_OFFSET(0x22B0, cached_frame_private, f_camera_cache);
-				GET_OFFSET(0x2A80, last_cached_frame_private, f_camera_cache);
+				OFFSET(0x22B0, cached_frame_private, f_camera_cache);
+				OFFSET(0x2A80, last_cached_frame_private, f_camera_cache);
 				OFFSET(0x12C0, view_target, ft_view_target);
 				OFFSET(0x3314, view_pitch_min, float);
 				OFFSET(0x3318, view_pitch_max, float);

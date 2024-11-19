@@ -140,6 +140,7 @@
     <ClCompile Include="overlay\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="overlay\imgui\imgui_tables.cpp" />
     <ClCompile Include="overlay\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="radar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
@@ -165,6 +166,7 @@
     <ClInclude Include="overlay\imgui\imstb_truetype.h" />
     <ClInclude Include="overlay\imgui\VKDefs.hh" />
     <ClInclude Include="overlay\overlay.h" />
+    <ClInclude Include="radar.h" />
     <ClInclude Include="util.hpp" />
   </ItemGroup>
   <ItemGroup>

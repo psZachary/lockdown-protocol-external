@@ -59,20 +59,28 @@ namespace config {
 	inline bool esp_enabled = true;
 	inline double esp_max_distance = 70.0;
 
+	inline bool esp_radar = true;
+	inline std::string esp_radar_position = "Middle Right";
+	inline double esp_radar_scale = 0.10;
+
 	inline bool player_esp = true;
 	inline bool player_distance = true;
 	inline bool player_box = true;
+	inline bool player_radar = true;
+	
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
 
 	inline bool weapon_esp = true;
 	inline bool weapon_item_state = true;
 	inline bool weapon_distance = false;
+	inline bool weapon_radar = true;
 	inline ImVec4 weapon_color = ImVec4(250.0f / 255.0f, 92.0f / 255.0f, 0.0f / 255.0f, 1.0f); // Orange
 
 	inline bool primary_object_esp = true;
 	inline bool primary_item_state = false;
 	inline bool primary_distance = false;
+	inline bool primary_radar = false;
 	inline ImVec4 gaz_bottle_color = ImVec4(0.0f / 255.0f, 83.0f / 255.0f, 250.0f / 255.0f, 1.0f); // Blue
 	inline ImVec4 vent_filter_color = ImVec4(65.0f / 255.0f, 115.0f / 255.0f, 217.0f / 255.0f, 1.0f); // Light Blue
 	inline ImVec4 rice_color = ImVec4(201.0f / 255.0f, 169.0f / 255.0f, 122.0f / 255.0f, 1.0f); // Tan
@@ -82,6 +90,7 @@ namespace config {
 	inline bool secondary_item_state = false;
 	inline bool secondary_distance = false;
 	inline bool secondary_object_esp = true;
+	inline bool secondary_radar = false;
 	inline ImVec4 fuse_color = ImVec4(105.0f / 255.0f, 105.0f / 255.0f, 105.0f / 255.0f, 1.0f); // Grey
 	inline ImVec4 battery_color = ImVec4(189.0f / 255.0f, 189.0f / 255.0f, 189.0f / 255.0f, 1.0f); // Light Grey
 	inline ImVec4 screw_driver_color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f); // White
@@ -172,18 +181,25 @@ namespace config {
 		// Save ESP-related settings
 		j["esp_enabled"] = esp_enabled;
 		j["esp_max_distance"] = esp_max_distance;
+		j["esp_radar"] = esp_radar;
+		j["esp_radar_position"] = esp_radar_position;
+		j["esp_radar_scale"] = esp_radar_scale;
 		j["player_esp"] = player_esp;
 		j["player_distance"] = player_distance;
 		j["player_box"] = player_box;
+		j["player_radar"] = player_radar;
 		j["weapon_esp"] = weapon_esp;
 		j["weapon_item_state"] = weapon_item_state;
 		j["weapon_distance"] = weapon_distance;
+		j["weapon_radar"] = weapon_radar;
 		j["primary_object_esp"] = primary_object_esp;
 		j["primary_item_state"] = primary_item_state;
 		j["primary_distance"] = primary_distance;
+		j["primary_radar"] = primary_radar;
 		j["secondary_item_state"] = secondary_item_state;
 		j["secondary_distance"] = secondary_distance;
 		j["secondary_object_esp"] = secondary_object_esp;
+		j["secondary_radar"] = secondary_radar;
 		j["task_object_esp"] = task_object_esp;
 		j["task_object_distance"] = task_object_distance;
 		j["task_object_state"] = task_object_state;
@@ -281,18 +297,25 @@ namespace config {
 		// Load ESP-related settings
 		j.at("esp_enabled").get_to(esp_enabled);
 		j.at("esp_max_distance").get_to(esp_max_distance);
+		j.at("esp_radar").get_to(esp_radar);
+		j.at("esp_radar_position").get_to(esp_radar_position);
+		j.at("esp_radar_scale").get_to(esp_radar_scale);
 		j.at("player_esp").get_to(player_esp);
 		j.at("player_distance").get_to(player_distance);
 		j.at("player_box").get_to(player_box);
+		j.at("player_radar").get_to(player_radar);
 		j.at("weapon_esp").get_to(weapon_esp);
 		j.at("weapon_item_state").get_to(weapon_item_state);
 		j.at("weapon_distance").get_to(weapon_distance);
+		j.at("weapon_radar").get_to(weapon_radar);
 		j.at("primary_object_esp").get_to(primary_object_esp);
 		j.at("primary_item_state").get_to(primary_item_state);
 		j.at("primary_distance").get_to(primary_distance);
+		j.at("primary_radar").get_to(primary_radar);
 		j.at("secondary_item_state").get_to(secondary_item_state);
 		j.at("secondary_distance").get_to(secondary_distance);
 		j.at("secondary_object_esp").get_to(secondary_object_esp);
+		j.at("secondary_radar").get_to(secondary_radar);
 		j.at("task_object_esp").get_to(task_object_esp);
 		j.at("task_object_distance").get_to(task_object_distance);
 		j.at("task_object_state").get_to(task_object_state);

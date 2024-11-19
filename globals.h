@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "game_structures.hpp"
+#include <d3d11.h>
 
 namespace globals {
 	using namespace protocol::engine::sdk;
