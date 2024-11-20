@@ -66,6 +66,7 @@ namespace config {
 	inline bool player_esp = true;
 	inline bool player_distance = true;
 	inline bool player_box = true;
+	inline bool player_ghost = true;
 	inline bool player_radar = true;
 	
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
@@ -187,6 +188,7 @@ namespace config {
 		j["player_esp"] = player_esp;
 		j["player_distance"] = player_distance;
 		j["player_box"] = player_box;
+		j["player_ghost"] = player_ghost;
 		j["player_radar"] = player_radar;
 		j["weapon_esp"] = weapon_esp;
 		j["weapon_item_state"] = weapon_item_state;
@@ -303,6 +305,7 @@ namespace config {
 		j.at("player_esp").get_to(player_esp);
 		j.at("player_distance").get_to(player_distance);
 		j.at("player_box").get_to(player_box);
+		j.at("player_ghost").get_to(player_ghost);
 		j.at("player_radar").get_to(player_radar);
 		j.at("weapon_esp").get_to(weapon_esp);
 		j.at("weapon_item_state").get_to(weapon_item_state);

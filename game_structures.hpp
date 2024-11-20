@@ -348,6 +348,17 @@ namespace protocol {
 				}
 			};
 
+			class u_capsule_component : public u_object {
+			public:
+				OFFSET(0x588, capsule_half_height, float);
+				OFFSET(0x58C, capsule_radius, float);
+			};
+
+			class u_sphere_component : public u_object {
+			public:
+				OFFSET(0x588, sphere_radius, float);
+			};
+
 			class character_movement_component : public u_object {
 			public:
 				OFFSET(0x178, jump_z_velocity, float);
@@ -725,7 +736,8 @@ namespace protocol {
 				OFFSET(0xA00, aim_oscilation_factor, double);
 				OFFSET(0x800, health, int);
 				OFFSET(0xC99, alive, bool);
-				OFFSET(0x4D4, onfloor, bool);
+				OFFSET(0x4D4, on_floor, bool);
+				OFFSET(0x5D0, net_floor, bool);
 				OFFSET(0xD72, can_play, bool);
 				OFFSET(0x1058, in_game, bool);
 				OFFSET(0x568, run, bool);
@@ -764,6 +776,9 @@ namespace protocol {
 				OFFSET(0x420, orientation, u_scene_component*);
 				OFFSET(0x1228, skin_save, u_save_skin*);
 				OFFSET(0x11D8, skin_set, FStr_SkinSet);
+				OFFSET(0x408, body_collider, u_capsule_component*);
+				OFFSET(0x410, head_collider, u_sphere_component*);
+				OFFSET(0x370, ghost_root, u_scene_component*);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);

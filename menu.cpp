@@ -137,6 +137,7 @@ void menu::draw()
 
 						if (ImGui::CollapsingHeader("Details##PlayerESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Distance##PlayerDistance", &player_distance);
+							ImGui::Checkbox("Ghost##PlayerGhost", &player_ghost);
 							ImGui::Checkbox("Box##PlayerBox", &player_box);
 							ImGui::Checkbox("Show on Radar##PlayerRadar", &player_radar);
 						}
@@ -150,7 +151,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 6.5;
+						calculatedHeight += itemHeight * 7.5;
 
 						ImGui::EndTabItem();
 					}

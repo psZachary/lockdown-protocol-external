@@ -74,6 +74,14 @@ std::string CalculateDistance(const FVector& location1, const vector3& location2
 	return stream.str();
 }
 
+double CalculateDistanceMeters(const vector3& location1, const vector3& location2) {
+	double dx = location1.x - location2.x;
+	double dy = location1.y - location2.y;
+	double dz = location1.z - location2.z;
+
+	return std::sqrt(dx * dx + dy * dy + dz * dz) / 100.0;
+}
+
 // Function to convert FVector to vector3
 vector3 ConvertFVectorToVector3(const FVector& fvec) {
 	return vector3{ static_cast<float>(fvec.X), static_cast<float>(fvec.Y), static_cast<float>(fvec.Z) };
@@ -471,61 +479,106 @@ static void render_callback() {
 
 				// Temporary color with modified alpha
 				ImVec4 temp_color = (role == 4) ? dissident_color : employee_color;
-				temp_color.w = 0.05f;  // 10% (0.1)
-
-				// Convert to ImU32
+				temp_color.w = 0.05f;  // 10% transparency
 				ImU32 color_with_alpha = ImGui::ColorConvertFloat4ToU32(temp_color);
 
 				auto mec_root = mec->get_root_component();
 				if (!mec_root) continue;
 
-				auto position = mec_root->get_relative_location();
-				auto distance = CalculateDistance(local_mec->get_net_location(), position);
-				double distanceDouble = std::stod(distance);
+				auto ghost_root = mec->get_ghost_root();
+				if (!ghost_root) continue;
 
-				if (distanceDouble <= esp_max_distance) {
-					if (player_box) {
-						vector3 screen_position_top, screen_position_bottom;
-						bool top_visible = util::w2s(position + vector3{ 0, 0, 190 }, last_frame_cached.pov, screen_position_top); // Adjust for head height
-						bool bottom_visible = util::w2s(position, last_frame_cached.pov, screen_position_bottom); // Adjust for feet
+				auto position = mec_root->get_relative_location(); // Player location (feet)
+				auto ghostPosition = ghost_root->get_relative_location(); // Ghost location (head/base)
 
-						if (top_visible && bottom_visible) {
-							// Add an offset to extend the bottom of the box
-							float bottom_offset = 15.0f;
-							screen_position_bottom.y += bottom_offset;
+				// Calculate the distance between ghost and player
+				double ghost_distance = CalculateDistanceMeters(position, ghostPosition);
 
-							// Calculate box dimensions
-							float box_height = screen_position_bottom.y - screen_position_top.y;
-							float box_width = box_height * 0.6f; // Adjust width based on aspect ratio
+				if (ghost_distance > 2) { // If ghost moved away from the body
+					if (player_ghost) {
+						if (player_box) {
+							vector3 screen_position_top, screen_position_bottom;
+							bool top_visible = util::w2s(ghostPosition + vector3{ 0, 0, 20 }, last_frame_cached.pov, screen_position_top); // Adjust for head height
+							bool bottom_visible = util::w2s(ghostPosition, last_frame_cached.pov, screen_position_bottom); // Adjust for feet
 
-							// Define top-left and bottom-right corners
-							ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y); // Top-left
-							ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y); // Bottom-right
+							if (top_visible && bottom_visible) {
+								float bottom_offset = 30.0f;
+								screen_position_bottom.y += bottom_offset;
 
-							overlay->draw_rect_with_fill(
-								box_pos1,					// Top-left corner
-								box_pos2,					// Bottom-right corner
-								color_with_alpha,			// Semi-transparent fill (20% opacity)
-								IM_COL32(0, 0, 0, 255),		// Solid black outline
-								1.0f,                       // Outline thickness
-								2.0f                        // Optional corner rounding
-							);
+								float box_height = screen_position_bottom.y - screen_position_top.y;
+								float box_width = box_height * 1.0f;
+
+								ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y);
+								ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y);
+
+								overlay->draw_rect_with_fill(
+									box_pos1,
+									box_pos2,
+									color_with_alpha,
+									IM_COL32(0, 0, 0, 255),
+									1.0f,
+									2.0f
+								);
+							}
+						}
+
+						vector3 ghost_screen_position{};
+						if (util::w2s(ghostPosition, last_frame_cached.pov, ghost_screen_position)) {
+							// Render ghost name centered
+							std::string ghost_name = "[GHOST]" + name;
+							int ghost_text_width = ghost_name.length() * 7; // Approx character width in pixels
+							ghost_screen_position.x -= ghost_text_width / 2;
+
+							overlay->draw_text(ghost_screen_position, color, ghost_name.c_str(), true);
 						}
 					}
-					vector3 screen_position{};
-					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
-						std::string name_norm = "[" + name + "]" + (role == 4 ? "[D]" : "") + (player_distance ? "[" + distance + "m]" : "");
+				}
+				else { // Show player ESP if ghost is close
+					auto distance = CalculateDistance(local_mec->get_net_location(), position);
+					double distanceDouble = std::stod(distance);
 
-						// Calculate text width based on character count and font size
-						int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
-						screen_position.x -= text_width / 2; // Shift the position left by half the text width
+					if (distanceDouble <= esp_max_distance) {
+						if (player_box) {
+							vector3 screen_position_top, screen_position_bottom;
+							bool top_visible = util::w2s(position + vector3{ 0, 0, 190 }, last_frame_cached.pov, screen_position_top); // Adjust for head height
+							bool bottom_visible = util::w2s(position, last_frame_cached.pov, screen_position_bottom); // Adjust for feet
 
-						overlay->draw_text(screen_position, color, name_norm.c_str(), true);
+							if (top_visible && bottom_visible) {
+								float bottom_offset = 15.0f;
+								screen_position_bottom.y += bottom_offset;
+
+								float box_height = screen_position_bottom.y - screen_position_top.y;
+								float box_width = box_height * 0.6f;
+
+								ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y);
+								ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y);
+
+								overlay->draw_rect_with_fill(
+									box_pos1,
+									box_pos2,
+									color_with_alpha,
+									IM_COL32(0, 0, 0, 255),
+									1.0f,
+									2.0f
+								);
+							}
+						}
+
+						vector3 screen_position{};
+						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
+							std::string name_norm = "[" + name + "]" + (role == 4 ? "[D]" : "") + (player_distance ? "[" + distance + "m]" : "");
+
+							int text_width = name_norm.length() * 7;
+							screen_position.x -= text_width / 2;
+
+							overlay->draw_text(screen_position, color, name_norm.c_str(), true);
+						}
 					}
 				}
 			}
 		}
 	}
+
 
 	for (auto item : world_item_cache) {
 		if (!item) continue;

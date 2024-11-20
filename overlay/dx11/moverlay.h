@@ -92,6 +92,26 @@ public:
         }
     }
 
+    inline void draw_circle(const ImVec2& center, float radius, ImU32 color, int num_segments = 32, float thickness = 1.0f) {
+        draw_list->AddCircle(center, radius, color, num_segments, thickness);
+    }
+
+    inline void draw_circle_filled(const ImVec2& center, float radius, ImU32 color, int num_segments = 32) {
+        draw_list->AddCircleFilled(center, radius, color, num_segments);
+    }
+
+    inline void draw_circle_with_fill(const ImVec2& center, float radius, ImU32 fill_color, ImU32 outline_color, int num_segments = 32, float thickness = 1.0f) {
+        // Draw filled circle if alpha in fill_color > 0
+        if ((fill_color >> 24) & 0xFF) { // Check if the alpha component of fill_color is non-zero
+            draw_list->AddCircleFilled(center, radius, fill_color, num_segments);
+        }
+
+        // Draw outline if thickness > 0
+        if (thickness > 0.0f) {
+            draw_list->AddCircle(center, radius, outline_color, num_segments, thickness);
+        }
+    }
+
     FLOAT window_width, window_height;
     bool exit_ready, show_menu = true;
     bool clear_screen = false;
