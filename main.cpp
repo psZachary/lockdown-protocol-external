@@ -32,9 +32,8 @@ using namespace protocol::game::sdk;
 using namespace protocol::engine;
 
 std::unordered_map<std::string, ItemProperties> itemData;
-std::unordered_set<int> found_targets; // Store indices of found targets
-static int current_target_index = 0;   // Keep track of the current target being processed
-static float expanding_radius = 0.0f; // Expanding circle radius for the current target
+
+static int current_target_index = 0;
 
 void InitializeItems() {
 	itemData["KNIFE"] = ItemProperties(0.1, 0.4, 0.4, 130, 20);
@@ -135,6 +134,27 @@ float ExtractMeaningfulValue(double largeValue) {
 	return largeValue; // If no "e-" is found, return the original value
 }
 
+// Function to calculate angular distance
+float CalculateAngularDistance(float target_pitch, float target_yaw, float camera_pitch, float camera_yaw) {
+	// Calculate pitch difference and normalize it
+	float pitch_diff = target_pitch - camera_pitch;
+	if (pitch_diff > 180.0f) pitch_diff -= 360.0f;
+	if (pitch_diff < -180.0f) pitch_diff += 360.0f;
+
+	// Calculate yaw difference and normalize it
+	float yaw_diff = target_yaw - camera_yaw;
+	if (yaw_diff > 180.0f) yaw_diff -= 360.0f;
+	if (yaw_diff < -180.0f) yaw_diff += 360.0f;
+
+	// Return the combined angular difference (simple Euclidean distance)
+	return sqrtf(pitch_diff * pitch_diff + yaw_diff * yaw_diff);
+}
+
+// Function to check if the target has been focused for the required time
+bool IsTargetFocused(float focus_time, float required_time) {
+	return focus_time >= required_time;
+}
+
 static void cache_useful() {
 	bool items_populated = false;  // Flag to track if items have been populated once
 
@@ -164,6 +184,11 @@ static void cache_useful() {
 		std::vector < task_pizzushis* > temp_task_pizzushi_cache{};
 		std::vector < task_data* > temp_task_data_cache{};
 		std::vector < task_scanner* > temp_task_scanner_cache{};
+
+		f_camera_cache last_frame_cached;
+		int current_target_index = 0;
+		float expanding_radius = 0.0f;
+		std::vector<FStr_ScannerDot> scanner_targets;
 
 		auto levels = gworld->get_levels();
 		for (auto level : levels.list()) {
@@ -1355,10 +1380,8 @@ static void render_callback() {
 					if (!scanner_machine_root) continue;
 
 					auto scanner_machine_loc = scanner_machine_root->get_relative_location();
-
 					auto mec_root = local_mec->get_root_component();
 					auto mec_loc = mec_root->get_relative_location();
-
 					auto mec2machine_distance = CalculateDistanceMeters(mec_loc, scanner_machine_loc);
 
 					if (mec2machine_distance < 0.5) {
@@ -1369,142 +1392,37 @@ static void render_callback() {
 						f_camera_cache last_frame_cached = local_camera_manager->get_cached_frame_private();
 						vector3 camera_rotation = last_frame_cached.pov.rotation;
 
-						static float target_focus_time = 0.0f;          // Time the camera has been on the target
-						static const float required_focus_time = 1.0f; // Time required to mark a target as found
+						static float expanding_radius = 20.0f; // Initial size of the circle
+						static const float max_expansion_radius = 30.0f; // Maximum size for the expanding circle
+						const float max_distance = 100.0f; // Define the max distance for the clamping logic
 
-						if (current_target_index < scanner_targets.size()) {
-							auto& scan_target = scanner_targets[current_target_index];
+						// Get the nearest dot value
+						double nearest_dot = scanner_screen->get_nearest_dot();
 
-							// Extract raw pitch and yaw values from the target
-							double target_pitch = scan_target.Rotation_9.y;
-							double target_yaw = scan_target.Rotation_9.x;
+						// Calculate the expansion factor (the smaller the value, the larger the circle)
+						float expansion_factor = std::clamp(static_cast<float>(nearest_dot) / max_distance, 0.0f, 1.0f);
+						expanding_radius = max_expansion_radius * (1.0f - expansion_factor); // Inverse relationship with the dot distance
 
-							// Handle near-zero values (like 1.21507e-311) by setting them to predefined values
-							if (std::abs(target_pitch) < 1e-5) {
-								target_pitch = -30.0f;  // Set pitch to -30 if close to zero
-							}
+						// Draw the cyan circle as the border 
+						ImVec2 screen_center = ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f);
+						float circle_radius = max_expansion_radius; // Fixed size for the cyan circle
 
-							if (std::abs(target_yaw) < 1e-5) {
-								target_yaw = 0.0f;  // Set yaw to zero if close to zero
-							}
+						// Draw the cyan border circle (just the outline)
+						ImU32 scanner_color = ImGui::ColorConvertFloat4ToU32(task_scanner_color);
+						overlay->draw_circle(screen_center, circle_radius, scanner_color, 64, 2.0f); // Draw border with thickness 2.0f
 
-							// Normalize yaw to [-180, 180]
-							if (target_yaw > 180.0f) {
-								target_yaw -= 360.0f;  // Normalize yaw if greater than 180
-							}
-							else if (target_yaw < -180.0f) {
-								target_yaw += 360.0f;  // Normalize yaw if less than -180
-							}
+						// Draw the expanding circle inside the cyan border
+						ImU32 expanding_circle_color = IM_COL32(255, 255, 255, 128); // Semi-transparent white for expanding circle
+						overlay->draw_circle_filled(screen_center, expanding_radius, expanding_circle_color, 64);
 
-							// Normalize pitch to [-180, 180]
-							target_pitch = std::fmod(target_pitch + 180.0f, 360.0f) - 180.0f;
+						// Draw the text inside the circle
+						std::ostringstream ss;
+						ss << std::fixed << std::setprecision(2) << nearest_dot;
+						std::string nearest_dot_text = "[" + ss.str() + "]";
 
-							// Handle special cases for pitch close to zero
-							if (std::abs(target_pitch) < 1e-5) {
-								target_pitch = -30.0f;  // Set pitch to -30 if very small
-							}
-
-							// Debugging normalized values
-							std::cout << "Target Yaw After: " << target_yaw << std::endl;
-							std::cout << "Target Pitch After: " << target_pitch << std::endl;
-
-							// Normalize camera pitch and yaw
-							float normalized_camera_pitch = std::fmod(camera_rotation.x + 360.0f, 360.0f);
-							if (normalized_camera_pitch > 180.0f) normalized_camera_pitch -= 360.0f;
-
-							float normalized_camera_yaw = std::fmod(camera_rotation.y + 360.0f, 360.0f);
-							if (normalized_camera_yaw > 180.0f) normalized_camera_yaw -= 360.0f;
-
-							// Calculate pitch and yaw differences
-							float pitch_diff = target_pitch - normalized_camera_pitch;
-							if (pitch_diff > 180.0f) pitch_diff -= 360.0f;
-							if (pitch_diff < -180.0f) pitch_diff += 360.0f;
-
-							float yaw_diff = target_yaw - normalized_camera_yaw;
-							if (yaw_diff > 180.0f) yaw_diff -= 360.0f;
-							if (yaw_diff < -180.0f) yaw_diff += 360.0f;
-
-							std::cout << "Camera Yaw: " << camera_rotation.y << std::endl;
-							std::cout << "Camera Pitch: " << camera_rotation.x << std::endl;
-							std::cout << "Pitch Difference: " << pitch_diff << " | Yaw Difference: " << yaw_diff << std::endl;
-
-							// Adjust small yaw differences (with more precision)
-							if (std::abs(yaw_diff) < 4.0f) {
-								yaw_diff = 0.0f; // Treat small yaw differences (within ±4 degrees) as zero for precision
-							}
-
-							if (std::abs(pitch_diff) < 4.0f) {
-								pitch_diff = 0.0f; // Treat small pitch differences (within ±4 degrees) as zero for precision
-							}
-
-							// Check if the player is within the target range
-							float pitch_range = 4.0f; // Allow ±4 degrees for pitch
-							float yaw_range = 4.0f;   // Allow ±4 degrees for yaw
-							bool is_in_range = std::abs(pitch_diff) <= pitch_range && std::abs(yaw_diff) <= yaw_range;
-
-							// Handle target "focus time" and completion
-							if (is_in_range) {
-								target_focus_time += ImGui::GetIO().DeltaTime; // Increment focus time
-
-								// Automatically switch to the next target after focusing for the required time
-								if (target_focus_time >= required_focus_time) {
-									current_target_index++;
-									target_focus_time = 0.0f;                   // Reset focus time
-									expanding_radius = 0.0f;                   // Reset expanding circle
-								}
-							}
-							else {
-								target_focus_time = 0.0f; // Reset focus time if not in range
-							}
-
-							// Smooth camera rotation transition
-							float smoothing_factor = 0.1f;  // Adjust smoothing factor to control transition speed
-							camera_rotation.x = camera_rotation.x + smoothing_factor * pitch_diff;
-							camera_rotation.y = camera_rotation.y + smoothing_factor * yaw_diff;
-
-							// Render the pointer and indicators
-							ImVec2 screen_center = ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f);
-							float circle_radius = 20.0f;       // Cyan circle radius
-							float pointer_length = 10.0f;     // Length of the triangle pointer
-							float pointer_base_width = 20.0f; // Base width of the triangle pointer
-
-							// Calculate triangle points for the pointer
-							float pointer_angle = atan2f(-pitch_diff, yaw_diff);
-							ImVec2 pointer_tip = ImVec2(
-								screen_center.x + cos(pointer_angle) * (circle_radius + pointer_length),
-								screen_center.y + sin(pointer_angle) * (circle_radius + pointer_length)
-							);
-							ImVec2 pointer_left = ImVec2(
-								screen_center.x + cos(pointer_angle + 3.14159f / 2) * (pointer_base_width / 2) +
-								cos(pointer_angle) * circle_radius,
-								screen_center.y + sin(pointer_angle + 3.14159f / 2) * (pointer_base_width / 2) +
-								sin(pointer_angle) * circle_radius
-							);
-							ImVec2 pointer_right = ImVec2(
-								screen_center.x + cos(pointer_angle - 3.14159f / 2) * (pointer_base_width / 2) +
-								cos(pointer_angle) * circle_radius,
-								screen_center.y + sin(pointer_angle - 3.14159f / 2) * (pointer_base_width / 2) +
-								sin(pointer_angle) * circle_radius
-							);
-
-							// Draw the cyan circle and triangle pointer
-							overlay->draw_circle(screen_center, circle_radius, IM_COL32(0, 255, 255, 255), 64, 2.0f);
-							overlay->draw_triangle_filled(pointer_tip, pointer_left, pointer_right, IM_COL32(0, 255, 255, 255));
-
-							// Draw the expanding white circle based on proximity
-							float angular_distance = sqrtf(pitch_diff * pitch_diff + yaw_diff * yaw_diff);
-							float expansion_factor = std::clamp(1.0f - (angular_distance / 45.0f), 0.0f, 1.0f); // Scales between 0 and 1
-							expanding_radius = circle_radius * expansion_factor;
-
-							ImU32 expanding_circle_color = IM_COL32(255, 255, 255, 128); // Semi-transparent white
-							overlay->draw_circle_filled(screen_center, expanding_radius, expanding_circle_color, 64);
-						}
-						else {
-							current_target_index = 0; // Reset if we've processed all targets
-						}
+						ImVec2 text_size = ImGui::CalcTextSize(nearest_dot_text.c_str());
+						overlay->draw_text(ImVec2(screen_center.x - text_size.x / 2, screen_center.y - text_size.y / 2), scanner_color, nearest_dot_text.c_str(), true);
 					}
-
-
 				}
 			}
 		}

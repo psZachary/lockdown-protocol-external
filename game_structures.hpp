@@ -669,12 +669,27 @@ namespace protocol {
 			class a_scanner_machine_c : public a_actor {
 			public:
 				GET_OFFSET(0x2A0, mecs, t_array<a_pawn*>);
+				GET_OFFSET(0x2B8, scan_rotation, FRotator);
 				GET_OFFSET(0x298, default_scene_root, u_scene_component*);
+			};
+			class uw_scanner_targetdot_c : public u_object {
+			public:
+				GET_OFFSET(0x2D0, location, vector2);
+				GET_OFFSET(0x2C8, radius, double);
+				GET_OFFSET(0x2A8, rotation, FRotator);
 			};
 			class a_scanner_screen_c : public a_actor {
 			public:
 				GET_OFFSET(0x3A8, targets, t_array<FStr_ScannerDot>);
 				GET_OFFSET(0x3C8, nearest_dot, double);
+				GET_OFFSET(0x320, timeline_value, float);
+				GET_OFFSET(0x324, timeline_direction, int); // 0 forward | 1 backward
+				GET_OFFSET(0x33C, process, int32_t);
+				GET_OFFSET(0x390, main_rotation, FRotator);
+				GET_OFFSET(0x3B8, h_angles, t_array<int32_t>);
+				GET_OFFSET(0x3F8, targets_process, t_array<int32_t>);
+				GET_OFFSET(0x408, old_targets_process, t_array<int32_t>);
+				GET_OFFSET(0x3D8, main_rotation_target, FRotator);
 			};
 			class task_scanner : public a_actor {
 			public:

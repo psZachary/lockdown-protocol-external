@@ -121,7 +121,7 @@ namespace config {
 	inline ImVec4 task_computer_color = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
 
 	inline bool task_scanners = true;
-
+	inline ImVec4 task_scanner_color = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
 
 	// Function to convert ImVec4 to JSON and vice versa
 	inline void to_json(nlohmann::json& j, const ImVec4& color) {
@@ -216,6 +216,7 @@ namespace config {
 		j["task_alim"] = task_alim;
 		j["task_pizzushi"] = task_pizzushi;
 		j["task_computers"] = task_computers;
+		j["task_scanners"] = task_scanners;
 		
 		// Colors (individually serialize RGBA components for each color)
 		j["employee_color"] = { {"r", employee_color.x}, {"g", employee_color.y}, {"b", employee_color.z}, {"a", employee_color.w} };
@@ -226,6 +227,7 @@ namespace config {
 		j["task_alim_color"] = { {"r", task_alim_color.x}, {"g", task_alim_color.y}, {"b", task_alim_color.z}, {"a", task_alim_color.w} };
 		j["task_pizzushi_color"] = { {"r", task_pizzushi_color.x}, {"g", task_pizzushi_color.y}, {"b", task_pizzushi_color.z}, {"a", task_pizzushi_color.w} };
 		j["task_computer_color"] = { {"r", task_computer_color.x}, {"g", task_computer_color.y}, {"b", task_computer_color.z}, {"a", task_computer_color.w} };
+		j["task_scanner_color"] = { {"r", task_scanner_color.x}, {"g", task_scanner_color.y}, {"b", task_scanner_color.z}, {"a", task_scanner_color.w} };
 		j["weapon_color"] = { {"r", weapon_color.x}, {"g", weapon_color.y}, {"b", weapon_color.z}, {"a", weapon_color.w} };
 		j["fuse_color"] = { {"r", fuse_color.x}, {"g", fuse_color.y}, {"b", fuse_color.z}, {"a", fuse_color.w} };
 		j["battery_color"] = { {"r", battery_color.x}, {"g", battery_color.y}, {"b", battery_color.z}, {"a", battery_color.w} };
@@ -335,6 +337,7 @@ namespace config {
 		j.at("task_alim").get_to(task_alim);
 		j.at("task_pizzushi").get_to(task_pizzushi);
 		j.at("task_computers").get_to(task_computers);
+		j.at("task_scanners").get_to(task_scanners);
 
 		// Colors (individually unpack RGBA components for each color if present)
 		if (j.contains("employee_color")) {
@@ -391,6 +394,13 @@ namespace config {
 			task_computer_color.y = j["task_computer_color"].at("g").get<float>();
 			task_computer_color.z = j["task_computer_color"].at("b").get<float>();
 			task_computer_color.w = j["task_computer_color"].at("a").get<float>();
+		}
+
+		if (j.contains("task_scanner_color")) {
+			task_scanner_color.x = j["task_scanner_color"].at("r").get<float>();
+			task_scanner_color.y = j["task_scanner_color"].at("g").get<float>();
+			task_scanner_color.z = j["task_scanner_color"].at("b").get<float>();
+			task_scanner_color.w = j["task_scanner_color"].at("a").get<float>();
 		}
 
 		if (j.contains("weapon_color")) {

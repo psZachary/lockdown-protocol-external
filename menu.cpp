@@ -171,12 +171,13 @@ void menu::draw()
 							ImGui::Checkbox("Distance##TaskDistance", &task_object_distance);
 						}
 						if (ImGui::CollapsingHeader("Colors##WorldESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
-							ImGui::ColorEdit4("Delivery Color", (float*)&task_delivery_color);
-							ImGui::ColorEdit4("Pressure Color", (float*)&task_machine_color);
-							ImGui::ColorEdit4("Vent Color", (float*)&task_vent_color);
-							ImGui::ColorEdit4("Alimentation Color", (float*)&task_alim_color);
-							ImGui::ColorEdit4("Pizzushi Color", (float*)&task_pizzushi_color);
-							ImGui::ColorEdit4("Computers Color", (float*)&task_computer_color);
+							ImGui::ColorEdit4("Delivery Color", (float*)&task_delivery_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Pressure Color", (float*)&task_machine_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Vent Color", (float*)&task_vent_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Alimentation Color", (float*)&task_alim_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Pizzushi Color", (float*)&task_pizzushi_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Computers Color", (float*)&task_computer_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Scanner Color", (float*)&task_scanner_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
@@ -191,10 +192,11 @@ void menu::draw()
 							ImGui::Checkbox("Alimentations##TaskLocation", &task_alim);
 							ImGui::Checkbox("Pizzushi##TaskLocation", &task_pizzushi);
 							ImGui::Checkbox("Computers##TaskLocation", &task_computers);
+							ImGui::Checkbox("Scanner##TaskLocation", &task_scanners);
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 12.5;
+						calculatedHeight += itemHeight * 13;
 
 						ImGui::EndTabItem();
 					}
