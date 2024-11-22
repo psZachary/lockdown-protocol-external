@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <thread>
 #include <string>
 #include "overlay/overlay.h"
@@ -20,6 +20,8 @@
 #include <limits>
 #include "game_math.hpp"
 #include "game_function.hpp"
+#include <unordered_set>
+#include <algorithm>
 
 using namespace menu;
 using namespace radar;
@@ -30,6 +32,9 @@ using namespace protocol::game::sdk;
 using namespace protocol::engine;
 
 std::unordered_map<std::string, ItemProperties> itemData;
+std::unordered_set<int> found_targets; // Store indices of found targets
+static int current_target_index = 0;   // Keep track of the current target being processed
+static float expanding_radius = 0.0f; // Expanding circle radius for the current target
 
 void InitializeItems() {
 	itemData["KNIFE"] = ItemProperties(0.1, 0.4, 0.4, 130, 20);
@@ -113,6 +118,23 @@ std::string TranslateRoomName(int roomNum) {
 	}
 }
 
+float ExtractMeaningfulValue(double largeValue) {
+	std::ostringstream oss;
+	oss << std::scientific << largeValue; // Convert to string in scientific notation
+	std::string valueAsString = oss.str();
+
+	size_t eIndex = valueAsString.find("e-");
+	if (eIndex != std::string::npos) {
+		// Extract the exponent part after "e-"
+		std::string exponentPart = valueAsString.substr(eIndex + 2); // Skip "e-"
+		int exponent = std::stoi(exponentPart); // Convert to an integer
+
+		// Compute the meaningful value (e.g., exponent % 360 for rotation logic)
+		return static_cast<float>(exponent % 360);
+	}
+	return largeValue; // If no "e-" is found, return the original value
+}
+
 static void cache_useful() {
 	bool items_populated = false;  // Flag to track if items have been populated once
 
@@ -141,6 +163,7 @@ static void cache_useful() {
 		std::vector < task_deliveries* > temp_task_delivery_cache{};
 		std::vector < task_pizzushis* > temp_task_pizzushi_cache{};
 		std::vector < task_data* > temp_task_data_cache{};
+		std::vector < task_scanner* > temp_task_scanner_cache{};
 
 		auto levels = gworld->get_levels();
 		for (auto level : levels.list()) {
@@ -176,6 +199,9 @@ static void cache_useful() {
 				if (class_name.find("Task_Data_C") != std::string::npos) {
 					temp_task_data_cache.push_back((task_data*)actor);
 				}
+				if (class_name.find("Task_Scanner_C") != std::string::npos) {
+					temp_task_scanner_cache.push_back((task_scanner*)actor);
+				}
 				if (class_name.find("Mec_C") != std::string::npos) {
 					temp_player_cache.push_back((mec_pawn*)actor);
 				}
@@ -190,6 +216,7 @@ static void cache_useful() {
 		task_delivery_cache = temp_task_delivery_cache;
 		task_pizzushi_cache = temp_task_pizzushi_cache;
 		task_data_cache = temp_task_data_cache;
+		task_scanner_cache = temp_task_scanner_cache;
 
 		// Call PopulateUniqueItems only once after items are populated
 		if (!items_populated && !temp_world_item_cache.empty()) {
@@ -239,9 +266,6 @@ static void render_callback() {
 	if (GetAsyncKeyState(rapid_fire_hotkey) & 1) {
 		rapid_fire = !rapid_fire;
 	}
-	if (GetAsyncKeyState(VK_PRIOR) & 1) {
-
-	}
 
 	//if (GetAsyncKeyState(aimbot_hotkey) & 1) {
 	//	aimbot = !aimbot;
@@ -268,6 +292,9 @@ static void render_callback() {
 	//    << cost << ");" << std::endl;
 	//}
 
+
+
+	/*
 	if (aimbot) {
 		// Retrieve cached frame for camera details
 		f_camera_cache last_frame_cached = local_camera_manager->get_cached_frame_private();
@@ -320,6 +347,7 @@ static void render_callback() {
 			local_camera_manager->set_cached_frame_private(last_frame_cached);
 		}
 	}
+*/
 
 	if (infinite_ammo) {
 		if (hand_item) {
@@ -498,34 +526,59 @@ static void render_callback() {
 					if (player_ghost) {
 						if (player_box) {
 							vector3 screen_position_top, screen_position_bottom;
+
+							// Adjust for ghost height and feet position
 							bool top_visible = util::w2s(ghostPosition + vector3{ 0, 0, 20 }, last_frame_cached.pov, screen_position_top); // Adjust for head height
 							bool bottom_visible = util::w2s(ghostPosition, last_frame_cached.pov, screen_position_bottom); // Adjust for feet
 
 							if (top_visible && bottom_visible) {
-								float bottom_offset = 30.0f;
+								float bottom_offset = 30.0f; // Ghost-specific bottom offset
 								screen_position_bottom.y += bottom_offset;
 
+								// Calculate box dimensions
 								float box_height = screen_position_bottom.y - screen_position_top.y;
-								float box_width = box_height * 1.0f;
+								float box_width = box_height * 1.0f; // Ghost-specific width-to-height ratio
 
 								ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y);
 								ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y);
 
-								overlay->draw_rect_with_fill(
-									box_pos1,
-									box_pos2,
-									color_with_alpha,
-									IM_COL32(0, 0, 0, 255),
-									1.0f,
-									2.0f
+								// Define corner line properties
+								float corner_line_length = box_width * 0.25f; // Adjust for desired length
+								float corner_thickness = 2.0f;               // Adjust for desired thickness
+								ImU32 corner_color = color;
+
+								// Top-left corner lines
+								overlay->draw_rect_filled(box_pos1, ImVec2(box_pos1.x + corner_line_length, box_pos1.y + corner_thickness), corner_color);
+								overlay->draw_rect_filled(box_pos1, ImVec2(box_pos1.x + corner_thickness, box_pos1.y + corner_line_length), corner_color);
+
+								// Top-right corner lines
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_line_length, box_pos1.y), ImVec2(box_pos2.x, box_pos1.y + corner_thickness), corner_color);
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_thickness, box_pos1.y), ImVec2(box_pos2.x, box_pos1.y + corner_line_length), corner_color);
+
+								// Bottom-left corner lines
+								overlay->draw_rect_filled(ImVec2(box_pos1.x, box_pos2.y - corner_thickness), ImVec2(box_pos1.x + corner_line_length, box_pos2.y), corner_color);
+								overlay->draw_rect_filled(ImVec2(box_pos1.x, box_pos2.y - corner_line_length), ImVec2(box_pos1.x + corner_thickness, box_pos2.y), corner_color);
+
+								// Bottom-right corner lines
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_line_length, box_pos2.y - corner_thickness), box_pos2, corner_color);
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_thickness, box_pos2.y - corner_line_length), box_pos2, corner_color);
+
+								// Optional: Draw filled rectangle inside the box
+								ImU32 fill_color = color_with_alpha;
+								overlay->draw_rect_filled(
+									ImVec2(box_pos1.x, box_pos1.y),
+									ImVec2(box_pos2.x, box_pos2.y),
+									fill_color
 								);
 							}
 						}
 
 						vector3 ghost_screen_position{};
 						if (util::w2s(ghostPosition, last_frame_cached.pov, ghost_screen_position)) {
+							auto distance = CalculateDistance(local_mec->get_net_location(), ghostPosition);
+
 							// Render ghost name centered
-							std::string ghost_name = "[GHOST]" + name;
+							std::string ghost_name = "[" + name + "]" + "[G]" + (player_distance ? "[" + distance + "m]" : "");
 							int ghost_text_width = ghost_name.length() * 7; // Approx character width in pixels
 							ghost_screen_position.x -= ghost_text_width / 2;
 
@@ -553,16 +606,37 @@ static void render_callback() {
 								ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y);
 								ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y);
 
-								overlay->draw_rect_with_fill(
-									box_pos1,
-									box_pos2,
-									color_with_alpha,
-									IM_COL32(0, 0, 0, 255),
-									1.0f,
-									2.0f
+								// Define corner line properties
+								float corner_line_length = box_width * 0.2f; // Adjust for desired length
+								float corner_thickness = 3.0f;              // Adjust for desired thickness
+								ImU32 corner_color = color;
+
+								// Top-left corner lines
+								overlay->draw_rect_filled(box_pos1, ImVec2(box_pos1.x + corner_line_length, box_pos1.y + corner_thickness), corner_color);
+								overlay->draw_rect_filled(box_pos1, ImVec2(box_pos1.x + corner_thickness, box_pos1.y + corner_line_length), corner_color);
+
+								// Top-right corner lines
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_line_length, box_pos1.y), ImVec2(box_pos2.x, box_pos1.y + corner_thickness), corner_color);
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_thickness, box_pos1.y), ImVec2(box_pos2.x, box_pos1.y + corner_line_length), corner_color);
+
+								// Bottom-left corner lines
+								overlay->draw_rect_filled(ImVec2(box_pos1.x, box_pos2.y - corner_thickness), ImVec2(box_pos1.x + corner_line_length, box_pos2.y), corner_color);
+								overlay->draw_rect_filled(ImVec2(box_pos1.x, box_pos2.y - corner_line_length), ImVec2(box_pos1.x + corner_thickness, box_pos2.y), corner_color);
+
+								// Bottom-right corner lines
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_line_length, box_pos2.y - corner_thickness), box_pos2, corner_color);
+								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_thickness, box_pos2.y - corner_line_length), box_pos2, corner_color);
+
+								// Filled rectangle inside the box
+								ImU32 fill_color = color_with_alpha;
+								overlay->draw_rect_filled(
+									ImVec2(box_pos1.x, box_pos1.y),
+									ImVec2(box_pos2.x, box_pos2.y),
+									fill_color
 								);
 							}
 						}
+
 
 						vector3 screen_position{};
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
@@ -598,7 +672,6 @@ static void render_callback() {
 		ImU32 battery_esp_color = ImGui::ColorConvertFloat4ToU32(battery_color);
 		ImU32 screw_driver_esp_color = ImGui::ColorConvertFloat4ToU32(screw_driver_color);
 		ImU32 container_esp_color = ImGui::ColorConvertFloat4ToU32(container_color);
-
 
 		if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
 			auto gun_data = (u_data_gun*)data;
@@ -968,7 +1041,7 @@ static void render_callback() {
 							auto bottleReqLevel = machineBottle->get_request_level();
 							auto bottleLevel = machineBottle->get_level();
 
-							if (bottleLevel != bottleReqLevel && bottleRoot) {  // Only if levels don�t match
+							if (bottleLevel != bottleReqLevel && bottleRoot) {  // Only if levels don’t match
 								auto bottleLocation = bottleRoot->get_relative_location();
 								auto distance = CalculateDistance(local_mec->get_net_location(), bottleLocation);
 								double distanceDouble = std::stod(distance);
@@ -1270,43 +1343,172 @@ static void render_callback() {
 		}
 	}
 
-	/*
 	for (auto scanner : task_scanner_cache) {
 		if (!scanner) continue;
 		auto role = local_mec->get_player_role();
 
 		if (role == 3 || role == 4) {
 			if (task_object_esp) {
-				auto task_scanner = scanner->get_scanner_ref();
-				std::cout << "scanner ref found!" << std::endl;
-				auto task_mecs_array = task_scanner->get_mecs();
-				std::cout << "scanner mec array found!" << std::endl;
-				auto task_mecs = task_mecs_array.list();
-				std::cout << "scanner mecs put into array!" << std::endl;
-				if (task_scan) {
-					for (auto scanner_mec : task_mecs) {
-						std::cout << "scanner mec loop!" << std::endl;
-						if (!scanner_mec) continue;
-						auto scannerRoot = scanner_mec->get_root_component();
-						if (!scannerRoot) {
-							std::cout << "scanner root is null!" << std::endl;
-							continue;
+				if (task_scanners) {
+					auto scanner_machine = scanner->get_scanner_ref();
+					auto scanner_machine_root = scanner_machine->get_root_component();
+					if (!scanner_machine_root) continue;
+
+					auto scanner_machine_loc = scanner_machine_root->get_relative_location();
+
+					auto mec_root = local_mec->get_root_component();
+					auto mec_loc = mec_root->get_relative_location();
+
+					auto mec2machine_distance = CalculateDistanceMeters(mec_loc, scanner_machine_loc);
+
+					if (mec2machine_distance < 0.5) {
+						auto scanner_screen = scanner->get_screen_ref();
+						auto scanner_targets_array = scanner_screen->get_targets();
+						auto scanner_targets = scanner_targets_array.list();
+
+						f_camera_cache last_frame_cached = local_camera_manager->get_cached_frame_private();
+						vector3 camera_rotation = last_frame_cached.pov.rotation;
+
+						static float target_focus_time = 0.0f;          // Time the camera has been on the target
+						static const float required_focus_time = 1.0f; // Time required to mark a target as found
+
+						if (current_target_index < scanner_targets.size()) {
+							auto& scan_target = scanner_targets[current_target_index];
+
+							// Extract raw pitch and yaw values from the target
+							double target_pitch = scan_target.Rotation_9.y;
+							double target_yaw = scan_target.Rotation_9.x;
+
+							// Handle near-zero values (like 1.21507e-311) by setting them to predefined values
+							if (std::abs(target_pitch) < 1e-5) {
+								target_pitch = -30.0f;  // Set pitch to -30 if close to zero
+							}
+
+							if (std::abs(target_yaw) < 1e-5) {
+								target_yaw = 0.0f;  // Set yaw to zero if close to zero
+							}
+
+							// Normalize yaw to [-180, 180]
+							if (target_yaw > 180.0f) {
+								target_yaw -= 360.0f;  // Normalize yaw if greater than 180
+							}
+							else if (target_yaw < -180.0f) {
+								target_yaw += 360.0f;  // Normalize yaw if less than -180
+							}
+
+							// Normalize pitch to [-180, 180]
+							target_pitch = std::fmod(target_pitch + 180.0f, 360.0f) - 180.0f;
+
+							// Handle special cases for pitch close to zero
+							if (std::abs(target_pitch) < 1e-5) {
+								target_pitch = -30.0f;  // Set pitch to -30 if very small
+							}
+
+							// Debugging normalized values
+							std::cout << "Target Yaw After: " << target_yaw << std::endl;
+							std::cout << "Target Pitch After: " << target_pitch << std::endl;
+
+							// Normalize camera pitch and yaw
+							float normalized_camera_pitch = std::fmod(camera_rotation.x + 360.0f, 360.0f);
+							if (normalized_camera_pitch > 180.0f) normalized_camera_pitch -= 360.0f;
+
+							float normalized_camera_yaw = std::fmod(camera_rotation.y + 360.0f, 360.0f);
+							if (normalized_camera_yaw > 180.0f) normalized_camera_yaw -= 360.0f;
+
+							// Calculate pitch and yaw differences
+							float pitch_diff = target_pitch - normalized_camera_pitch;
+							if (pitch_diff > 180.0f) pitch_diff -= 360.0f;
+							if (pitch_diff < -180.0f) pitch_diff += 360.0f;
+
+							float yaw_diff = target_yaw - normalized_camera_yaw;
+							if (yaw_diff > 180.0f) yaw_diff -= 360.0f;
+							if (yaw_diff < -180.0f) yaw_diff += 360.0f;
+
+							std::cout << "Camera Yaw: " << camera_rotation.y << std::endl;
+							std::cout << "Camera Pitch: " << camera_rotation.x << std::endl;
+							std::cout << "Pitch Difference: " << pitch_diff << " | Yaw Difference: " << yaw_diff << std::endl;
+
+							// Adjust small yaw differences (with more precision)
+							if (std::abs(yaw_diff) < 4.0f) {
+								yaw_diff = 0.0f; // Treat small yaw differences (within ±4 degrees) as zero for precision
+							}
+
+							if (std::abs(pitch_diff) < 4.0f) {
+								pitch_diff = 0.0f; // Treat small pitch differences (within ±4 degrees) as zero for precision
+							}
+
+							// Check if the player is within the target range
+							float pitch_range = 4.0f; // Allow ±4 degrees for pitch
+							float yaw_range = 4.0f;   // Allow ±4 degrees for yaw
+							bool is_in_range = std::abs(pitch_diff) <= pitch_range && std::abs(yaw_diff) <= yaw_range;
+
+							// Handle target "focus time" and completion
+							if (is_in_range) {
+								target_focus_time += ImGui::GetIO().DeltaTime; // Increment focus time
+
+								// Automatically switch to the next target after focusing for the required time
+								if (target_focus_time >= required_focus_time) {
+									current_target_index++;
+									target_focus_time = 0.0f;                   // Reset focus time
+									expanding_radius = 0.0f;                   // Reset expanding circle
+								}
+							}
+							else {
+								target_focus_time = 0.0f; // Reset focus time if not in range
+							}
+
+							// Smooth camera rotation transition
+							float smoothing_factor = 0.1f;  // Adjust smoothing factor to control transition speed
+							camera_rotation.x = camera_rotation.x + smoothing_factor * pitch_diff;
+							camera_rotation.y = camera_rotation.y + smoothing_factor * yaw_diff;
+
+							// Render the pointer and indicators
+							ImVec2 screen_center = ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f);
+							float circle_radius = 20.0f;       // Cyan circle radius
+							float pointer_length = 10.0f;     // Length of the triangle pointer
+							float pointer_base_width = 20.0f; // Base width of the triangle pointer
+
+							// Calculate triangle points for the pointer
+							float pointer_angle = atan2f(-pitch_diff, yaw_diff);
+							ImVec2 pointer_tip = ImVec2(
+								screen_center.x + cos(pointer_angle) * (circle_radius + pointer_length),
+								screen_center.y + sin(pointer_angle) * (circle_radius + pointer_length)
+							);
+							ImVec2 pointer_left = ImVec2(
+								screen_center.x + cos(pointer_angle + 3.14159f / 2) * (pointer_base_width / 2) +
+								cos(pointer_angle) * circle_radius,
+								screen_center.y + sin(pointer_angle + 3.14159f / 2) * (pointer_base_width / 2) +
+								sin(pointer_angle) * circle_radius
+							);
+							ImVec2 pointer_right = ImVec2(
+								screen_center.x + cos(pointer_angle - 3.14159f / 2) * (pointer_base_width / 2) +
+								cos(pointer_angle) * circle_radius,
+								screen_center.y + sin(pointer_angle - 3.14159f / 2) * (pointer_base_width / 2) +
+								sin(pointer_angle) * circle_radius
+							);
+
+							// Draw the cyan circle and triangle pointer
+							overlay->draw_circle(screen_center, circle_radius, IM_COL32(0, 255, 255, 255), 64, 2.0f);
+							overlay->draw_triangle_filled(pointer_tip, pointer_left, pointer_right, IM_COL32(0, 255, 255, 255));
+
+							// Draw the expanding white circle based on proximity
+							float angular_distance = sqrtf(pitch_diff * pitch_diff + yaw_diff * yaw_diff);
+							float expansion_factor = std::clamp(1.0f - (angular_distance / 45.0f), 0.0f, 1.0f); // Scales between 0 and 1
+							expanding_radius = circle_radius * expansion_factor;
+
+							ImU32 expanding_circle_color = IM_COL32(255, 255, 255, 128); // Semi-transparent white
+							overlay->draw_circle_filled(screen_center, expanding_radius, expanding_circle_color, 64);
 						}
-						std::cout << "scanner root found!" << std::endl;
-						vector3 screen_position{};
-						FVector scannerLocation = scanner_mec->get_net_location();
-						vector3 scannerLocationVec3{ scannerLocation.X, scannerLocation.Y, scannerLocation.Z };
-						std::cout << "scanner location:" << scannerLocationVec3.x << "| " << scannerLocationVec3.y << " | " << scannerLocationVec3.z << std::endl;
-						if (util::w2s(scannerLocationVec3, last_frame_cached.pov, screen_position)) {
-							overlay->draw_text(screen_position, IM_COL32(255, 255, 0, 255), "[SCANNER?]", true);
-							std::cout << "scanner pos cast found!" << std::endl;
+						else {
+							current_target_index = 0; // Reset if we've processed all targets
 						}
 					}
+
+
 				}
 			}
 		}
 	}
-	*/
 }
 
 int main() {

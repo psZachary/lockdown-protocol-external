@@ -26,6 +26,7 @@ namespace config {
 	inline double friction = 100000.00; // 0.0 is default value friction
 	inline bool infinite_stamina = false;
 	inline bool god_mode = false;
+	inline int player_fov = 103;
 	inline bool aimbot = false;
 
 	// Weapons
@@ -119,6 +120,9 @@ namespace config {
 	inline bool task_computers = true;
 	inline ImVec4 task_computer_color = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
 
+	inline bool task_scanners = true;
+
+
 	// Function to convert ImVec4 to JSON and vice versa
 	inline void to_json(nlohmann::json& j, const ImVec4& color) {
 		j = nlohmann::json{ {"r", color.x}, {"g", color.y}, {"b", color.z}, {"a", color.w} };
@@ -160,6 +164,7 @@ namespace config {
 		j["friction"] = friction;
 		j["infinite_stamina"] = infinite_stamina;
 		j["god_mode"] = god_mode;
+		j["player_fov"] = player_fov;
 		j["fast_melee"] = fast_melee;
 		j["cast_time"] = cast_time;
 		j["recover_time"] = recover_time;
@@ -250,6 +255,7 @@ namespace config {
 		std::ifstream file(filePath);
 		if (!file.is_open()) {
 			std::cerr << "Warning: Config file not found. Loading defaults." << std::endl;
+			SaveConfig();
 			return;  // If file doesn't exist, load defaults and return
 		}
 
@@ -277,6 +283,7 @@ namespace config {
 		j.at("friction").get_to(friction);
 		j.at("infinite_stamina").get_to(infinite_stamina);
 		j.at("god_mode").get_to(god_mode);
+		j.at("player_fov").get_to(player_fov);
 		j.at("fast_melee").get_to(fast_melee);
 		j.at("cast_time").get_to(cast_time);
 		j.at("recover_time").get_to(recover_time);

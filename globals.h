@@ -23,4 +23,5 @@ namespace globals {
 	inline std::vector < task_deliveries* > task_delivery_cache{};
 	inline std::vector < task_pizzushis* > task_pizzushi_cache{};
 	inline std::vector < task_data* > task_data_cache{};
+	inline std::vector < task_scanner* > task_scanner_cache{};
 }

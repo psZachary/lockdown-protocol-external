@@ -146,8 +146,8 @@ void menu::draw()
 						ImGui::SameLine();
 						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Colors##PlayerESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
-							ImGui::ColorEdit4("Employee Color", (float*)&employee_color);
-							ImGui::ColorEdit4("Dissident Color", (float*)&dissident_color);
+							ImGui::ColorEdit4("Employee Color", (float*)&employee_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Dissident Color", (float*)&dissident_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
@@ -215,7 +215,7 @@ void menu::draw()
 						ImGui::SameLine();
 						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Color##WeaponESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
-							ImGui::ColorEdit4("Weapon Color", (float*)&weapon_color);
+							ImGui::ColorEdit4("Weapon Color", (float*)&weapon_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
@@ -241,11 +241,11 @@ void menu::draw()
 						ImGui::SameLine();
 						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Colors##PrimaryObjectESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
-							ImGui::ColorEdit4("Gaz Bottle Color", (float*)&gaz_bottle_color);
-							ImGui::ColorEdit4("Vent Filter Color", (float*)&vent_filter_color);
-							ImGui::ColorEdit4("Rice Color", (float*)&rice_color);
-							ImGui::ColorEdit4("Package Color", (float*)&package_color);
-							ImGui::ColorEdit4("Sample Color", (float*)&sample_color);
+							ImGui::ColorEdit4("Gaz Bottle Color", (float*)&gaz_bottle_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Vent Filter Color", (float*)&vent_filter_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Rice Color", (float*)&rice_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Package Color", (float*)&package_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Sample Color", (float*)&sample_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
@@ -271,10 +271,10 @@ void menu::draw()
 						ImGui::SameLine();
 						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Colors##SecondaryObjectESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
-							ImGui::ColorEdit4("Fuse Color", (float*)&fuse_color);
-							ImGui::ColorEdit4("Battery Color", (float*)&battery_color);
-							ImGui::ColorEdit4("Screw Driver Color", (float*)&screw_driver_color);
-							ImGui::ColorEdit4("Container Color", (float*)&container_color);
+							ImGui::ColorEdit4("Fuse Color", (float*)&fuse_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Battery Color", (float*)&battery_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Screw Driver Color", (float*)&screw_driver_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Container Color", (float*)&container_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
@@ -376,10 +376,9 @@ void menu::draw()
 
 				ImGui::Separator();
 
-				int fov = local_mec->get_camera()->get_field_of_view();
 				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-				if (ImGui::SliderInt("##fov", &fov, 20, 150, "FOV: %d")) {
-					local_mec->get_camera()->set_field_of_view(fov);
+				if (ImGui::SliderInt("##fov", &player_fov, 20, 150, "FOV: %d")) {
+					local_mec->get_camera()->set_field_of_view(player_fov);
 				}
 			}
 			ImGui::EndChild();
@@ -779,7 +778,7 @@ void menu::draw()
 						int ammo = hand_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::SliderInt("##Ammo", &ammo, 0, 100, "Ammo: %d%")) {
+						if (ImGui::SliderInt("##HandAmmo", &ammo, 0, 100, "Ammo: %d%")) {
 							hand_state.Value_8 = ammo;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -1118,7 +1117,7 @@ void menu::draw()
 						int ammo = bag_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::SliderInt("##Ammo", &ammo, 0, 100, "Ammo: %d%")) {
+						if (ImGui::SliderInt("##BagAmmo", &ammo, 0, 100, "Ammo: %d%")) {
 							bag_state.Value_8 = ammo;
 							local_mec->set_bag_state(bag_state);
 						}

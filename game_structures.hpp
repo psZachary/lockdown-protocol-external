@@ -96,6 +96,11 @@ namespace protocol {
 				int32_t Time_15;
 			};
 
+			struct FStr_ScannerDot {
+				vector2 Rotation_9;
+				int32_t Process_5;
+			};
+
 			struct FStr_SkinSet {
 
 			};
@@ -345,6 +350,34 @@ namespace protocol {
 					t.scale3d = get_relative_scale();
 					t.translation = get_relative_location();
 					return t;
+				}
+
+				bool get_b_visible() {
+					uint8_t bitfield = mem::rpm<uint8_t>(pthis + 0x188);
+					return (bitfield >> 5) & 0x1; // Extract bit 5
+				}
+
+				void set_b_visible(bool value) {
+					uint8_t bitfield = mem::rpm<uint8_t>(pthis + 0x188);
+					if (value)
+						bitfield |= (1 << 5); // Set bit 5
+					else
+						bitfield &= ~(1 << 5); // Clear bit 5
+					mem::wpm<uint8_t>(pthis + 0x188, bitfield);
+				}
+
+				bool get_hidden_in_game() {
+					uint8_t bitfield = mem::rpm<uint8_t>(pthis + 0x189);
+					return (bitfield >> 3) & 0x1; // Extract bit 3
+				}
+
+				void set_hidden_in_game(bool value) {
+					uint8_t bitfield = mem::rpm<uint8_t>(pthis + 0x189);
+					if (value)
+						bitfield |= (1 << 3); // Set bit 3
+					else
+						bitfield &= ~(1 << 3); // Clear bit 3
+					mem::wpm<uint8_t>(pthis + 0x189, bitfield);
 				}
 			};
 
@@ -632,6 +665,21 @@ namespace protocol {
 			class task_machines : public a_actor {
 			public:
 				GET_OFFSET(0x380, machines, t_array<a_machine_pannel_c*>);
+			};
+			class a_scanner_machine_c : public a_actor {
+			public:
+				GET_OFFSET(0x2A0, mecs, t_array<a_pawn*>);
+				GET_OFFSET(0x298, default_scene_root, u_scene_component*);
+			};
+			class a_scanner_screen_c : public a_actor {
+			public:
+				GET_OFFSET(0x3A8, targets, t_array<FStr_ScannerDot>);
+				GET_OFFSET(0x3C8, nearest_dot, double);
+			};
+			class task_scanner : public a_actor {
+			public:
+				GET_OFFSET(0x360, scanner_ref, a_scanner_machine_c*);
+				GET_OFFSET(0x368, screen_ref, a_scanner_screen_c*);
 			};
 			class u_text_block : public u_object {
 			public:

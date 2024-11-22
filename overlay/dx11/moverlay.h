@@ -56,13 +56,20 @@ public:
 
 
     inline void draw_text(const ImVec2& pos, ImU32 col, const char* text_begin, bool outline = false, float font_size = 0.0f, const char* end = 0) {
+        // Extract the alpha value from 'col'
+        ImU8 alpha = (col >> IM_COL32_A_SHIFT) & 0xFF;  // Extract the alpha channel (0-255)
+
+        // Create a black color with the same alpha as 'col'
+        ImU32 black_with_alpha = IM_COL32(0, 0, 0, alpha);
+
         if (outline) {
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x + 1, pos.y + 1), IM_COL32_BLACK, text_begin, end);
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x - 1, pos.y - 1), IM_COL32_BLACK, text_begin, end);
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x + 1, pos.y - 1), IM_COL32_BLACK, text_begin, end);
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x - 1, pos.y + 1), IM_COL32_BLACK, text_begin, end);
+            draw_list->AddText(NULL, font_size, ImVec2(pos.x + 1, pos.y + 1), black_with_alpha, text_begin, end);
+            draw_list->AddText(NULL, font_size, ImVec2(pos.x - 1, pos.y - 1), black_with_alpha, text_begin, end);
+            draw_list->AddText(NULL, font_size, ImVec2(pos.x + 1, pos.y - 1), black_with_alpha, text_begin, end);
+            draw_list->AddText(NULL, font_size, ImVec2(pos.x - 1, pos.y + 1), black_with_alpha, text_begin, end);
         }
 
+        // Draw the main text with the original color
         draw_list->AddText(NULL, font_size, pos, col, text_begin);
     }
     inline void draw_rect(const ImVec2& pos1, const ImVec2& pos2, ImU32 col, bool outline = false, float rounding = 0.0f, int rounding_corners_flags = 0x0F, float thickness = 0.1f) {
@@ -110,6 +117,10 @@ public:
         if (thickness > 0.0f) {
             draw_list->AddCircle(center, radius, outline_color, num_segments, thickness);
         }
+    }
+
+    inline void draw_triangle_filled(const ImVec2& point1, const ImVec2& point2, const ImVec2& point3, ImU32 color) {
+        draw_list->AddTriangleFilled(point1, point2, point3, color);
     }
 
     FLOAT window_width, window_height;
