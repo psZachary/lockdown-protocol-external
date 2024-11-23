@@ -196,7 +196,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 13;
+						calculatedHeight += itemHeight * 13.5;
 
 						ImGui::EndTabItem();
 					}
@@ -533,8 +533,14 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
 
+						// Check if "C4" is not already in the combo box and add it manually if it's missing
+						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
+							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						}
+
+						// Now list all the items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
@@ -794,7 +800,12 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+
+						// Check if "C4" is not already in the combo box and add it manually if it's missing
+						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
+							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						}
 
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
@@ -870,7 +881,12 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+
+						// Check if "C4" is not already in the combo box and add it manually if it's missing
+						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
+							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						}
 
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
@@ -1133,7 +1149,12 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN" };
+						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+
+						// Check if "C4" is not already in the combo box and add it manually if it's missing
+						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
+							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						}
 
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {

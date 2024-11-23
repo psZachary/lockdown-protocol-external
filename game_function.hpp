@@ -17,6 +17,8 @@ inline std::unordered_map<std::string, std::string> item_class_map = {
 	{"SHOTGUN", "DA_Shotgun"},
 	{"SMG", "DA_SMG"},
 	{"RIFLE", "DA_Rifle"},
+	{"DETONATOR", "DA_Detonator"},
+	{"C4", "DA_C4"}
 };
 
 std::vector<uintptr_t> find_objects(const std::string& name_find);
@@ -96,6 +98,14 @@ inline u_data_item* AssignToItemData(const std::string& target_name) {
 		found_objects = find_objects("Knife");
 	}
 
+	if (upper_name == "DETONATOR") {
+		found_objects = find_objects("Detonator");  // Explicit fallback for Detonator
+	}
+
+	if (upper_name == "C4") {
+		found_objects = find_objects("C4");  // Explicit fallback for C4
+	}
+
 	if (found_objects.empty()) {
 		return nullptr;
 	}
@@ -112,6 +122,18 @@ inline u_data_item* AssignToItemData(const std::string& target_name) {
 				selected_object = obj_addr;
 				break; // Stop searching once a valid match is found
 			}
+		}
+
+		if ((upper_name == "DETONATOR" && is_a(obj_addr, "Data_Melee_C")) ||
+			(is_a(obj_addr, "Data_Gun_C") && upper_name != "DETONATOR")) {
+			selected_object = obj_addr;
+			break; // Stop searching once a valid match is found
+		}
+
+		if ((upper_name == "C4" && is_a(obj_addr, "Data_Melee_C")) ||
+			(is_a(obj_addr, "Data_Gun_C") && upper_name != "C4")) {
+			selected_object = obj_addr;
+			break; // Stop searching once a valid match is found
 		}
 	}
 
