@@ -397,6 +397,10 @@ static void render_callback() {
 		local_mec->set_health(10000);
 	}
 
+	if (player_fov != 103) {
+		local_mec->get_camera()->set_field_of_view(player_fov);
+	}
+
 	//static double fric = local_mec->get_friction();
 	//std::cout << *reinterpret_cast<std::uint64_t*>(&fric);
 	if (speedhack) {
