@@ -2,6 +2,8 @@
 
 #include "game_math.hpp"
 #include <vector>
+#include <cwchar> 
+#include <string>
 #include <map>
 #include "mem.hpp"
 
@@ -582,6 +584,13 @@ namespace protocol {
 				OFFSET(0x0044, crit_stamina, int32_t);
 				OFFSET(0x0050, cost, int32_t);
 			};
+			class a_voice_source : public u_object {
+			public:
+				OFFSET(0x2C8, target_distance, float);
+				OFFSET(0x310, deviation_ratio, double);
+				OFFSET(0x318, delta, float);
+				OFFSET(0x320, distance_factor, double);
+			};
 			class u_data_melee : public u_data_item {
 			public:
 				GET_OFFSET(0x02C8, melee_type, u_data_meleetype*)
@@ -827,6 +836,8 @@ namespace protocol {
 				OFFSET(0x6A8, move_input, FVector);
 				OFFSET(0x6A1, MoveInputState, int);
 				OFFSET(0x6C0, net_move_input_state, int);
+				OFFSET(0xEB4, voice_steps, int32_t);
+				OFFSET(0xEB8, max_voice_steps, int32_t);
 				OFFSET(0x588, net_location, FVector);
 				OFFSET(0x1134, skin_color, int32_t);
 				OFFSET(0x870, hand_state, FStr_ItemState);
@@ -842,6 +853,7 @@ namespace protocol {
 				OFFSET(0x408, body_collider, u_capsule_component*);
 				OFFSET(0x410, head_collider, u_sphere_component*);
 				OFFSET(0x370, ghost_root, u_scene_component*);
+				OFFSET(0x810, audio_voice, a_voice_source*);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);

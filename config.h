@@ -72,6 +72,8 @@ namespace config {
 	
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
+	inline ImVec4 ghost_employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+	inline ImVec4 ghost_dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
 
 	inline bool weapon_esp = true;
 	inline bool weapon_item_state = true;
@@ -220,7 +222,9 @@ namespace config {
 		
 		// Colors (individually serialize RGBA components for each color)
 		j["employee_color"] = { {"r", employee_color.x}, {"g", employee_color.y}, {"b", employee_color.z}, {"a", employee_color.w} };
+		j["ghost_employee_color"] = { {"r", employee_color.x}, {"g", employee_color.y}, {"b", employee_color.z}, {"a", employee_color.w} };
 		j["dissident_color"] = { {"r", dissident_color.x}, {"g", dissident_color.y}, {"b", dissident_color.z}, {"a", dissident_color.w} };
+		j["ghost_dissident_color"] = { {"r", dissident_color.x}, {"g", dissident_color.y}, {"b", dissident_color.z}, {"a", dissident_color.w} };
 		j["task_delivery_color"] = { {"r", task_delivery_color.x}, {"g", task_delivery_color.y}, {"b", task_delivery_color.z}, {"a", task_delivery_color.w} };
 		j["task_machine_color"] = { {"r", task_machine_color.x}, {"g", task_machine_color.y}, {"b", task_machine_color.z}, {"a", task_machine_color.w} };
 		j["task_vent_color"] = { {"r", task_vent_color.x}, {"g", task_vent_color.y}, {"b", task_vent_color.z}, {"a", task_vent_color.w} };
@@ -352,6 +356,19 @@ namespace config {
 			dissident_color.y = j["dissident_color"].at("g").get<float>();
 			dissident_color.z = j["dissident_color"].at("b").get<float>();
 			dissident_color.w = j["dissident_color"].at("a").get<float>();
+		}
+		if (j.contains("ghost_employee_color")) {
+			employee_color.x = j["ghost_employee_color"].at("r").get<float>();
+			employee_color.y = j["ghost_employee_color"].at("g").get<float>();
+			employee_color.z = j["ghost_employee_color"].at("b").get<float>();
+			employee_color.w = j["ghost_employee_color"].at("a").get<float>();
+		}
+
+		if (j.contains("ghost_dissident_color")) {
+			dissident_color.x = j["ghost_dissident_color"].at("r").get<float>();
+			dissident_color.y = j["ghost_dissident_color"].at("g").get<float>();
+			dissident_color.z = j["ghost_dissident_color"].at("b").get<float>();
+			dissident_color.w = j["ghost_dissident_color"].at("a").get<float>();
 		}
 
 		if (j.contains("task_delivery_color")) {

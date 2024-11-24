@@ -9,7 +9,6 @@
 #include "data_cache.h"
 #include <unordered_set>
 #include "util.hpp"
-#include <iomanip>
 #include "game_function.hpp"
 
 using namespace globals;
@@ -68,7 +67,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.8 [UNRELEASED]");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.8");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -148,6 +147,10 @@ void menu::draw()
 						if (ImGui::CollapsingHeader("Colors##PlayerESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit4("Employee Color", (float*)&employee_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Dissident Color", (float*)&dissident_color, ImGuiColorEditFlags_AlphaBar);
+							if (player_ghost) {
+								ImGui::ColorEdit4("Employee Ghost Color", (float*)&ghost_employee_color, ImGuiColorEditFlags_AlphaBar);
+								ImGui::ColorEdit4("Dissident Ghost Color", (float*)&ghost_dissident_color, ImGuiColorEditFlags_AlphaBar);
+							}
 						}
 						ImGui::EndChild();
 

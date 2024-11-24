@@ -533,11 +533,19 @@ static void render_callback() {
 				ImU32 color = (role == 4)
 					? ImGui::ColorConvertFloat4ToU32(dissident_color)
 					: ImGui::ColorConvertFloat4ToU32(employee_color);
+				ImU32 ghostcolor = (role == 4)
+					? ImGui::ColorConvertFloat4ToU32(ghost_dissident_color)
+					: ImGui::ColorConvertFloat4ToU32(ghost_employee_color);
 
 				// Temporary color with modified alpha
 				ImVec4 temp_color = (role == 4) ? dissident_color : employee_color;
 				temp_color.w = 0.05f;  // 10% transparency
 				ImU32 color_with_alpha = ImGui::ColorConvertFloat4ToU32(temp_color);
+
+				// Temporary color with modified alpha
+				ImVec4 temp_ghostcolor = (role == 4) ? ghost_dissident_color : ghost_employee_color;
+				temp_ghostcolor.w = 0.05f;  // 10% transparency
+				ImU32 color_with_alpha_ghost = ImGui::ColorConvertFloat4ToU32(temp_ghostcolor);
 
 				auto mec_root = mec->get_root_component();
 				if (!mec_root) continue;
@@ -574,7 +582,7 @@ static void render_callback() {
 								// Define corner line properties
 								float corner_line_length = box_width * 0.25f; // Adjust for desired length
 								float corner_thickness = 2.0f;               // Adjust for desired thickness
-								ImU32 corner_color = color;
+								ImU32 corner_color = ghostcolor;
 
 								// Top-left corner lines
 								overlay->draw_rect_filled(box_pos1, ImVec2(box_pos1.x + corner_line_length, box_pos1.y + corner_thickness), corner_color);
@@ -593,7 +601,7 @@ static void render_callback() {
 								overlay->draw_rect_filled(ImVec2(box_pos2.x - corner_thickness, box_pos2.y - corner_line_length), box_pos2, corner_color);
 
 								// Optional: Draw filled rectangle inside the box
-								ImU32 fill_color = color_with_alpha;
+								ImU32 fill_color = color_with_alpha_ghost;
 								overlay->draw_rect_filled(
 									ImVec2(box_pos1.x, box_pos1.y),
 									ImVec2(box_pos2.x, box_pos2.y),
@@ -611,7 +619,7 @@ static void render_callback() {
 							int ghost_text_width = ghost_name.length() * 7; // Approx character width in pixels
 							ghost_screen_position.x -= ghost_text_width / 2;
 
-							overlay->draw_text(ghost_screen_position, color, ghost_name.c_str(), true);
+							overlay->draw_text(ghost_screen_position, ghostcolor, ghost_name.c_str(), true);
 						}
 					}
 				}
