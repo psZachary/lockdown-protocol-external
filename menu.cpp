@@ -67,7 +67,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.8");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.9");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -139,6 +139,7 @@ void menu::draw()
 							ImGui::Checkbox("Ghost##PlayerGhost", &player_ghost);
 							ImGui::Checkbox("Box##PlayerBox", &player_box);
 							ImGui::Checkbox("Show on Radar##PlayerRadar", &player_radar);
+							ImGui::Checkbox("Show Ghost on Radar##PlayerRadar", &ghost_radar);
 						}
 						ImGui::EndChild();
 
@@ -154,7 +155,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 7.5;
+						calculatedHeight += itemHeight * 8.5;
 
 						ImGui::EndTabItem();
 					}
@@ -207,6 +208,8 @@ void menu::draw()
 					// Weapon ESP Tab
 					if (ImGui::BeginTabItem("Weapon")) {
 						ImGui::Checkbox("Enabled##WeaponESP", &weapon_esp);
+						ImGui::SameLine();
+						ImGui::Checkbox("Weapon Cases##WeaponCases", &weapon_case_esp);
 						// Begin custom side-by-side child sections
 						float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
 						ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
@@ -214,6 +217,10 @@ void menu::draw()
 							ImGui::Checkbox("Item State##WeaponItemState", &weapon_item_state);
 							ImGui::Checkbox("Distance##WeaponDistance", &weapon_distance);
 							ImGui::Checkbox("Show on Radar##WeaponRadar", &weapon_radar);
+							ImGui::Separator();
+							ImGui::Checkbox("Case State##WeaponCaseState", &weapon_case_state);
+							ImGui::SameLine(); MenuTooltip("Only works in self hosted lobbies.");
+							ImGui::Checkbox("Case Distance##WeaponCaseDistance", &weapon_case_distance);
 						}
 						ImGui::EndChild();
 
@@ -221,10 +228,11 @@ void menu::draw()
 						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
 						if (ImGui::CollapsingHeader("Color##WeaponESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit4("Weapon Color", (float*)&weapon_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Weapon Case Color", (float*)&weapon_case_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 6.5;
+						calculatedHeight += itemHeight * 8.5;
 
 						ImGui::EndTabItem();
 					}

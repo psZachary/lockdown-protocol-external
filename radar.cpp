@@ -137,7 +137,9 @@ void radar::draw() {
 
 		// Convert colors from config.h to ImU32
 		ImU32 employeeColor = ImGui::ColorConvertFloat4ToU32(config::employee_color);
+		ImU32 ghostEmployeeColor = ImGui::ColorConvertFloat4ToU32(config::ghost_employee_color);
 		ImU32 dissidentColor = ImGui::ColorConvertFloat4ToU32(config::dissident_color);
+		ImU32 ghostDissidentColor = ImGui::ColorConvertFloat4ToU32(config::ghost_dissident_color);
 		ImU32 weaponColor = ImGui::ColorConvertFloat4ToU32(config::weapon_color);
 		ImU32 gazColor = ImGui::ColorConvertFloat4ToU32(config::gaz_bottle_color);
 		ImU32 ventColor = ImGui::ColorConvertFloat4ToU32(config::vent_filter_color);
@@ -162,8 +164,6 @@ void radar::draw() {
 		// Plot players
 		if (player_radar) {
 			for (auto mec : player_cache) {
-				auto state = mec->player_state();
-				if (!state) continue;
 
 				if (mec != local_mec) {
 					auto role = mec->get_player_role(); // Get player role
@@ -189,6 +189,35 @@ void radar::draw() {
 				}
 			}
 		}
+
+		// Plot ghosts
+		if (ghost_radar) {
+			for (auto mec : player_cache) {
+				if (mec != local_mec) {
+					auto role = mec->get_player_role(); // Get player role
+					ImU32 color = (role == 4) ? ghostDissidentColor : ghostEmployeeColor; // Use config colors
+
+					auto ghost_root = mec->get_ghost_root();
+					if (!ghost_root) continue;
+
+					auto relative_location = ghost_root->get_relative_location();
+					vector3 position = relative_location;
+					vector3 relativePos = position - local_pos; // Calculate relative position
+					vector2 radarPos = { relativePos.x * scaleFactor, relativePos.y * scaleFactor }; // Map to radar space
+
+					// Rotate radar points based on player facing angle
+					radarPos = rotate_point(radarPos, player_facing_angle);
+
+					// Only draw players within radar bounds
+					if (radarPos.magnitude() < radarSize / 2) {
+						vector2 pointPos = radarCenter + radarPos; // Map to radar space
+						ImGui::GetForegroundDrawList()->AddCircleFilled(
+							toImVec2(pointPos), 3.0f, color); // Use role color
+					}
+				}
+			}
+		}
+
 
 		// Plot weapons
 		if (weapon_radar) {

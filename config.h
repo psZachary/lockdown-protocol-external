@@ -69,6 +69,7 @@ namespace config {
 	inline bool player_box = true;
 	inline bool player_ghost = true;
 	inline bool player_radar = true;
+	inline bool ghost_radar = true;
 	
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
@@ -76,10 +77,14 @@ namespace config {
 	inline ImVec4 ghost_dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
 
 	inline bool weapon_esp = true;
+	inline bool weapon_case_esp = true;
 	inline bool weapon_item_state = true;
+	inline bool weapon_case_state = false;
 	inline bool weapon_distance = false;
+	inline bool weapon_case_distance = false;
 	inline bool weapon_radar = true;
 	inline ImVec4 weapon_color = ImVec4(250.0f / 255.0f, 92.0f / 255.0f, 0.0f / 255.0f, 1.0f); // Orange
+	inline ImVec4 weapon_case_color = ImVec4(250.0f / 255.0f, 92.0f / 255.0f, 0.0f / 255.0f, 1.0f); // Orange
 
 	inline bool primary_object_esp = true;
 	inline bool primary_item_state = false;
@@ -197,9 +202,13 @@ namespace config {
 		j["player_box"] = player_box;
 		j["player_ghost"] = player_ghost;
 		j["player_radar"] = player_radar;
+		j["ghost_radar"] = ghost_radar;
 		j["weapon_esp"] = weapon_esp;
+		j["weapon_case_esp"] = weapon_case_esp;
 		j["weapon_item_state"] = weapon_item_state;
+		j["weapon_case_state"] = weapon_case_state;
 		j["weapon_distance"] = weapon_distance;
+		j["weapon_case_distance"] = weapon_case_distance;
 		j["weapon_radar"] = weapon_radar;
 		j["primary_object_esp"] = primary_object_esp;
 		j["primary_item_state"] = primary_item_state;
@@ -233,6 +242,7 @@ namespace config {
 		j["task_computer_color"] = { {"r", task_computer_color.x}, {"g", task_computer_color.y}, {"b", task_computer_color.z}, {"a", task_computer_color.w} };
 		j["task_scanner_color"] = { {"r", task_scanner_color.x}, {"g", task_scanner_color.y}, {"b", task_scanner_color.z}, {"a", task_scanner_color.w} };
 		j["weapon_color"] = { {"r", weapon_color.x}, {"g", weapon_color.y}, {"b", weapon_color.z}, {"a", weapon_color.w} };
+		j["weapon_case_color"] = { {"r", weapon_case_color.x}, {"g", weapon_case_color.y}, {"b", weapon_case_color.z}, {"a", weapon_case_color.w} };
 		j["fuse_color"] = { {"r", fuse_color.x}, {"g", fuse_color.y}, {"b", fuse_color.z}, {"a", fuse_color.w} };
 		j["battery_color"] = { {"r", battery_color.x}, {"g", battery_color.y}, {"b", battery_color.z}, {"a", battery_color.w} };
 		j["screw_driver_color"] = { {"r", screw_driver_color.x}, {"g", screw_driver_color.y}, {"b", screw_driver_color.z}, {"a", screw_driver_color.w} };
@@ -320,9 +330,13 @@ namespace config {
 		j.at("player_box").get_to(player_box);
 		j.at("player_ghost").get_to(player_ghost);
 		j.at("player_radar").get_to(player_radar);
+		j.at("ghost_radar").get_to(ghost_radar);
 		j.at("weapon_esp").get_to(weapon_esp);
+		j.at("weapon_case_esp").get_to(weapon_case_esp);
 		j.at("weapon_item_state").get_to(weapon_item_state);
+		j.at("weapon_case_state").get_to(weapon_case_state);
 		j.at("weapon_distance").get_to(weapon_distance);
+		j.at("weapon_case_distance").get_to(weapon_case_distance);
 		j.at("weapon_radar").get_to(weapon_radar);
 		j.at("primary_object_esp").get_to(primary_object_esp);
 		j.at("primary_item_state").get_to(primary_item_state);
@@ -425,6 +439,14 @@ namespace config {
 			weapon_color.y = j["weapon_color"].at("g").get<float>();
 			weapon_color.z = j["weapon_color"].at("b").get<float>();
 			weapon_color.w = j["weapon_color"].at("a").get<float>();
+		}
+		
+
+		if (j.contains("weapon_case_color")) {
+			weapon_case_color.x = j["weapon_case_color"].at("r").get<float>();
+			weapon_case_color.y = j["weapon_case_color"].at("g").get<float>();
+			weapon_case_color.z = j["weapon_case_color"].at("b").get<float>();
+			weapon_case_color.w = j["weapon_case_color"].at("a").get<float>();
 		}
 
 		if (j.contains("fuse_color")) {

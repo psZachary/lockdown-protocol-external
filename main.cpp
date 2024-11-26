@@ -184,6 +184,7 @@ static void cache_useful() {
 		std::vector < task_pizzushis* > temp_task_pizzushi_cache{};
 		std::vector < task_data* > temp_task_data_cache{};
 		std::vector < task_scanner* > temp_task_scanner_cache{};
+		std::vector < a_weapon_case_code_c* > temp_weapon_case_cache{};
 
 		f_camera_cache last_frame_cached;
 		int current_target_index = 0;
@@ -230,6 +231,9 @@ static void cache_useful() {
 				if (class_name.find("Mec_C") != std::string::npos) {
 					temp_player_cache.push_back((mec_pawn*)actor);
 				}
+				if (class_name.find("WeaponCaseCode_C") != std::string::npos) {
+					temp_weapon_case_cache.push_back((a_weapon_case_code_c*)actor);
+				}
 			}
 		}
 
@@ -242,6 +246,7 @@ static void cache_useful() {
 		task_pizzushi_cache = temp_task_pizzushi_cache;
 		task_data_cache = temp_task_data_cache;
 		task_scanner_cache = temp_task_scanner_cache;
+		weapon_case_cache = temp_weapon_case_cache;
 
 		// Call PopulateUniqueItems only once after items are populated
 		if (!items_populated && !temp_world_item_cache.empty()) {
@@ -689,7 +694,6 @@ static void render_callback() {
 			}
 		}
 	}
-
 
 	for (auto item : world_item_cache) {
 		if (!item) continue;
@@ -1434,6 +1438,78 @@ static void render_callback() {
 
 						ImVec2 text_size = ImGui::CalcTextSize(nearest_dot_text.c_str());
 						overlay->draw_text(ImVec2(screen_center.x - text_size.x / 2, screen_center.y - text_size.y / 2), scanner_color, nearest_dot_text.c_str(), true);
+					}
+				}
+			}
+		}
+	}
+
+	for (auto weapon_case : weapon_case_cache) {
+		if (!weapon_case) continue;
+
+		auto role = local_mec->get_player_role();
+		if (role == 3 || role == 4) {
+			if (weapon_case_esp) {
+				// get case esp bool
+				ImU32 case_color = ImGui::ColorConvertFloat4ToU32(weapon_case_color);
+
+				auto weapon_case_code = weapon_case->get_target_values();
+				auto case_code = weapon_case_code.list();
+
+				auto box_to_open = weapon_case->get_box_to_open();
+				auto case_weapon = box_to_open->get_selected_weapon_qsdsf();
+				//if (!case_weapon) continue;
+
+				auto case_weapon_state = box_to_open->get_item_slot();
+				auto case_weapon_ammo = case_weapon_state->get_item_state().Value_8;
+
+				// Build the string
+				std::string weapon_case_code_string;
+				std::ostringstream oss;
+
+				for (const auto& byte : case_code) {
+					oss << static_cast<int>(byte); // Convert UINT8 to integer and append directly
+				}
+
+				weapon_case_code_string = oss.str(); // Extract the string
+
+				auto caseRoot = weapon_case->get_root_component();
+				if (!caseRoot) {
+					std::cout << "weapon case root is null!" << std::endl;
+					continue;
+				}
+
+				auto caseLocation = caseRoot->get_relative_location();
+				auto caseOpen = box_to_open->get_case_open();
+				auto selected_weapon = box_to_open->get_selected_weapon();
+				std::unordered_map<int, std::string> weapon_map = {
+					{1, "Empty"},
+					{2, "Pistol"},
+					{3, "Revolver"},
+					{4, "Shorty"}
+				};
+
+				std::string case_weapon_name = weapon_map.count(selected_weapon) ? weapon_map[selected_weapon] : "Unknown";
+
+				if (!caseOpen && selected_weapon != 1) {
+					auto distance = CalculateDistance(local_mec->get_net_location(), caseLocation);
+					double distanceDouble = std::stod(distance);
+
+					if (distanceDouble <= esp_max_distance) {
+						vector3 screen_position{};
+						if (util::w2s(caseLocation, last_frame_cached.pov, screen_position)) {
+							// Calculate text width based on character count and font size
+							std::string name_norm = "[CASE]" + (weapon_case_distance ? "[" + distance + "m]" : "");
+							int text_width = name_norm.length() * 7; // Assume each character is approximately 6 pixels wide
+							screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+							overlay->draw_text(screen_position, case_color, name_norm.c_str(), true);
+							if (weapon_case_state) {
+								screen_position.y += 15;
+								std::string weapon_case_text = "[" + weapon_case_code_string + "][" + case_weapon_name + "|Ammo: " + std::to_string(case_weapon_ammo) + "]";
+								overlay->draw_text(screen_position, case_color, weapon_case_text.c_str(), true);
+							}
+						}
 					}
 				}
 			}
