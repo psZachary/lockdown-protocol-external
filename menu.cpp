@@ -219,9 +219,10 @@ void menu::draw()
 							ImGui::Checkbox("Distance##WeaponDistance", &weapon_distance);
 							ImGui::Checkbox("Show on Radar##WeaponRadar", &weapon_radar);
 							ImGui::Separator();
-							ImGui::Checkbox("Case State##WeaponCaseState", &weapon_case_state);
+							ImGui::Checkbox("Case Code##WeaponCaseState", &weapon_case_state);
 							ImGui::SameLine(); MenuTooltip("Only works in self hosted lobbies.");
 							ImGui::Checkbox("Case Distance##WeaponCaseDistance", &weapon_case_distance);
+							ImGui::Checkbox("Case Weapon##WeaponCaseInfo", &weapon_case_info);
 						}
 						ImGui::EndChild();
 
@@ -233,7 +234,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 8.5;
+						calculatedHeight += itemHeight * 9.5;
 
 						ImGui::EndTabItem();
 					}

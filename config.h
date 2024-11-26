@@ -82,6 +82,7 @@ namespace config {
 	inline bool weapon_case_state = false;
 	inline bool weapon_distance = false;
 	inline bool weapon_case_distance = false;
+	inline bool weapon_case_info = false;
 	inline bool weapon_radar = true;
 	inline ImVec4 weapon_color = ImVec4(250.0f / 255.0f, 92.0f / 255.0f, 0.0f / 255.0f, 1.0f); // Orange
 	inline ImVec4 weapon_case_color = ImVec4(250.0f / 255.0f, 92.0f / 255.0f, 0.0f / 255.0f, 1.0f); // Orange
@@ -207,6 +208,7 @@ namespace config {
 		j["weapon_case_esp"] = weapon_case_esp;
 		j["weapon_item_state"] = weapon_item_state;
 		j["weapon_case_state"] = weapon_case_state;
+		j["weapon_case_info"] = weapon_case_info;
 		j["weapon_distance"] = weapon_distance;
 		j["weapon_case_distance"] = weapon_case_distance;
 		j["weapon_radar"] = weapon_radar;
@@ -335,6 +337,7 @@ namespace config {
 		j.at("weapon_case_esp").get_to(weapon_case_esp);
 		j.at("weapon_item_state").get_to(weapon_item_state);
 		j.at("weapon_case_state").get_to(weapon_case_state);
+		j.at("weapon_case_info").get_to(weapon_case_info);
 		j.at("weapon_distance").get_to(weapon_distance);
 		j.at("weapon_case_distance").get_to(weapon_case_distance);
 		j.at("weapon_radar").get_to(weapon_radar);

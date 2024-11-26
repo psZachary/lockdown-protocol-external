@@ -1506,7 +1506,12 @@ static void render_callback() {
 							overlay->draw_text(screen_position, case_color, name_norm.c_str(), true);
 							if (weapon_case_state) {
 								screen_position.y += 15;
-								std::string weapon_case_text = "[" + weapon_case_code_string + "][" + case_weapon_name + "|Ammo: " + std::to_string(case_weapon_ammo) + "]";
+								std::string weapon_case_text = "[Code: " + weapon_case_code_string + "]";
+								overlay->draw_text(screen_position, case_color, weapon_case_text.c_str(), true);
+							}
+							if (weapon_case_info) {
+								screen_position.y += 15;
+								std::string weapon_case_text = "[" + case_weapon_name + "|Ammo:" + std::to_string(case_weapon_ammo) + "]";
 								overlay->draw_text(screen_position, case_color, weapon_case_text.c_str(), true);
 							}
 						}
