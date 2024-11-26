@@ -14,6 +14,9 @@ using namespace protocol::engine;
 
 // Global item class mapping
 inline std::unordered_map<std::string, std::string> item_class_map = {
+	{"SHORTY", "DA_Shorty"},
+	{"REVOLVER", "DA_Revolver"},
+	{"PISTOL", "DA_Pistol"},
 	{"SHOTGUN", "DA_Shotgun"},
 	{"SMG", "DA_SMG"},
 	{"RIFLE", "DA_Rifle"},

@@ -1281,7 +1281,7 @@ static void render_callback() {
 										std::string toppingType = (tableTopping >= 1 && tableTopping <= 5) ? topping_types[tableTopping] : "Invalid"; // fix credited to sinusbot
 
 										screen_position.y += 15;
-										overlay->draw_text(screen_position, task_color, ("[" + riceType + " | " + fishType + " | " + toppingType + "]").c_str(), true);
+										overlay->draw_text(screen_position, task_color, ("[" + riceType + "|" + fishType + "|" + toppingType + "]").c_str(), true);
 									}
 								}
 							}

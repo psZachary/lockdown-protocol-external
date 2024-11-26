@@ -109,6 +109,7 @@ void menu::draw()
 				primary_object_esp = esp_enabled;
 				secondary_object_esp = esp_enabled;
 				esp_radar = esp_enabled;
+				weapon_case_esp = esp_enabled;
 			}
 			ImGui::SameLine();
 			ImHotkey("##ESPHotkey", &esp_hotkey);
@@ -544,11 +545,13 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
 
-						// Check if "C4" is not already in the combo box and add it manually if it's missing
-						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
-							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						// Ensure all special items are added to the list if missing
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								item_names.push_back(special_item); // Add missing special items
+							}
 						}
 
 						// Now list all the items
@@ -577,26 +580,6 @@ void menu::draw()
 
 								// Reset combo box selection after changing the item
 								selected_item_name = "";
-							}
-						}
-
-						// Manually add the special items to the list if they aren't already populated
-						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
-									selected_item_name = special_item;
-
-									auto item_data = AssignToItemData(special_item);
-									if (item_data) {
-										local_mec->set_hand_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << special_item << std::endl;
-									}
-
-									// Reset combo box selection after changing the item
-									selected_item_name = "";
-								}
 							}
 						}
 
@@ -806,16 +789,24 @@ void menu::draw()
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_hand_item(nullptr); // Clear the hand item
+						}
+
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
 
-						// Check if "C4" is not already in the combo box and add it manually if it's missing
-						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
-							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						// Ensure all special items are added to the list if missing
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								item_names.push_back(special_item); // Add missing special items
+							}
 						}
 
+						// Now list all the items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
@@ -841,26 +832,6 @@ void menu::draw()
 
 								// Reset combo box selection after changing the item
 								selected_item_name = "";
-							}
-						}
-
-						// Manually add the special items to the list if they aren't already populated
-						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
-									selected_item_name = special_item;
-
-									auto item_data = AssignToItemData(special_item);
-									if (item_data) {
-										local_mec->set_hand_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << special_item << std::endl;
-									}
-
-									// Reset combo box selection after changing the item
-									selected_item_name = "";
-								}
 							}
 						}
 
@@ -890,13 +861,16 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
 
-						// Check if "C4" is not already in the combo box and add it manually if it's missing
-						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
-							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						// Ensure all special items are added to the list if missing
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								item_names.push_back(special_item); // Add missing special items
+							}
 						}
 
+						// Now list all the items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
@@ -922,26 +896,6 @@ void menu::draw()
 
 								// Reset combo box selection after changing the item
 								selected_item_name = "";
-							}
-						}
-
-						// Manually add the special items to the list if they aren't already populated
-						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
-									selected_item_name = special_item;
-
-									auto item_data = AssignToItemData(special_item);
-									if (item_data) {
-										local_mec->set_bag_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << special_item << std::endl;
-									}
-
-									// Reset combo box selection after changing the item
-									selected_item_name = "";
-								}
 							}
 						}
 
@@ -1155,16 +1109,24 @@ void menu::draw()
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_bag_item(nullptr); // Clear the bag item
+						}
+
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
 
-						// Check if "C4" is not already in the combo box and add it manually if it's missing
-						if (std::find(item_names.begin(), item_names.end(), "C4") == item_names.end()) {
-							item_names.push_back("C4");  // Add C4 to the list if it's not already there
+						// Ensure all special items are added to the list if missing
+						for (const auto& special_item : special_items) {
+							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
+								item_names.push_back(special_item); // Add missing special items
+							}
 						}
 
+						// Now list all the items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
@@ -1190,26 +1152,6 @@ void menu::draw()
 
 								// Reset combo box selection after changing the item
 								selected_item_name = "";
-							}
-						}
-
-						// Manually add the special items to the list if they aren't already populated
-						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								if (ImGui::Selectable(special_item.c_str(), special_item == selected_item_name)) {
-									selected_item_name = special_item;
-
-									auto item_data = AssignToItemData(special_item);
-									if (item_data) {
-										local_mec->set_bag_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << special_item << std::endl;
-									}
-
-									// Reset combo box selection after changing the item
-									selected_item_name = "";
-								}
 							}
 						}
 
