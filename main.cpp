@@ -273,6 +273,7 @@ static void render_callback() {
 		primary_object_esp = esp_enabled;
 		secondary_object_esp = esp_enabled;
 		esp_radar = esp_enabled;
+		weapon_case_esp = esp_enabled;
 		//std::cout << "Fire Spread:" << local_mec->get_fire_spread() << std::endl;
 	}
 	if (GetAsyncKeyState(speedhack_hotkey) & 1) {
