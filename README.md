@@ -1,4 +1,4 @@
-# Game Enhancement Tool (Fork of Lockdown Protocol External)
+# Game Enhancement Tool
 
 This project has enhanced item data management, overlay improvements, and various player enhancement features.
 
