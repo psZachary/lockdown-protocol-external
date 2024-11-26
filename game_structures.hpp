@@ -649,21 +649,21 @@ namespace protocol {
 			};
 			class a_weapon_case_box_c : public a_actor {
 			public:
-				GET_OFFSET(0x02E0, case_open, bool);
-				GET_OFFSET(0x02F0, item_slot, a_itemslot_c*);
-				GET_OFFSET(0x02E8, selected_weapon_qsdsf, u_data_gun*);
-				GET_OFFSET(0x02F8, selected_weapon, int);
+				OFFSET(0x02E0, case_open, bool);
+				OFFSET(0x02F0, item_slot, a_itemslot_c*);
+				OFFSET(0x02E8, selected_weapon_qsdsf, u_data_gun*);
+				OFFSET(0x02F8, selected_weapon, int);
 			};
 			class a_weapon_case_code_c : public a_actor {
 			public:
-				GET_OFFSET(0x0324, open, bool);
-				GET_OFFSET(0x0328, weapon, a_itemslot_c*);
-				GET_OFFSET(0x0330, weapon_type, u_data_gun*);
-				GET_OFFSET(0x02B8, default_scene_root, u_scene_component*);
-				GET_OFFSET(0x0310, target_values, t_array<UINT8>);
-				GET_OFFSET(0x02D0, process_values, t_array<int>);
-				GET_OFFSET(0x0340, result_values, t_array<int>);
-				GET_OFFSET(0x0370, box_to_open, a_weapon_case_box_c*);
+				OFFSET(0x0324, open, bool);
+				OFFSET(0x0328, weapon, a_itemslot_c*);
+				OFFSET(0x0330, weapon_type, u_data_gun*);
+				OFFSET(0x02B8, default_scene_root, u_scene_component*);
+				OFFSET(0x0310, target_values, t_array<UINT8>);
+				OFFSET(0x02D0, process_values, t_array<int>);
+				OFFSET(0x0340, result_values, t_array<int>);
+				OFFSET(0x0370, box_to_open, a_weapon_case_box_c*);
 			};
 			class a_vent_c : public a_actor {
 			public:

@@ -536,7 +536,7 @@ void menu::draw()
 					}
 					ImGui::Text("Hand Item: %s", display_name.c_str());
 					ImGui::SameLine();
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 70);
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
 						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
 							selected_item_name = "EMPTY";
@@ -586,13 +586,27 @@ void menu::draw()
 
 						ImGui::EndCombo();
 					}
+					// Show the checkbox for locking
+					ImGui::SameLine();
+					if (ImGui::Checkbox("Lock", &lock_hand_item)) {
+						if (lock_hand_item) {
+							// Save the current hand item and state
+							locked_hand_item = hand_item;
+							locked_hand_state = local_mec->get_hand_state();
+						}
+						else {
+							// Clear the locked data when unlocking
+							locked_hand_item = nullptr;
+						}
+					}
+
 					auto hand_state = local_mec->get_hand_state();
 					if (hand_item_name == "GAZ BOTTLE") {
 						const char* colors[] = { "Yellow", "Red", "Blue" };
 						int current_value = hand_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Color", &current_value, colors, IM_ARRAYSIZE(colors))) {
+						if (ImGui::Combo("##HandColor", &current_value, colors, IM_ARRAYSIZE(colors))) {
 							hand_state.Value_8 = current_value;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -602,7 +616,7 @@ void menu::draw()
 						int package_value = hand_state.Value_8 - 1;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##PackageTypes", &package_value, package_types, IM_ARRAYSIZE(package_types))) {
+						if (ImGui::Combo("##HandPackageTypes", &package_value, package_types, IM_ARRAYSIZE(package_types))) {
 							hand_state.Value_8 = package_value + 1;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -612,7 +626,7 @@ void menu::draw()
 						int fish_value = hand_state.Value_8 - 1;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##FishType", &fish_value, fish_types, IM_ARRAYSIZE(fish_types))) {
+						if (ImGui::Combo("##HandFishType", &fish_value, fish_types, IM_ARRAYSIZE(fish_types))) {
 							hand_state.Value_8 = fish_value + 1;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -622,7 +636,7 @@ void menu::draw()
 						int rice_value = hand_state.Value_8 - 1;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##RiceType", &rice_value, rice_types, IM_ARRAYSIZE(rice_types))) {
+						if (ImGui::Combo("##HandRiceType", &rice_value, rice_types, IM_ARRAYSIZE(rice_types))) {
 							hand_state.Value_8 = rice_value + 1;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -633,7 +647,7 @@ void menu::draw()
 						int selected_index = current_value;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Color", &selected_index, colors, IM_ARRAYSIZE(colors))) {
+						if (ImGui::Combo("##HandColor", &selected_index, colors, IM_ARRAYSIZE(colors))) {
 							if (selected_index == 9) {
 								// Handle "Dirty" selection
 								hand_state.Value_8 = -1;
@@ -665,7 +679,7 @@ void menu::draw()
 							(hand_state.Time_15 == 1 ? hand_state.Value_8 + 5 : hand_state.Value_8);
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##SampleColor", &current_index, colors, IM_ARRAYSIZE(colors))) {
+						if (ImGui::Combo("##HandSampleColor", &current_index, colors, IM_ARRAYSIZE(colors))) {
 							if (current_index == 0) { // Empty
 								hand_state.Value_8 = 0;
 								hand_state.Time_15 = 0;
@@ -693,14 +707,14 @@ void menu::draw()
 						float half_width = (ImGui::GetContentRegionAvail().x) / 2;
 
 						ImGui::SetNextItemWidth(half_width);
-						if (ImGui::Combo("##ValueColor", &value_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
+						if (ImGui::Combo("##HandValueColor", &value_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
 							hand_state.Value_8 = value_color + 1;
 							local_mec->set_hand_state(hand_state);
 						}
 
 						ImGui::SameLine();
 						ImGui::SetNextItemWidth(half_width);
-						if (ImGui::Combo("##TimeColor", &time_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
+						if (ImGui::Combo("##HandTimeColor", &time_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
 							hand_state.Time_15 = time_color + 1;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -720,15 +734,15 @@ void menu::draw()
 						int container_index = container_value - 1;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Rice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
+						if (ImGui::Combo("##HandRice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
 							rice_value = rice_index + 1;
 						}
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Fish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
+						if (ImGui::Combo("##HandFish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
 							fish_value = fish_index + 1;
 						}
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Container Color", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
+						if (ImGui::Combo("##HandContainerColor", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
 							container_value = container_index + 1;
 						}
 
@@ -752,7 +766,7 @@ void menu::draw()
 						int selected_index = current_value;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Cassette", &selected_index, cassette_titles, IM_ARRAYSIZE(cassette_titles))) {
+						if (ImGui::Combo("##HandCassette", &selected_index, cassette_titles, IM_ARRAYSIZE(cassette_titles))) {
 							hand_state.Value_8 = selected_index; 
 							local_mec->set_hand_state(hand_state);
 						}
@@ -761,7 +775,7 @@ void menu::draw()
 						int clean_percentage = hand_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::SliderInt("##%", &clean_percentage, 0, 100, "Clean: %d%")) {
+						if (ImGui::SliderInt("##HandClean%", &clean_percentage, 0, 100, "Clean: %d%")) {
 							hand_state.Value_8 = clean_percentage;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -770,7 +784,7 @@ void menu::draw()
 						int charge_percentage = hand_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::SliderInt("##%", &charge_percentage, 0, 100, "Charge: %d%")) {
+						if (ImGui::SliderInt("##HandCharge%", &charge_percentage, 0, 100, "Charge: %d%")) {
 							hand_state.Value_8 = charge_percentage;
 							local_mec->set_hand_state(hand_state);
 						}
@@ -852,7 +866,7 @@ void menu::draw()
 					}
 					ImGui::Text("Bag Item: %s", display_name.c_str());
 					ImGui::SameLine();
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 70);
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
 						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
 							selected_item_name = "EMPTY";
@@ -902,7 +916,19 @@ void menu::draw()
 
 						ImGui::EndCombo();
 					}
-
+					// Show the checkbox for locking
+					ImGui::SameLine();
+					if (ImGui::Checkbox("Lock", &lock_bag_item)) {
+						if (lock_bag_item) {
+							// Save the current bag item and state
+							locked_bag_item = bag_item;
+							locked_bag_state = local_mec->get_bag_state();
+						}
+						else {
+							// Clear the locked data when unlocking
+							locked_bag_item = nullptr;
+						}
+					}
 					auto bag_state = local_mec->get_bag_state();
 					if (bag_item_name == "GAZ BOTTLE") {
 						const char* colors[] = { "Yellow", "Red", "Blue" };

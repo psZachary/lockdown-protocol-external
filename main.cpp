@@ -419,6 +419,28 @@ static void render_callback() {
 		local_mec->set_friction(0);
 	}
 
+	if (lock_hand_item) {
+		// Check if the hand item is empty
+		if (!local_mec->get_hand_item()) {
+			if (locked_hand_item) {
+				// Restore the locked hand item and state
+				local_mec->set_hand_item(locked_hand_item);
+				local_mec->set_hand_state(locked_hand_state);
+			}
+		}
+	}
+
+	if (lock_bag_item) {
+		// Check if the bag item is empty
+		if (!local_mec->get_bag_item()) {
+			if (locked_bag_item) {
+				// Restore the locked bag item and state
+				local_mec->set_bag_item(locked_bag_item);
+				local_mec->set_bag_state(locked_bag_state);
+			}
+		}
+	}
+
 	if (hand_item) {
 		if (fast_melee || infinite_melee_range) {
 			if (util::get_name_from_fname(hand_item->class_private()->fname_index()).find("Data_Melee_C") != std::string::npos) {

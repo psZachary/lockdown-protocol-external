@@ -4,7 +4,9 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
-
+#include "game_structures.hpp"
+using namespace protocol::engine::sdk;
+using namespace protocol::game::sdk;
 namespace config {
 	// Hotkeys
 	inline int menu_hotkey = VK_F1;
@@ -55,6 +57,13 @@ namespace config {
 
 	// Inventory
 	inline bool can_inventory = false;
+	inline bool lock_hand_item = false;
+	inline bool lock_bag_item = false;
+	// Inventory Lock Variables
+	inline u_data_item* locked_hand_item = nullptr; // Store the locked hand item
+	inline FStr_ItemState locked_hand_state;        // Store the locked item state
+	inline u_data_item* locked_bag_item = nullptr; // Store the locked bag item
+	inline FStr_ItemState locked_bag_state;        // Store the locked item state
 
 	// ESP
 	inline bool esp_enabled = true;
