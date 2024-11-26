@@ -1278,7 +1278,7 @@ static void render_callback() {
 
 										std::string riceType = (tableRice >= 1 && tableRice <= 3) ? rice_types[tableRice] : "Invalid";
 										std::string fishType = (tableFish >= 1 && tableFish <= 4) ? fish_types[tableFish] : "Invalid";
-										std::string toppingType = (tableTopping >= 1 && tableTopping <= 4) ? topping_types[tableTopping] : "Invalid";
+										std::string toppingType = (tableTopping >= 1 && tableTopping <= 5) ? topping_types[tableTopping] : "Invalid"; // fix credited to sinusbot
 
 										screen_position.y += 15;
 										overlay->draw_text(screen_position, task_color, ("[" + riceType + " | " + fishType + " | " + toppingType + "]").c_str(), true);

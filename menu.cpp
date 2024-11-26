@@ -753,8 +753,6 @@ void menu::draw()
 					} // Pizzushi
 					else if (hand_item_name == "CASSETTE") {
 						const char* cassette_titles[] = {
-							"On And On",
-							"C U Again",
 							"KHARMA",
 							"Who Am I",
 							"Burning Wish",
@@ -764,7 +762,7 @@ void menu::draw()
 							"Worship",
 							"Royalty (Instrumental)",
 							"Grave",
-						};
+						}; // new list credit to sinusbot
 
 						int current_value = hand_state.Value_8;
 						int selected_index = current_value;
