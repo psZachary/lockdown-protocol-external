@@ -45,6 +45,15 @@ This project has enhanced item data management, overlay improvements, and variou
    - `Insert` : Toggle No Recoil
    - `Del` : Toggle Max Damage
 
+## Downloads
+[v2.9](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47725)
+~~[v2.8](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47693)~~
+~~[v2.7](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47597)~~
+~~[v2.5](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47504)~~
+~~[v2.3](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47384)~~
+~~[v2.0](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47333)~~
+~~[v1.0](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47283)~~
+
 ## File Structure
 - `main.cpp`: Core logic and main game loop with memory and overlay management.
 - `ItemProperties.h`: Defines item properties structure and initializes game item data for quick lookups.
