@@ -98,6 +98,11 @@ namespace protocol {
 				int32_t Time_15;
 			};
 
+			struct FStr_WeaponCase_Step {
+				int Value;
+				int Target;
+			};
+
 			struct FStr_ScannerDot {
 				vector2 Rotation_9;
 				int32_t Process_5;
@@ -150,6 +155,13 @@ namespace protocol {
 					//delete[] buffer;
 					return list;
 				}
+			};
+
+			struct FStr_WeaponCase_Result {
+				t_array<UINT8> Values;
+				t_array<int> Types;
+				int State;
+				FStr_WeaponCase_Step Steps;
 			};
 
 			template<typename KT, typename VT>
@@ -654,6 +666,13 @@ namespace protocol {
 				OFFSET(0x02E8, selected_weapon_qsdsf, u_data_gun*);
 				OFFSET(0x02F8, selected_weapon, int);
 			};
+			class uw_weaponcase_ui_c : public u_object {
+			public:
+				OFFSET(0x02E0, case_open, bool);
+				OFFSET(0x02F0, item_slot, a_itemslot_c*);
+				OFFSET(0x02E8, selected_weapon_qsdsf, u_data_gun*);
+				OFFSET(0x02F8, selected_weapon, int);
+			};
 			class a_weapon_case_code_c : public a_actor {
 			public:
 				OFFSET(0x0324, open, bool);
@@ -661,9 +680,12 @@ namespace protocol {
 				OFFSET(0x0330, weapon_type, u_data_gun*);
 				OFFSET(0x02B8, default_scene_root, u_scene_component*);
 				OFFSET(0x0310, target_values, t_array<UINT8>);
-				OFFSET(0x02D0, process_values, t_array<int>);
-				OFFSET(0x0340, result_values, t_array<int>);
+				OFFSET(0x02D0, process_values, t_array<UINT8>);
+				OFFSET(0x0340, result_values, t_array<UINT8>);
 				OFFSET(0x0370, box_to_open, a_weapon_case_box_c*);
+				OFFSET(0x0338, step, FStr_WeaponCase_Step);
+				OFFSET(0x02E0, result, FStr_WeaponCase_Result);
+				OFFSET(0x2C0, screen, uw_weaponcase_ui_c*);
 			};
 			class a_vent_c : public a_actor {
 			public:

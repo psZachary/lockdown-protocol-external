@@ -67,7 +67,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v2.9");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.0");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -1080,18 +1080,16 @@ void menu::draw()
 					}
 					else if (bag_item_name == "CASSETTE") {
 						const char* cassette_titles[] = {
-							"On And On",
-							"C U Again",
-							"KHARMA",
-							"Who Am I",
-							"Burning Wish",
-							"Cake",
-							"Puzzle",
-							"Sun",
-							"Worship",
-							"Royalty (Instrumental)",
-							"Grave",
-						};
+									"KHARMA",
+									"Who Am I",
+									"Burning Wish",
+									"Cake",
+									"Puzzle",
+									"Sun",
+									"Worship",
+									"Royalty (Instrumental)",
+									"Grave",
+						}; // new list credit to sinusbot
 
 						int current_value = bag_state.Value_8;
 						int selected_index = current_value;
