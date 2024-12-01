@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include "mem.hpp"
+#include "fstr_color_link.hpp"
 
 #define pthis (uintptr_t)this
 // Does not add get_##name to the front and uses the direct name
@@ -17,7 +18,6 @@
 // Adds set_##name to the front
 #define SET_OFFSET(offset, name, type) SET_OFFSET_NAMED(offset, set_##name, type)
 #define OFFSET(offset, name, type) GET_OFFSET(offset, name, type) SET_OFFSET(offset, name, type)
-
 
 namespace protocol {
 	namespace engine {
@@ -101,6 +101,10 @@ namespace protocol {
 			struct FStr_WeaponCase_Step {
 				int Value;
 				int Target;
+			};
+
+			struct FTimerHandle {
+				UINT64 Handle;
 			};
 
 			struct FStr_ScannerDot {
@@ -583,6 +587,10 @@ namespace protocol {
 				OFFSET(0x1A0, throw_type, u_data_item_throwtype*);
 				OFFSET(0x190, can_inventory, bool);
 			};
+			struct FStr_Item {
+				u_data_item* Data_18;
+				FStr_ItemState State_19;
+			};
 			class u_data_meleetype : public u_object {
 			public:
 				OFFSET(0x0060, recover_time, double);
@@ -675,25 +683,25 @@ namespace protocol {
 			};
 			class a_weapon_case_code_c : public a_actor {
 			public:
-				OFFSET(0x0324, open, bool);
-				OFFSET(0x0328, weapon, a_itemslot_c*);
-				OFFSET(0x0330, weapon_type, u_data_gun*);
 				OFFSET(0x02B8, default_scene_root, u_scene_component*);
-				OFFSET(0x0310, target_values, t_array<UINT8>);
-				OFFSET(0x02D0, process_values, t_array<UINT8>);
-				OFFSET(0x0340, result_values, t_array<UINT8>);
+				OFFSET(0x0318, target_values, t_array<UINT8>);
+				OFFSET(0x02D8, process_values, t_array<UINT8>);
+				OFFSET(0x0328, process_index, INT32);
+				OFFSET(0x0348, result_values, t_array<UINT8>);
 				OFFSET(0x0370, box_to_open, a_weapon_case_box_c*);
-				OFFSET(0x0338, step, FStr_WeaponCase_Step);
-				OFFSET(0x02E0, result, FStr_WeaponCase_Result);
+				OFFSET(0x0340, step, FStr_WeaponCase_Step);
+				OFFSET(0x02E8, result, FStr_WeaponCase_Result);
 				OFFSET(0x2C0, screen, uw_weaponcase_ui_c*);
+				OFFSET(0x380, open_delay, INT32);
+				OFFSET(0x388, opening_timer, FTimerHandle);
 			};
 			class a_vent_c : public a_actor {
 			public:
 				GET_OFFSET(0x348, task_vent, bool);
 				GET_OFFSET(0x308, filter, a_itemslot_c*);
 				GET_OFFSET(0x2E8, root, u_scene_component*);
-				OFFSET(0x338, lock_state, int); 
-				OFFSET(0x35D, sector, int); 
+				OFFSET(0x338, lock_state, int);
+				OFFSET(0x35D, sector, int);
 				OFFSET(0x33C, clean_request, int32_t);
 				OFFSET(0x330, energy, int32_t);
 			};
@@ -809,6 +817,14 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x370, task_tables, t_array<a_pizzushi_table_c*>);
 			};
+			class a_gm_c : public u_object {
+			public:
+				GET_OFFSET(0x458, player_colors_app, t_array<FStr_ColorLink>);
+			};
+			class a_pc_c : public u_object {
+			public:
+				GET_OFFSET(0x990, gm_ref, a_gm_c*);
+			};
 			class u_data_player : public u_object {
 			public:
 				OFFSET(0x30, body_armor_1, int32_t);
@@ -831,7 +847,6 @@ namespace protocol {
 				OFFSET(0x1E0, player_map_location_y, vector2);
 				OFFSET(0x1F0, player_map_result_x, vector2);
 				OFFSET(0x200, player_map_result_y, vector2);
-
 			};
 			class mec_pawn : public a_pawn {
 			public:
@@ -874,17 +889,23 @@ namespace protocol {
 				OFFSET(0x970, body_armor_color, double);
 				OFFSET(0xC9B, request_fly, bool);
 				OFFSET(0x6A8, move_input, FVector);
-				OFFSET(0x6A1, MoveInputState, int);
+				OFFSET(0x6A1, move_input_state, int);
 				OFFSET(0x6C0, net_move_input_state, int);
 				OFFSET(0xEB4, voice_steps, int32_t);
 				OFFSET(0xEB8, max_voice_steps, int32_t);
 				OFFSET(0x588, net_location, FVector);
 				OFFSET(0x1134, skin_color, int32_t);
 				OFFSET(0x870, hand_state, FStr_ItemState);
+				OFFSET(0x89C, net_item_state, FStr_ItemState);
+				OFFSET(0x950, net_cammo, double);
 				OFFSET(0x880, bag_state, FStr_ItemState);
 				OFFSET(0x0A40, player_data, u_data_player*);
 				OFFSET(0x0690, hand_item, u_data_item*);
+				OFFSET(0x838, net_hand_item, u_data_item*);
+				OFFSET(0x10D8, net_hand_item_new, FStr_Item);
 				OFFSET(0x878, bag_item, u_data_item*);
+				OFFSET(0x1168, net_bag_item, u_data_item*);
+				OFFSET(0x1188, net_bag_item_new, FStr_Item);
 				OFFSET(0x3A0, camera, u_camera_component*);
 				OFFSET(0x388, absolute_rotation, u_scene_component*);
 				OFFSET(0x420, orientation, u_scene_component*);
@@ -894,6 +915,7 @@ namespace protocol {
 				OFFSET(0x410, head_collider, u_sphere_component*);
 				OFFSET(0x370, ghost_root, u_scene_component*);
 				OFFSET(0x810, audio_voice, a_voice_source*);
+				OFFSET(0x808, pc_ref, a_pc_c*);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);

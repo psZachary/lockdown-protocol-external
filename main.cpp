@@ -1479,9 +1479,12 @@ static void render_callback() {
 
 				auto weapon_case_code = weapon_case->get_target_values();
 				auto case_code = weapon_case_code.list();
+				auto case_timer = weapon_case->get_opening_timer().Handle;
+				auto open_delay = weapon_case->get_open_delay();
 
 				auto box_to_open = weapon_case->get_box_to_open();
 				auto case_weapon = box_to_open->get_selected_weapon_qsdsf();
+				auto case_open = box_to_open->get_case_open();
 				//if (!case_weapon) continue;
 
 				auto case_weapon_state = box_to_open->get_item_slot();
@@ -1504,7 +1507,6 @@ static void render_callback() {
 				}
 
 				auto caseLocation = caseRoot->get_relative_location();
-				auto caseOpen = box_to_open->get_case_open();
 				auto selected_weapon = box_to_open->get_selected_weapon();
 				std::unordered_map<int, std::string> weapon_map = {
 					{1, "Empty"},
@@ -1515,7 +1517,7 @@ static void render_callback() {
 
 				std::string case_weapon_name = weapon_map.count(selected_weapon) ? weapon_map[selected_weapon] : "Unknown";
 
-				if (!caseOpen && selected_weapon != 1) {
+				if (!case_open && selected_weapon != 1) {
 					auto distance = CalculateDistance(local_mec->get_net_location(), caseLocation);
 					double distanceDouble = std::stod(distance);
 

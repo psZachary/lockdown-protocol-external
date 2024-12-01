@@ -52,6 +52,28 @@ void PopulateUniqueItems() {
 	}
 }
 
+std::string MenuCalculateDistance(const FVector& location1, const vector3& location2) {
+	// Calculate the difference in coordinates
+	double dx = location1.X - location2.x;
+	double dy = location1.Y - location2.y;
+	double dz = location1.Z - location2.z;
+
+	// Calculate the distance and divide by 100.0 to get distance in meters (assuming 100 units per meter)
+	double distance = std::sqrt(dx * dx + dy * dy + dz * dz) / 100.0;
+
+	std::ostringstream stream;
+	stream << std::fixed << std::setprecision(2) << distance;
+	return stream.str();
+}
+
+double MenuCalculateDistanceMeters(const vector3& location1, const vector3& location2) {
+	double dx = location1.x - location2.x;
+	double dy = location1.y - location2.y;
+	double dz = location1.z - location2.z;
+
+	return std::sqrt(dx * dx + dy * dy + dz * dz) / 100.0;
+}
+
 void menu::draw()
 {
 	static std::string selected_item_name = "";
@@ -60,6 +82,10 @@ void menu::draw()
 
 	if (GetAsyncKeyState(menu_hotkey) & 1) {
 		menu_open = !menu_open;
+	}
+
+	if (GetAsyncKeyState(player_list_hotkey) & 1) {
+		player_list = !player_list;
 	}
 
 	if (menu_open) {
@@ -141,6 +167,9 @@ void menu::draw()
 							ImGui::Checkbox("Box##PlayerBox", &player_box);
 							ImGui::Checkbox("Show on Radar##PlayerRadar", &player_radar);
 							ImGui::Checkbox("Show Ghost on Radar##PlayerRadar", &ghost_radar);
+							ImGui::Checkbox("Player List##PlayerList", &player_list);
+							ImGui::SameLine();
+							ImHotkey("##PlyaerListHotkey", &player_list_hotkey);
 						}
 						ImGui::EndChild();
 
@@ -156,7 +185,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 8.5;
+						calculatedHeight += itemHeight * 9.5;
 
 						ImGui::EndTabItem();
 					}
@@ -767,7 +796,7 @@ void menu::draw()
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##HandCassette", &selected_index, cassette_titles, IM_ARRAYSIZE(cassette_titles))) {
-							hand_state.Value_8 = selected_index; 
+							hand_state.Value_8 = selected_index;
 							local_mec->set_hand_state(hand_state);
 						}
 					}
@@ -1099,7 +1128,7 @@ void menu::draw()
 							bag_state.Value_8 = selected_index;
 							local_mec->set_bag_state(bag_state);
 						}
-						}
+					}
 					else if (bag_item_name == "VENT FILTER") {
 						int clean_percentage = bag_state.Value_8;
 
@@ -1269,6 +1298,95 @@ void menu::draw()
 		}
 
 		ImGui::PopStyleColor(3);
+
+		ImGui::End();
+	}
+
+	if (player_list) {
+		// Temporary vectors to separate employees and dissidents
+		std::vector<std::pair<std::string, ImVec4>> employees;
+		std::vector<std::pair<std::string, ImVec4>> dissidents;
+
+		// Variables to calculate dynamic size
+		float max_text_width = 0.0f;
+		int total_entries = 0;
+
+		for (auto mec : player_cache) {
+			auto state = mec->player_state();
+			if (!state) continue;
+
+			auto name = state->get_player_name_private().read_string();
+			auto role = mec->get_player_role();
+
+			auto mec_root = mec->get_root_component();
+			if (!mec_root) continue;
+
+			auto position = mec_root->get_relative_location();
+			auto distance = MenuCalculateDistance(local_mec->get_net_location(), position);
+
+			auto ghost_root = mec->get_ghost_root();
+			bool is_ghost = false;
+			double ghost_distance = 0.0;
+
+			if (ghost_root) {
+				auto ghostPosition = ghost_root->get_relative_location();
+				ghost_distance = MenuCalculateDistanceMeters(position, ghostPosition);
+
+				if (ghost_distance > 2) {
+					is_ghost = true; // User is a ghost
+				}
+			}
+
+			// Determine the display name with [D] for dissident and [G] for ghost
+			std::string display_name =
+				(role == 4 ? std::string("[D]") : std::string("")) +
+				(is_ghost ? std::string("[G]") : std::string("")) +
+				name +
+				(player_distance ? " [" + distance + "m]" : "");
+
+			// Fetch the player's color from the configuration
+			ImVec4 color = (role == 4) ? dissident_color : employee_color;
+
+			// Add to the respective list
+			if (role == 4) {
+				dissidents.emplace_back(display_name, color);
+			}
+			else {
+				employees.emplace_back(display_name, color);
+			}
+
+			// Calculate text width for dynamic sizing
+			float text_width = ImGui::CalcTextSize(display_name.c_str()).x;
+			max_text_width = (std::max)(max_text_width, text_width);
+			total_entries++;
+		}
+
+		// Add padding
+		float padding = 70.0f; // Add extra padding to width and height
+		float row_height = ImGui::GetTextLineHeightWithSpacing(); // Height of a row (with spacing)
+		float window_width = max_text_width + padding;
+		float window_height = total_entries * row_height + padding;
+
+		// Set dynamic size for the window
+		ImGui::SetNextWindowSize(ImVec2(window_width, window_height), ImGuiCond_Always);
+		ImVec2 startPosition = ImVec2(530, 20);
+		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
+
+		ImGui::Begin("Players", &player_list, ImGuiWindowFlags_AlwaysAutoResize);
+
+		// Render Dissidents
+		if (ImGui::CollapsingHeader("Dissidents", ImGuiTreeNodeFlags_DefaultOpen)) {
+			for (const auto& [display_name, color] : dissidents) {
+				ImGui::TextColored(color, "%s", display_name.c_str());
+			}
+		}
+
+		// Render Employees
+		if (ImGui::CollapsingHeader("Employees", ImGuiTreeNodeFlags_DefaultOpen)) {
+			for (const auto& [display_name, color] : employees) {
+				ImGui::TextColored(color, "%s", display_name.c_str());
+			}
+		}
 
 		ImGui::End();
 	}
