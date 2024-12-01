@@ -3,7 +3,8 @@
 This project has enhanced item data management, overlay improvements, and various player enhancement features.
 
 ## Downloads
-[v2.9](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47725)
+[v3.0](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47761)
+~~[v2.9](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47725)~~
 ~~[v2.8](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47693)~~
 ~~[v2.7](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47597)~~
 ~~[v2.5](https://www.unknowncheats.me/forum/downloads.php?do=file&id=47504)~~
