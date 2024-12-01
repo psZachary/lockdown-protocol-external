@@ -22,6 +22,7 @@ namespace config {
 	inline int max_damage_hotkey = VK_DELETE;
 	inline int aimbot_hotkey = VK_PRIOR;
 	inline int player_list_hotkey = VK_NEXT;
+	inline int player_list_locked_hotkey = VK_PRIOR;
 
 	// Player
 	inline bool speedhack = false;
@@ -81,6 +82,9 @@ namespace config {
 	inline bool player_radar = true;
 	inline bool ghost_radar = false;
 	inline bool player_list = false;
+	inline bool player_list_locked = false;
+	inline float player_list_x = 530;
+	inline float player_list_y = 20;
 	
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
@@ -177,6 +181,7 @@ namespace config {
 		j["max_damage_hotkey"] = max_damage_hotkey;
 		j["aimbot_hotkey"] = aimbot_hotkey;
 		j["player_list_hotkey"] = player_list_hotkey;
+		j["player_list_locked_hotkey"] = player_list_locked_hotkey;
 		
 		// Save boolean settings
 		j["speedhack"] = speedhack;
@@ -217,6 +222,9 @@ namespace config {
 		j["player_radar"] = player_radar;
 		j["ghost_radar"] = ghost_radar;
 		j["player_list"] = player_list;
+		j["player_list_locked"] = player_list_locked;
+		j["player_list_x"] = player_list_x;
+		j["player_list_y"] = player_list_y;
 		j["weapon_esp"] = weapon_esp;
 		j["weapon_case_esp"] = weapon_case_esp;
 		j["weapon_item_state"] = weapon_item_state;
@@ -308,6 +316,7 @@ namespace config {
 		j.at("max_damage_hotkey").get_to(max_damage_hotkey);
 		j.at("aimbot_hotkey").get_to(aimbot_hotkey);
 		j.at("player_list_hotkey").get_to(player_list_hotkey);
+		j.at("player_list_locked_hotkey").get_to(player_list_locked_hotkey);
 
 		// Load boolean settings
 		j.at("speedhack").get_to(speedhack);
@@ -348,6 +357,9 @@ namespace config {
 		j.at("player_radar").get_to(player_radar);
 		j.at("ghost_radar").get_to(ghost_radar);
 		j.at("player_list").get_to(player_list);
+		j.at("player_list_locked").get_to(player_list_locked);
+		j.at("player_list_x").get_to(player_list_x);
+		j.at("player_list_y").get_to(player_list_y);
 		j.at("weapon_esp").get_to(weapon_esp);
 		j.at("weapon_case_esp").get_to(weapon_case_esp);
 		j.at("weapon_item_state").get_to(weapon_item_state);

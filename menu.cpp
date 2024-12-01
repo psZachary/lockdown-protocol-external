@@ -88,6 +88,10 @@ void menu::draw()
 		player_list = !player_list;
 	}
 
+	if (GetAsyncKeyState(player_list_locked_hotkey) & 1) {
+		player_list_locked = !player_list_locked;
+	}
+
 	if (menu_open) {
 		ImVec2 startPosition = ImVec2(20, 20);
 
@@ -1303,6 +1307,8 @@ void menu::draw()
 	}
 
 	if (player_list) {
+		ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.1059f, 0.3765f, 0.6510f, 1.0f));
+
 		// Temporary vectors to separate employees and dissidents
 		std::vector<std::pair<std::string, ImVec4>> employees;
 		std::vector<std::pair<std::string, ImVec4>> dissidents;
@@ -1312,67 +1318,105 @@ void menu::draw()
 		int total_entries = 0;
 
 		for (auto mec : player_cache) {
-			auto state = mec->player_state();
-			if (!state) continue;
+			if (mec != local_mec) {
+				auto state = mec->player_state();
+				if (!state) continue;
 
-			auto name = state->get_player_name_private().read_string();
-			auto role = mec->get_player_role();
+				auto name = state->get_player_name_private().read_string();
+				auto role = mec->get_player_role();
 
-			auto mec_root = mec->get_root_component();
-			if (!mec_root) continue;
+				auto mec_root = mec->get_root_component();
+				if (!mec_root) continue;
 
-			auto position = mec_root->get_relative_location();
-			auto distance = MenuCalculateDistance(local_mec->get_net_location(), position);
+				auto position = mec_root->get_relative_location();
+				auto distance = MenuCalculateDistance(local_mec->get_net_location(), position);
 
-			auto ghost_root = mec->get_ghost_root();
-			bool is_ghost = false;
-			double ghost_distance = 0.0;
+				auto ghost_root = mec->get_ghost_root();
+				bool is_ghost = false;
+				double ghost_distance = 0.0;
 
-			if (ghost_root) {
-				auto ghostPosition = ghost_root->get_relative_location();
-				ghost_distance = MenuCalculateDistanceMeters(position, ghostPosition);
+				if (ghost_root) {
+					auto ghostPosition = ghost_root->get_relative_location();
+					ghost_distance = MenuCalculateDistanceMeters(position, ghostPosition);
 
-				if (ghost_distance > 2) {
-					is_ghost = true; // User is a ghost
+					if (ghost_distance > 2) {
+						is_ghost = true; // User is a ghost
+					}
 				}
+
+				// Determine the display name with [D] for dissident and [G] for ghost
+				std::string display_name =
+					(role == 4 ? std::string("[D]") : std::string("")) +
+					(is_ghost ? std::string("[G]") : std::string("")) +
+					name +
+					(player_distance ? " [" + distance + "m]" : "");
+
+				// Fetch the player's color from the configuration
+				ImVec4 color = (role == 4) ? dissident_color : employee_color;
+
+				// Add to the respective list
+				if (role == 4) {
+					dissidents.emplace_back(display_name, color);
+				}
+				else {
+					employees.emplace_back(display_name, color);
+				}
+
+				// Calculate text width for dynamic sizing
+				float text_width = ImGui::CalcTextSize(display_name.c_str()).x;
+				max_text_width = (std::max)(max_text_width, text_width);
+				total_entries++;
 			}
-
-			// Determine the display name with [D] for dissident and [G] for ghost
-			std::string display_name =
-				(role == 4 ? std::string("[D]") : std::string("")) +
-				(is_ghost ? std::string("[G]") : std::string("")) +
-				name +
-				(player_distance ? " [" + distance + "m]" : "");
-
-			// Fetch the player's color from the configuration
-			ImVec4 color = (role == 4) ? dissident_color : employee_color;
-
-			// Add to the respective list
-			if (role == 4) {
-				dissidents.emplace_back(display_name, color);
-			}
-			else {
-				employees.emplace_back(display_name, color);
-			}
-
-			// Calculate text width for dynamic sizing
-			float text_width = ImGui::CalcTextSize(display_name.c_str()).x;
-			max_text_width = (std::max)(max_text_width, text_width);
-			total_entries++;
 		}
 
-		// Add padding
-		float padding = 70.0f; // Add extra padding to width and height
-		float row_height = ImGui::GetTextLineHeightWithSpacing(); // Height of a row (with spacing)
+		// Add widths for headers and location info
+		float header_width = ImGui::CalcTextSize("Dissidents").x;
+		max_text_width = (std::max)(max_text_width, header_width);
+		max_text_width = (std::max)(max_text_width, ImGui::CalcTextSize("Location: X: 9999.9 Y: 9999.9").x);
+
+		// Calculate the total height
+		int header_entries = 6.75; // For "Dissidents" and "Employees" headers
+		int total_rows = total_entries + header_entries;
+		float row_height = ImGui::GetTextLineHeightWithSpacing();
+		float window_height = total_rows * row_height + 20.0f; // Add some extra padding
+
+		// Apply padding for width and height
+		float padding = 20.0f; // Padding around content
 		float window_width = max_text_width + padding;
-		float window_height = total_entries * row_height + padding;
 
 		// Set dynamic size for the window
 		ImGui::SetNextWindowSize(ImVec2(window_width, window_height), ImGuiCond_Always);
-		ImVec2 startPosition = ImVec2(530, 20);
-		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
+
+		// Define window flags
+		ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize;
+		if (player_list_locked) {
+			flags |= ImGuiWindowFlags_NoMove;
+		}
+
+		// Lock window position if the list is locked, otherwise allow moving
+		if (player_list_locked) {
+			ImGui::SetNextWindowPos(ImVec2(player_list_x, player_list_y), ImGuiCond_Always);
+		}
+		else {
+			ImGui::SetNextWindowPos(ImVec2(player_list_x, player_list_y), ImGuiCond_FirstUseEver);
+		}
 
 		ImGui::Begin("Players", &player_list, ImGuiWindowFlags_AlwaysAutoResize);
+		
+		ImVec2 menu_position = ImGui::GetWindowPos(); // Get the current menu position (X, Y)
+
+		ImGui::Text("Location:");
+		ImGui::Separator();
+		ImGui::Text("X: %.1f", menu_position.x); // Display the X coordinate
+		ImGui::SameLine();
+		ImGui::Text("Y: %.1f", menu_position.y); // Display the Y coordinate
+
+		if (ImGui::Checkbox("Lock List##LockList", &player_list_locked)) {
+			player_list_x = menu_position.x;
+			player_list_y = menu_position.y;
+		}
+		ImGui::SameLine();
+		ImHotkey("##PlayerListLockedHotkey", &player_list_locked_hotkey);
 
 		// Render Dissidents
 		if (ImGui::CollapsingHeader("Dissidents", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1388,6 +1432,7 @@ void menu::draw()
 			}
 		}
 
+		ImGui::PopStyleColor();
 		ImGui::End();
 	}
 }
