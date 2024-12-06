@@ -77,6 +77,7 @@ namespace config {
 
 	inline bool player_esp = true;
 	inline bool player_distance = true;
+	inline bool player_inventory = true;
 	inline bool player_box = true;
 	inline bool player_ghost = true;
 	inline bool player_radar = true;
@@ -217,6 +218,7 @@ namespace config {
 		j["esp_radar_scale"] = esp_radar_scale;
 		j["player_esp"] = player_esp;
 		j["player_distance"] = player_distance;
+		j["player_inventory"] = player_inventory;
 		j["player_box"] = player_box;
 		j["player_ghost"] = player_ghost;
 		j["player_radar"] = player_radar;
@@ -352,6 +354,7 @@ namespace config {
 		j.at("esp_radar_scale").get_to(esp_radar_scale);
 		j.at("player_esp").get_to(player_esp);
 		j.at("player_distance").get_to(player_distance);
+		j.at("player_inventory").get_to(player_inventory);
 		j.at("player_box").get_to(player_box);
 		j.at("player_ghost").get_to(player_ghost);
 		j.at("player_radar").get_to(player_radar);

@@ -97,7 +97,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.0");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.1 UNRELEASED");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -160,6 +160,8 @@ void menu::draw()
 					// Player ESP Tab
 					if (ImGui::BeginTabItem("Player")) {
 						ImGui::Checkbox("Enabled##PlayerESP", &player_esp);
+						ImGui::SameLine();
+						ImGui::Checkbox("Show on Radar##PlayerRadar", &player_radar);
 
 						// Begin custom side-by-side child sections
 						float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
@@ -167,10 +169,13 @@ void menu::draw()
 
 						if (ImGui::CollapsingHeader("Details##PlayerESPDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Distance##PlayerDistance", &player_distance);
-							ImGui::Checkbox("Ghost##PlayerGhost", &player_ghost);
+							ImGui::SameLine();
+							ImGui::Checkbox("Inventory##PlayerInventory", &player_inventory);
 							ImGui::Checkbox("Box##PlayerBox", &player_box);
-							ImGui::Checkbox("Show on Radar##PlayerRadar", &player_radar);
+							ImGui::Separator();
+							ImGui::Checkbox("Ghost##PlayerGhost", &player_ghost);
 							ImGui::Checkbox("Show Ghost on Radar##PlayerRadar", &ghost_radar);
+							ImGui::Separator();
 							ImGui::Checkbox("Player List##PlayerList", &player_list);
 							ImGui::SameLine();
 							ImHotkey("##PlyaerListHotkey", &player_list_hotkey);
@@ -178,7 +183,7 @@ void menu::draw()
 						ImGui::EndChild();
 
 						ImGui::SameLine();
-						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth - 10, 0), true);
 						if (ImGui::CollapsingHeader("Colors##PlayerESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit4("Employee Color", (float*)&employee_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Dissident Color", (float*)&dissident_color, ImGuiColorEditFlags_AlphaBar);
@@ -222,7 +227,7 @@ void menu::draw()
 						ImGui::SameLine();
 
 						// Task Locations Section
-						ImGui::BeginChild("TaskLocationsSection", ImVec2(halfWidth, 0), true);
+						ImGui::BeginChild("TaskLocationsSection", ImVec2(halfWidth - 10, 0), true);
 						if (ImGui::CollapsingHeader("Task Locations##WorldESPTasks", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Delivery##TaskLocation", &task_delivery);
 							ImGui::Checkbox("Pressure##TaskLocation", &task_machine);
@@ -260,7 +265,7 @@ void menu::draw()
 						ImGui::EndChild();
 
 						ImGui::SameLine();
-						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth - 10, 0), true);
 						if (ImGui::CollapsingHeader("Color##WeaponESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit4("Weapon Color", (float*)&weapon_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Weapon Case Color", (float*)&weapon_case_color, ImGuiColorEditFlags_AlphaBar);
@@ -287,7 +292,7 @@ void menu::draw()
 						ImGui::EndChild();
 
 						ImGui::SameLine();
-						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth - 10, 0), true);
 						if (ImGui::CollapsingHeader("Colors##PrimaryObjectESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit4("Gaz Bottle Color", (float*)&gaz_bottle_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Vent Filter Color", (float*)&vent_filter_color, ImGuiColorEditFlags_AlphaBar);
@@ -317,7 +322,7 @@ void menu::draw()
 						ImGui::EndChild();
 
 						ImGui::SameLine();
-						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth, 0), true);
+						ImGui::BeginChild("ColorsSection", ImVec2(halfWidth - 10, 0), true);
 						if (ImGui::CollapsingHeader("Colors##SecondaryObjectESPColors", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit4("Fuse Color", (float*)&fuse_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Battery Color", (float*)&battery_color, ImGuiColorEditFlags_AlphaBar);
@@ -405,7 +410,7 @@ void menu::draw()
 
 			ImGui::SameLine();
 
-			ImGui::BeginChild("OthersSection", ImVec2(halfWidth, 0), true);
+			ImGui::BeginChild("OthersSection", ImVec2(halfWidth - 10, 0), true);
 
 			if (ImGui::CollapsingHeader("Details##PlayerHackDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 				if (speedhack) {
@@ -468,7 +473,7 @@ void menu::draw()
 
 			ImGui::SameLine();
 
-			ImGui::BeginChild("OthersSection", ImVec2(halfWidth, 0), true);
+			ImGui::BeginChild("OthersSection", ImVec2(halfWidth - 10, 0), true);
 			if (fast_melee || infinite_melee_range) {
 				if (ImGui::CollapsingHeader("Melee Details##MeleeDetails", ImGuiTreeNodeFlags_DefaultOpen)) {
 					if (fast_melee) {
@@ -757,14 +762,21 @@ void menu::draw()
 						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
 						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
 
+						// Default value for Value_8 (1st option for rice, fish, and container)
+						if (hand_state.Value_8 <= 0) {
+							hand_state.Value_8 = 111; // Default to "White Rice", "Salmon", "Green"
+							local_mec->set_hand_state(hand_state); // Ensure it's set in-game
+						}
+
 						int value = hand_state.Value_8;
 						int rice_value = value / 100;
 						int fish_value = (value / 10) % 10;
 						int container_value = value % 10;
 
-						int rice_index = rice_value - 1;
-						int fish_index = fish_value - 1;
-						int container_index = container_value - 1;
+						// Initialize indices with default values (0 for the first option)
+						int rice_index = (rice_value > 0) ? rice_value - 1 : 0;
+						int fish_index = (fish_value > 0) ? fish_value - 1 : 0;
+						int container_index = (container_value > 0) ? container_value - 1 : 0;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##HandRice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
@@ -1086,14 +1098,21 @@ void menu::draw()
 						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
 						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
 
+						// Default value for Value_8 (1st option for rice, fish, and container)
+						if (bag_state.Value_8 <= 0) {
+							bag_state.Value_8 = 111; // Default to "White Rice", "Salmon", "Green"
+							local_mec->set_bag_state(bag_state); // Ensure it's set in-game
+						}
+
 						int value = bag_state.Value_8;
 						int rice_value = value / 100;
 						int fish_value = (value / 10) % 10;
 						int container_value = value % 10;
 
-						int rice_index = rice_value - 1;
-						int fish_index = fish_value - 1;
-						int container_index = container_value - 1;
+						// Initialize indices with default values (0 for the first option)
+						int rice_index = (rice_value > 0) ? rice_value - 1 : 0;
+						int fish_index = (fish_value > 0) ? fish_value - 1 : 0;
+						int container_index = (container_value > 0) ? container_value - 1 : 0;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##Rice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
@@ -1264,7 +1283,7 @@ void menu::draw()
 				}
 				ImGui::SameLine();
 				int intGravity = static_cast<int>(itemGravity * 100); // Scale double to int representation
-				if (ImGui::SliderInt("##Gravity", &intGravity, -10000, 10000, "Gravity: %d")) {
+				if (ImGui::SliderInt("##Gravity", &intGravity, -100000, 100000, "Gravity: %d")) {
 					itemGravity = intGravity / 100.0; // Convert back to double
 					itemThrow->set_gravity(itemGravity);
 				}
@@ -1402,7 +1421,7 @@ void menu::draw()
 		}
 
 		ImGui::Begin("Players", &player_list, ImGuiWindowFlags_AlwaysAutoResize);
-		
+
 		ImVec2 menu_position = ImGui::GetWindowPos(); // Get the current menu position (X, Y)
 
 		ImGui::Text("Location:");

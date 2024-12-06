@@ -712,6 +712,150 @@ static void render_callback() {
 							screen_position.x -= text_width / 2;
 
 							overlay->draw_text(screen_position, color, name_norm.c_str(), true);
+
+							if (player_inventory) {
+								auto mec_hand_item_data = mec->get_net_hand_item_new().Data_18;
+								auto mec_hand_item_state = mec->get_net_hand_item_new().State_19;
+
+								auto mec_bag_item_data = mec->get_net_bag_item_new().Data_18;
+								auto mec_bag_item_state = mec->get_net_bag_item_new().State_19;
+
+								std::string mec_hand_item_name = mec_hand_item_data ? mec_hand_item_data->get_name().read_string() : "";
+								std::string mec_bag_item_name = mec_bag_item_data ? mec_bag_item_data->get_name().read_string() : "";
+
+								// Helper function to format item state
+								auto format_item_state = [](const std::string& item_name, const auto& item_state) -> std::string {
+									std::string state_text;
+
+									if (item_name == "VENT FILTER") {
+										state_text = "Clean: " + std::to_string(item_state.Value_8) + "%";
+									}
+									else if (item_name == "BATTERY") {
+										state_text = "Charge: " + std::to_string(item_state.Value_8) + "%";
+									}
+									else if (item_name == "REVOLVER" || item_name == "PISTOL" || item_name == "SHORTY" ||
+										item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
+										state_text = "Ammo: " + std::to_string(item_state.Value_8);
+									}
+									else if (item_name == "CONTAINER") {
+										std::string colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red", "Dirty" };
+										int current_value = (item_state.Value_8 == -1) ? 6 : item_state.Value_8;
+										state_text = "Color: " + colors[current_value];
+									}
+									else if (item_name == "CASSETTE") {
+										const char* cassette_titles[] = {
+											"KHARMA", "Who Am I", "Burning Wish", "Cake", "Puzzle",
+											"Sun", "Worship", "Royalty (Instrumental)", "Grave"
+										};
+										if (item_state.Value_8 >= 0 && item_state.Value_8 < IM_ARRAYSIZE(cassette_titles)) {
+											state_text = "Song: " + std::string(cassette_titles[item_state.Value_8]);
+										}
+										else {
+											state_text = "Song: Unknown";
+										}
+									}
+									else if (item_name == "NAME") {
+										const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
+										const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
+										const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
+
+										int value = item_state.Value_8;
+										int rice_value = value / 100;
+										int fish_value = (value / 10) % 10;
+										int container_value = value % 10;
+
+										std::string rice = (rice_value > 0 && rice_value <= IM_ARRAYSIZE(rice_options)) ? rice_options[rice_value - 1] : "Unknown";
+										std::string fish = (fish_value > 0 && fish_value <= IM_ARRAYSIZE(fish_options)) ? fish_options[fish_value - 1] : "Unknown";
+										std::string container = (container_value > 0 && container_value <= IM_ARRAYSIZE(container_colors)) ? container_colors[container_value - 1] : "Unknown";
+
+										state_text = "Rice: " + rice + ", Fish: " + fish + ", Container: " + container;
+									}
+									else if (item_name == "FUSE") {
+										const char* fuse_colors[] = { "Red", "Yellow", "Blue" };
+										std::string value_color = (item_state.Value_8 > 0 && item_state.Value_8 <= IM_ARRAYSIZE(fuse_colors))
+											? fuse_colors[item_state.Value_8 - 1] : "Unknown";
+										std::string time_color = (item_state.Time_15 > 0 && item_state.Time_15 <= IM_ARRAYSIZE(fuse_colors))
+											? fuse_colors[item_state.Time_15 - 1] : "Unknown";
+
+										state_text = "Color1: " + value_color + ", Color2: " + time_color;
+									}
+									else if (item_name == "SAMPLE") {
+										const char* sample_colors[] = { "Empty", "Green", "Yellow", "Blue", "White", "Red",
+																		"Green Mix", "Yellow Mix", "Blue Mix", "White Mix" };
+										int index = (item_state.Value_8 == 0)
+											? 0
+											: (item_state.Time_15 == 1 ? item_state.Value_8 + 5 : item_state.Value_8);
+
+										state_text = "Color: " + ((index >= 0 && index < IM_ARRAYSIZE(sample_colors))
+											? std::string(sample_colors[index])
+											: "Unknown");
+									}
+									else if (item_name == "RICE") {
+										const char* rice_types[] = { "White", "Brown", "Black" };
+										int rice_index = item_state.Value_8 - 1;
+
+										state_text = "Type: " + ((rice_index >= 0 && rice_index < IM_ARRAYSIZE(rice_types))
+											? std::string(rice_types[rice_index])
+											: "Unknown");
+									}
+									else if (item_name == "FISH") {
+										const char* fish_types[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
+										int fish_index = item_state.Value_8 - 1;
+
+										state_text = "Type: " + ((fish_index >= 0 && fish_index < IM_ARRAYSIZE(fish_types))
+											? std::string(fish_types[fish_index])
+											: "Unknown");
+									}
+									else if (item_name == "PACKAGE") {
+										const char* package_types[] = { "Security", "Computers", "Botanic", "Restaurant", "Medical", "Tutorial", "Machine" };
+										int package_index = item_state.Value_8 - 1;
+
+										state_text = "Room: " + ((package_index >= 0 && package_index < IM_ARRAYSIZE(package_types))
+											? std::string(package_types[package_index])
+											: "Unknown");
+									}
+									else if (item_name == "GAZ BOTTLE") {
+										const char* colors[] = { "Yellow", "Red", "Blue" };
+										int color_index = item_state.Value_8;
+
+										state_text = "Color: " + ((color_index >= 0 && color_index < IM_ARRAYSIZE(colors))
+											? std::string(colors[color_index])
+											: "Unknown");
+									}
+
+									return state_text;
+									};
+
+								std::string hand_item_state_text = format_item_state(mec_hand_item_name, mec_hand_item_state);
+								std::string bag_item_state_text = format_item_state(mec_bag_item_name, mec_bag_item_state);
+
+								std::string item_display_text;
+								if (!mec_hand_item_name.empty() || !mec_bag_item_name.empty()) {
+									if (!mec_hand_item_name.empty()) {
+										item_display_text += "[H:" + mec_hand_item_name + "]";
+									}
+									if (!mec_bag_item_name.empty()) {
+										item_display_text += "[B:" + mec_bag_item_name + "]";
+									}
+
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, color, item_display_text.c_str(), true);
+
+									// Combine hand and bag state into one line and draw below item_display_text
+									std::string combined_state_text;
+									if (!hand_item_state_text.empty()) {
+										combined_state_text += "[" + hand_item_state_text + "]";
+									}
+									if (!bag_item_state_text.empty()) {
+										combined_state_text += "[" + bag_item_state_text + "]";
+									}
+
+									if (!combined_state_text.empty()) {
+										screen_position.y += 15;
+										overlay->draw_text(screen_position, color, combined_state_text.c_str(), true);
+									}
+								}
+							}
 						}
 					}
 				}
