@@ -339,55 +339,83 @@ static void render_callback() {
 		auto player_position_fvector = local_mec->get_net_location();
 		auto player_position = ConvertFVectorToVector3(player_position_fvector);
 
-		mec_pawn* closest_enemy = nullptr;
-		float closest_distance = 999999.0f;
-		vector3 closest_enemy_screen_position;
+		mec_pawn* best_target = nullptr;
+		float best_value = 999999.0f; // Use this to store the closest distance or the smallest screen offset
+		vector3 best_target_screen_position;
 
-		// Find the closest enemy to the player
+		// Get screen dimensions
+		int screen_width = GetSystemMetrics(SM_CXSCREEN);
+		int screen_height = GetSystemMetrics(SM_CYSCREEN);
+		vector2 screen_center = { screen_width / 2.0f, screen_height / 2.0f };
+
+		// Find the best target based on the toggle
 		for (auto mec : player_cache) {
 			auto state = mec->player_state();
 			if (!state) continue;
 
+			auto role = mec->get_player_role();
+
+			// Filter based on target_filter
+			if (target_filter == "Employees" && role != 3) continue; // Skip if not an Employee
+			if (target_filter == "Dissidents" && role != 4) continue; // Skip if not a Dissident
+
 			if (mec != local_mec) {
-				auto enemy_position = mec->get_root_component()->get_relative_location();
+				// Check if the player is dead by comparing ghost distance
+				auto ghost_root = mec->get_ghost_root();
+				if (!ghost_root) continue;
 
-				// Adjust the position for the head height
-				vector3 head_position = enemy_position + vector3{ 0, 0, 165 }; // Adjust for head height
+				auto ghost_position = ghost_root->get_relative_location(); // Ghost location
+				auto player_position = mec->get_root_component()->get_relative_location(); // Player position
 
-				auto distance_to_player = CalculateDistanceFloat(player_position, head_position);
+				double ghost_distance = CalculateDistanceMeters(player_position, ghost_position);
 
-				// Check if the target is visible on screen
+				if (ghost_distance > 2) continue; // Skip dead bodies
+
+				// Adjust the position based on the selected aim target
+				float aim_height_offset = 165.0f; // Default to head
+				if (aim_target == "Neck") aim_height_offset = 145.0f;
+				else if (aim_target == "Body") aim_height_offset = 125.0f;
+
+				vector3 target_position = player_position + vector3{ 0, 0, aim_height_offset }; // Adjust for selected target
+
 				vector3 screen_position{};
-				bool visible = util::w2s(head_position, last_frame_cached.pov, screen_position);
+				bool visible = util::w2s(target_position, last_frame_cached.pov, screen_position);
 
-				if (visible && distance_to_player < closest_distance) {
-					closest_distance = distance_to_player;
-					closest_enemy = mec;
-					closest_enemy_screen_position = screen_position;
+				if (visible) {
+					if (target_closest) {
+						// Target closest to the player
+						float distance_to_player = CalculateDistanceFloat(player_position, target_position);
+						if (distance_to_player < best_value) {
+							best_value = distance_to_player;
+							best_target = mec;
+							best_target_screen_position = screen_position;
+						}
+					}
+					else {
+						// Target closest to the center of the screen
+						float screen_distance = sqrtf(powf(screen_position.x - screen_center.x, 2) +
+							powf(screen_position.y - screen_center.y, 2));
+						if (screen_distance < best_value) {
+							best_value = screen_distance;
+							best_target = mec;
+							best_target_screen_position = screen_position;
+						}
+					}
 				}
 			}
 		}
 
-		// If a closest enemy was found and is visible, smooth the cursor movement
-		if (closest_enemy) {
-			// Get screen dimensions
-			int screen_width = GetSystemMetrics(SM_CXSCREEN);
-			int screen_height = GetSystemMetrics(SM_CYSCREEN);
+		// If a best target was found and is visible, smooth the cursor movement
+		if (best_target) {
+			int target_x = static_cast<int>(best_target_screen_position.x);
+			int target_y = static_cast<int>(best_target_screen_position.y);
 
-			// Map enemy head screen position to screen coordinates
-			int target_x = static_cast<int>(closest_enemy_screen_position.x);
-			int target_y = static_cast<int>(closest_enemy_screen_position.y);
-
-			// Get the center of the screen (where the crosshair is likely located)
-			int center_x = screen_width / 2;
-			int center_y = screen_height / 2;
+			int center_x = static_cast<int>(screen_center.x);
+			int center_y = static_cast<int>(screen_center.y);
 
 			// Calculate the relative movement offsets
 			float delta_x = static_cast<float>(target_x - center_x);
 			float delta_y = static_cast<float>(target_y - center_y);
-
-			// Smooth factor (adjust to control aggressiveness)
-			float smooth_factor = 0.5f;
 
 			// Apply smoothing to cursor movement
 			delta_x *= smooth_factor;

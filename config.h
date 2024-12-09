@@ -31,7 +31,13 @@ namespace config {
 	inline bool infinite_stamina = false;
 	inline bool god_mode = false;
 	inline int player_fov = 103;
+
+	// Aimbot
 	inline bool aimbot = true;
+	inline bool target_closest = false;
+	inline std::string target_filter = "All";
+	inline std::string aim_target = "Head";
+	inline float smooth_factor = 0.20;
 
 	// Weapons
 	// Melee
@@ -86,7 +92,7 @@ namespace config {
 	inline bool player_list_locked = false;
 	inline float player_list_x = 530;
 	inline float player_list_y = 20;
-	
+
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
 	inline ImVec4 ghost_employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
@@ -183,7 +189,7 @@ namespace config {
 		j["aimbot_hotkey"] = aimbot_hotkey;
 		j["aimbot_hold_key"] = aimbot_hold_key;
 		j["player_list_hotkey"] = player_list_hotkey;
-		
+
 		// Save boolean settings
 		j["speedhack"] = speedhack;
 		j["max_speed"] = max_speed;
@@ -209,6 +215,10 @@ namespace config {
 		j["ammo_count"] = ammo_count;
 		j["can_inventory"] = can_inventory;
 		j["aimbot"] = aimbot;
+		j["target_closest"] = target_closest;
+		j["target_filter"] = target_filter;
+		j["smooth_factor"] = smooth_factor;
+		j["aim_target"] = aim_target;
 
 		// Save ESP-related settings
 		j["esp_enabled"] = esp_enabled;
@@ -253,7 +263,7 @@ namespace config {
 		j["task_pizzushi"] = task_pizzushi;
 		j["task_computers"] = task_computers;
 		j["task_scanners"] = task_scanners;
-		
+
 		// Colors (individually serialize RGBA components for each color)
 		j["employee_color"] = { {"r", employee_color.x}, {"g", employee_color.y}, {"b", employee_color.z}, {"a", employee_color.w} };
 		j["ghost_employee_color"] = { {"r", employee_color.x}, {"g", employee_color.y}, {"b", employee_color.z}, {"a", employee_color.w} };
@@ -277,7 +287,7 @@ namespace config {
 		j["rice_color"] = { {"r", rice_color.x}, {"g", rice_color.y}, {"b", rice_color.z}, {"a", rice_color.w} };
 		j["package_color"] = { {"r", package_color.x}, {"g", package_color.y}, {"b", package_color.z}, {"a", package_color.w} };
 		j["sample_color"] = { {"r", sample_color.x}, {"g", sample_color.y}, {"b", sample_color.z}, {"a", sample_color.w} };
-		
+
 		std::ofstream file(filePath);  // This will create the file if it doesn't exist
 		if (file.is_open()) {
 			file << j.dump(4);  // Pretty print with 4 spaces
@@ -345,6 +355,10 @@ namespace config {
 		j.at("ammo_count").get_to(ammo_count);
 		j.at("can_inventory").get_to(can_inventory);
 		j.at("aimbot").get_to(aimbot);
+		j.at("target_filter").get_to(target_filter);
+		j.at("target_closest").get_to(target_closest);
+		j.at("smooth_factor").get_to(smooth_factor);
+		j.at("aim_target").get_to(aim_target);
 
 		// Load ESP-related settings
 		j.at("esp_enabled").get_to(esp_enabled);
@@ -473,7 +487,7 @@ namespace config {
 			weapon_color.z = j["weapon_color"].at("b").get<float>();
 			weapon_color.w = j["weapon_color"].at("a").get<float>();
 		}
-		
+
 
 		if (j.contains("weapon_case_color")) {
 			weapon_case_color.x = j["weapon_case_color"].at("r").get<float>();

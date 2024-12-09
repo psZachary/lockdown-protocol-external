@@ -111,6 +111,7 @@ void menu::draw()
 		if (ImGui::Selectable("PLAYER", selected_tab == 2)) selected_tab = 2;
 		if (ImGui::Selectable("WEAPON", selected_tab == 3)) selected_tab = 3;
 		if (ImGui::Selectable("ITEMS", selected_tab == 4)) selected_tab = 4;
+		if (ImGui::Selectable("AIMBOT", selected_tab == 5)) selected_tab = 5;
 		ImGui::Separator();
 		ImGui::Text("SETTINGS");
 		if (ImGui::Button("Save")) {
@@ -390,15 +391,6 @@ void menu::draw()
 				ImGui::Checkbox("Infinite Stamina", &infinite_stamina);
 				ImGui::SameLine();
 				ImHotkey("##InfstamHotkey", &infinite_stamina_hotkey);
-
-				//ImGui::BeginDisabled(true);
-				ImGui::Checkbox("Aimbot", &aimbot);
-				ImGui::SameLine();
-				ImHotkey("##AimbotHotkey", &aimbot_hotkey);
-				ImGui::Text("Hold Key:");
-				ImGui::SameLine();
-				ImHotkey("##AimbotHoldKey", &aimbot_hold_key);
-				//ImGui::EndDisabled();
 
 				if (ImGui::Button("Revive")) {
 					local_mec->set_alive(true);
@@ -1310,12 +1302,63 @@ void menu::draw()
 
 			calculatedHeight += itemHeight * 16.75;
 		}
+		// AIMBOT
+		else if (selected_tab == 5) {
+			// Begin custom side-by-side child sections
+			float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
+			ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
+			if (ImGui::CollapsingHeader("TOGGLE", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Checkbox("Aimbot", &aimbot);
+				ImGui::SameLine();
+				ImHotkey("##AimbotHotkey", &aimbot_hotkey);
+				ImGui::Text("Hold Key:");
+				ImGui::SameLine();
+				ImHotkey("##AimbotHoldKey", &aimbot_hold_key);
+				ImGui::SameLine(); MenuTooltip("Hold button for aim lock.");
+			}
+			ImGui::EndChild();
 
+			ImGui::SameLine();
+
+			ImGui::BeginChild("SettingsSection", ImVec2(halfWidth - 10, 0), true);
+			if (aimbot) {
+				if (ImGui::CollapsingHeader("Aimbot Settings##AimbotSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
+					// Add dropdown for target filter
+					const char* filter_options[] = { "All", "Employees", "Dissidents" };
+					static int selected_filter = 0; // 0 = All, 1 = Employees, 2 = Dissidents
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::Combo("Target Filter##TargetFilter", &selected_filter, filter_options, IM_ARRAYSIZE(filter_options))) {
+						// Update the config setting
+						if (selected_filter == 0) target_filter = "All";
+						else if (selected_filter == 1) target_filter = "Employees";
+						else if (selected_filter == 2) target_filter = "Dissidents";
+					}
+
+					// Add dropdown for aim target
+					const char* aim_target_options[] = { "Head", "Neck", "Body" };
+					static int selected_aim_target = 0; // 0 = Head, 1 = Neck, 2 = Body
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::Combo("Aim Target##AimTarget", &selected_aim_target, aim_target_options, IM_ARRAYSIZE(aim_target_options))) {
+						// Update the config setting
+						if (selected_aim_target == 0) aim_target = "Head";
+						else if (selected_aim_target == 1) aim_target = "Neck";
+						else if (selected_aim_target == 2) aim_target = "Body";
+					}
+
+					ImGui::Checkbox("Target Closest", &target_closest);
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderFloat("##smooth_factor", &smooth_factor, 0.01f, 1.0f, "Smooth Factor: %.02f");
+				}
+
+				ImGui::EndChild();
+				//calculatedHeight += itemHeight * 6;
+			}
+		}
 		ImGui::EndChild();
 
 		//ImGui::SetWindowSize(ImVec2(-1, calculatedHeight));
 		if (calculatedHeight <= 200.0f) {
-			ImGui::SetWindowSize(ImVec2(500.f, 200.0f));
+			ImGui::SetWindowSize(ImVec2(500.f, 220.0f));
 		}
 		else {
 			ImGui::SetWindowSize(ImVec2(500.f, calculatedHeight));
