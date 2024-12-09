@@ -21,8 +21,8 @@ namespace config {
 	inline int no_recoil_hotkey = VK_INSERT;
 	inline int max_damage_hotkey = VK_DELETE;
 	inline int aimbot_hotkey = VK_PRIOR;
+	inline int aimbot_hold_key = VK_LMENU;
 	inline int player_list_hotkey = VK_NEXT;
-	inline int player_list_locked_hotkey = VK_PRIOR;
 
 	// Player
 	inline bool speedhack = false;
@@ -31,7 +31,7 @@ namespace config {
 	inline bool infinite_stamina = false;
 	inline bool god_mode = false;
 	inline int player_fov = 103;
-	inline bool aimbot = false;
+	inline bool aimbot = true;
 
 	// Weapons
 	// Melee
@@ -181,8 +181,8 @@ namespace config {
 		j["no_recoil_hotkey"] = no_recoil_hotkey;
 		j["max_damage_hotkey"] = max_damage_hotkey;
 		j["aimbot_hotkey"] = aimbot_hotkey;
+		j["aimbot_hold_key"] = aimbot_hold_key;
 		j["player_list_hotkey"] = player_list_hotkey;
-		j["player_list_locked_hotkey"] = player_list_locked_hotkey;
 		
 		// Save boolean settings
 		j["speedhack"] = speedhack;
@@ -317,8 +317,8 @@ namespace config {
 		j.at("no_recoil_hotkey").get_to(no_recoil_hotkey);
 		j.at("max_damage_hotkey").get_to(max_damage_hotkey);
 		j.at("aimbot_hotkey").get_to(aimbot_hotkey);
+		j.at("aimbot_hold_key").get_to(aimbot_hold_key);
 		j.at("player_list_hotkey").get_to(player_list_hotkey);
-		j.at("player_list_locked_hotkey").get_to(player_list_locked_hotkey);
 
 		// Load boolean settings
 		j.at("speedhack").get_to(speedhack);

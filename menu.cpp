@@ -88,10 +88,6 @@ void menu::draw()
 		player_list = !player_list;
 	}
 
-	if (GetAsyncKeyState(player_list_locked_hotkey) & 1) {
-		player_list_locked = !player_list_locked;
-	}
-
 	if (menu_open) {
 		ImVec2 startPosition = ImVec2(20, 20);
 
@@ -395,11 +391,14 @@ void menu::draw()
 				ImGui::SameLine();
 				ImHotkey("##InfstamHotkey", &infinite_stamina_hotkey);
 
-				ImGui::BeginDisabled(true);
+				//ImGui::BeginDisabled(true);
 				ImGui::Checkbox("Aimbot", &aimbot);
 				ImGui::SameLine();
 				ImHotkey("##AimbotHotkey", &aimbot_hotkey);
-				ImGui::EndDisabled();
+				ImGui::Text("Hold Key:");
+				ImGui::SameLine();
+				ImHotkey("##AimbotHoldKey", &aimbot_hold_key);
+				//ImGui::EndDisabled();
 
 				if (ImGui::Button("Revive")) {
 					local_mec->set_alive(true);
@@ -435,6 +434,8 @@ void menu::draw()
 				}
 			}
 			ImGui::EndChild();
+
+			calculatedHeight += itemHeight * 9.5;
 		}
 		// WEAPON
 		else if (selected_tab == 3) {
@@ -1434,8 +1435,6 @@ void menu::draw()
 			player_list_x = menu_position.x;
 			player_list_y = menu_position.y;
 		}
-		ImGui::SameLine();
-		ImHotkey("##PlayerListLockedHotkey", &player_list_locked_hotkey);
 
 		// Render Dissidents
 		if (ImGui::CollapsingHeader("Dissidents", ImGuiTreeNodeFlags_DefaultOpen)) {

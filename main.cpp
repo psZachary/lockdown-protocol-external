@@ -303,9 +303,9 @@ static void render_callback() {
 		rapid_fire = !rapid_fire;
 	}
 
-	//if (GetAsyncKeyState(aimbot_hotkey) & 1) {
-	//	aimbot = !aimbot;
-	//}
+	if (GetAsyncKeyState(aimbot_hotkey) & 1) {
+		aimbot = !aimbot;
+	}
 
 	auto hand_item = local_mec->get_hand_item();
 	auto melee_item_data = (u_data_melee*)hand_item;
@@ -329,9 +329,7 @@ static void render_callback() {
 	//}
 
 
-
-	/*
-	if (aimbot) {
+	if (aimbot && GetAsyncKeyState(aimbot_hold_key) & 0x8000) {
 		// Retrieve cached frame for camera details
 		f_camera_cache last_frame_cached = local_camera_manager->get_cached_frame_private();
 		vector3 camera_location = last_frame_cached.pov.location; // Camera position
@@ -343,47 +341,69 @@ static void render_callback() {
 
 		mec_pawn* closest_enemy = nullptr;
 		float closest_distance = 999999.0f;
+		vector3 closest_enemy_screen_position;
 
-		// Find the closest enemy
+		// Find the closest enemy to the player
 		for (auto mec : player_cache) {
 			auto state = mec->player_state();
 			if (!state) continue;
 
 			if (mec != local_mec) {
 				auto enemy_position = mec->get_root_component()->get_relative_location();
-				auto distance = CalculateDistanceFloat(player_position, enemy_position);
 
-				if (distance < closest_distance) {
-					closest_distance = distance;
+				// Adjust the position for the head height
+				vector3 head_position = enemy_position + vector3{ 0, 0, 165 }; // Adjust for head height
+
+				auto distance_to_player = CalculateDistanceFloat(player_position, head_position);
+
+				// Check if the target is visible on screen
+				vector3 screen_position{};
+				bool visible = util::w2s(head_position, last_frame_cached.pov, screen_position);
+
+				if (visible && distance_to_player < closest_distance) {
+					closest_distance = distance_to_player;
 					closest_enemy = mec;
+					closest_enemy_screen_position = screen_position;
 				}
 			}
 		}
 
-		// If a closest enemy was found, proceed with aiming
+		// If a closest enemy was found and is visible, smooth the cursor movement
 		if (closest_enemy) {
-			vector3 enemy_location = closest_enemy->get_root_component()->get_relative_location();
-			vector3 direction = (enemy_location - camera_location).normalize();
+			// Get screen dimensions
+			int screen_width = GetSystemMetrics(SM_CXSCREEN);
+			int screen_height = GetSystemMetrics(SM_CYSCREEN);
 
-			// Calculate yaw and pitch for aiming
-			float target_yaw = atan2f(direction.y, direction.x) * 180.0f / 3.14159265f;
-			float target_pitch = asinf(direction.z) * 180.0f / 3.14159265f;
+			// Map enemy head screen position to screen coordinates
+			int target_x = static_cast<int>(closest_enemy_screen_position.x);
+			int target_y = static_cast<int>(closest_enemy_screen_position.y);
 
+			// Get the center of the screen (where the crosshair is likely located)
+			int center_x = screen_width / 2;
+			int center_y = screen_height / 2;
 
-			// Smoothly adjust camera rotation
-			float smooth_factor = 0.1f;
-			camera_rotation.x += (target_pitch - camera_rotation.x) * smooth_factor; // Smooth pitch
-			camera_rotation.y += (target_yaw - camera_rotation.y) * smooth_factor;  // Smooth yaw
+			// Calculate the relative movement offsets
+			float delta_x = static_cast<float>(target_x - center_x);
+			float delta_y = static_cast<float>(target_y - center_y);
 
-			// Update the camera rotation in the cache
-			last_frame_cached.pov.rotation = camera_rotation;
+			// Smooth factor (adjust to control aggressiveness)
+			float smooth_factor = 0.5f;
 
-			// Apply the updated cached frame back to the camera manager
-			local_camera_manager->set_last_cached_frame_private(last_frame_cached);
-			local_camera_manager->set_cached_frame_private(last_frame_cached);
+			// Apply smoothing to cursor movement
+			delta_x *= smooth_factor;
+			delta_y *= smooth_factor;
+
+			// Simulate mouse movement using SendInput
+			INPUT input = { 0 };
+			input.type = INPUT_MOUSE;
+			input.mi.dx = static_cast<LONG>(delta_x);
+			input.mi.dy = static_cast<LONG>(delta_y);
+			input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_MOVE_NOCOALESCE; // Relative movement
+
+			// Send the input to the game
+			SendInput(1, &input, sizeof(INPUT));
 		}
 	}
-*/
 
 	if (infinite_ammo) {
 		if (hand_item) {
@@ -706,7 +726,6 @@ static void render_callback() {
 								);
 							}
 						}
-
 
 						vector3 screen_position{};
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {

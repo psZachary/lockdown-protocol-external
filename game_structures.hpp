@@ -447,6 +447,7 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x308, pawn_private, a_pawn*);
 				GET_OFFSET(0x0388, player_name_private, fstring);
+				GET_OFFSET(0x02B0, saved_network_address, fstring);
 			};
 
 			class a_game_state_base {
