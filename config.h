@@ -38,6 +38,7 @@ namespace config {
 	inline std::string target_filter = "All";
 	inline std::string aim_target = "Head";
 	inline float smooth_factor = 0.20;
+	inline float aimbot_fov = 100.0;
 
 	// Weapons
 	// Melee
@@ -219,6 +220,7 @@ namespace config {
 		j["target_filter"] = target_filter;
 		j["smooth_factor"] = smooth_factor;
 		j["aim_target"] = aim_target;
+		j["aimbot_fov"] = aimbot_fov;
 
 		// Save ESP-related settings
 		j["esp_enabled"] = esp_enabled;
@@ -359,6 +361,7 @@ namespace config {
 		j.at("target_closest").get_to(target_closest);
 		j.at("smooth_factor").get_to(smooth_factor);
 		j.at("aim_target").get_to(aim_target);
+		j.at("aimbot_fov").get_to(aimbot_fov);
 
 		// Load ESP-related settings
 		j.at("esp_enabled").get_to(esp_enabled);

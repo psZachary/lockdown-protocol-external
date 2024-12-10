@@ -1307,7 +1307,7 @@ void menu::draw()
 			// Begin custom side-by-side child sections
 			float halfWidth = (ImGui::GetContentRegionAvail().x) / 2;
 			ImGui::BeginChild("DetailsSection", ImVec2(halfWidth, 0), true);
-			if (ImGui::CollapsingHeader("TOGGLE", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (ImGui::CollapsingHeader("Toggle", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Checkbox("Aimbot", &aimbot);
 				ImGui::SameLine();
 				ImHotkey("##AimbotHotkey", &aimbot_hotkey);
@@ -1346,6 +1346,8 @@ void menu::draw()
 					}
 
 					ImGui::Checkbox("Target Closest", &target_closest);
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderFloat("FOV##AimbotFOV", &aimbot_fov, 0.0f, 500.0f, "Aimbot FOV: %.01f");
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					ImGui::SliderFloat("##smooth_factor", &smooth_factor, 0.01f, 1.0f, "Smooth Factor: %.02f");
 				}

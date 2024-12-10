@@ -328,7 +328,16 @@ static void render_callback() {
 	//    << cost << ");" << std::endl;
 	//}
 
+	if (aimbot) {
+		// Draw FOV circle
+		int screen_width = GetSystemMetrics(SM_CXSCREEN);
+		int screen_height = GetSystemMetrics(SM_CYSCREEN);
+		ImVec2 screen_center = ImVec2(screen_width / 2.0f, screen_height / 2.0f);
 
+		// Semi-transparent circle
+		ImU32 circle_color = IM_COL32(255, 255, 255, 100); // White with transparency
+		overlay->draw_circle(screen_center, aimbot_fov, circle_color, 64, 1.5f);
+	}
 	if (aimbot && GetAsyncKeyState(aimbot_hold_key) & 0x8000) {
 		// Retrieve cached frame for camera details
 		f_camera_cache last_frame_cached = local_camera_manager->get_cached_frame_private();
@@ -382,6 +391,12 @@ static void render_callback() {
 				bool visible = util::w2s(target_position, last_frame_cached.pov, screen_position);
 
 				if (visible) {
+					// Calculate distance from screen center
+					float screen_distance = sqrtf(powf(screen_position.x - screen_width / 2.0f, 2) +
+						powf(screen_position.y - screen_height / 2.0f, 2));
+
+					if (screen_distance > aimbot_fov) continue; // Skip if outside FOV
+
 					if (target_closest) {
 						// Target closest to the player
 						float distance_to_player = CalculateDistanceFloat(player_position, target_position);
@@ -393,8 +408,13 @@ static void render_callback() {
 					}
 					else {
 						// Target closest to the center of the screen
-						float screen_distance = sqrtf(powf(screen_position.x - screen_center.x, 2) +
-							powf(screen_position.y - screen_center.y, 2));
+
+						// Calculate distance from screen center
+						float screen_distance = sqrtf(powf(screen_position.x - screen_width / 2.0f, 2) +
+							powf(screen_position.y - screen_height / 2.0f, 2));
+
+						if (screen_distance > aimbot_fov) continue; // Skip if outside FOV
+
 						if (screen_distance < best_value) {
 							best_value = screen_distance;
 							best_target = mec;
@@ -1836,6 +1856,7 @@ int main() {
 
 	std::cout << "Absolute Address: 0x" << std::hex << absoluteAddress << std::endl;
 		*/
+
 
 	while (true) {
 		overlay->msg_loop();

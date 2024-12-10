@@ -871,6 +871,7 @@ namespace protocol {
 				OFFSET(0x568, run, bool);
 				OFFSET(0x569, walk, bool);
 				OFFSET(0x0710, acceleration, vector2);
+				OFFSET(0x05A0, net_velocity, FVector);
 				OFFSET(0x0608, fire_spread, double);
 				OFFSET(0x0618, vertical_recoil, double);
 				OFFSET(0x0620, horizontal_recoil, double);
