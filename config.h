@@ -37,8 +37,9 @@ namespace config {
 	inline bool target_closest = false;
 	inline std::string target_filter = "All";
 	inline std::string aim_target = "Head";
-	inline float smooth_factor = 0.20;
-	inline float aimbot_fov = 100.0;
+	inline float smooth_factor = 0.50;
+	inline float aimbot_fov = 120.0;
+	inline ImVec4 fov_color = ImVec4(1.0f, 1.0f, 1.0f, 0.392f);  // White transparent
 
 	// Weapons
 	// Melee
@@ -80,7 +81,7 @@ namespace config {
 
 	inline bool esp_radar = true;
 	inline std::string esp_radar_position = "Middle Right";
-	inline double esp_radar_scale = 0.10;
+	inline double esp_radar_scale = 0.06;
 
 	inline bool player_esp = true;
 	inline bool player_distance = true;
@@ -289,6 +290,7 @@ namespace config {
 		j["rice_color"] = { {"r", rice_color.x}, {"g", rice_color.y}, {"b", rice_color.z}, {"a", rice_color.w} };
 		j["package_color"] = { {"r", package_color.x}, {"g", package_color.y}, {"b", package_color.z}, {"a", package_color.w} };
 		j["sample_color"] = { {"r", sample_color.x}, {"g", sample_color.y}, {"b", sample_color.z}, {"a", sample_color.w} };
+		j["fov_color"] = { {"r", fov_color.x}, {"g", fov_color.y}, {"b", fov_color.z}, {"a", fov_color.w} };
 
 		std::ofstream file(filePath);  // This will create the file if it doesn't exist
 		if (file.is_open()) {
@@ -305,263 +307,289 @@ namespace config {
 	inline void LoadConfig(const std::string& filename = "config.json") {
 		std::string directory = "config";
 		std::string filePath = directory + "/" + filename;
-		std::ifstream file(filePath);
-		if (!file.is_open()) {
-			std::cerr << "Warning: Config file not found. Loading defaults." << std::endl;
+
+		try {
+			// Check if the file exists
+			if (!std::filesystem::exists(filePath)) {
+				std::cerr << "Config file not found. Creating a new one with defaults." << std::endl;
+				SaveConfig();
+				return;
+			}
+
+			// Open and parse the config file
+			std::ifstream file(filePath);
+			if (!file.is_open()) {
+				throw std::ios_base::failure("Failed to open config file.");
+			}
+
+			nlohmann::json j;
+			file >> j;
+			file.close();
+
+			// Load hotkey settings
+			j.at("menu_hotkey").get_to(menu_hotkey);
+			j.at("esp_hotkey").get_to(esp_hotkey);
+			j.at("speedhack_hotkey").get_to(speedhack_hotkey);
+			j.at("god_mode_hotkey").get_to(god_mode_hotkey);
+			j.at("infinite_stamina_hotkey").get_to(infinite_stamina_hotkey);
+			j.at("fast_melee_hotkey").get_to(fast_melee_hotkey);
+			j.at("infinite_melee_range_hotkey").get_to(infinite_melee_range_hotkey);
+			j.at("auto_fire_hotkey").get_to(auto_fire_hotkey);
+			j.at("rapid_fire_hotkey").get_to(rapid_fire_hotkey);
+			j.at("no_recoil_hotkey").get_to(no_recoil_hotkey);
+			j.at("max_damage_hotkey").get_to(max_damage_hotkey);
+			j.at("aimbot_hotkey").get_to(aimbot_hotkey);
+			j.at("aimbot_hold_key").get_to(aimbot_hold_key);
+			j.at("player_list_hotkey").get_to(player_list_hotkey);
+
+			// Load boolean settings
+			j.at("speedhack").get_to(speedhack);
+			j.at("max_speed").get_to(max_speed);
+			j.at("friction").get_to(friction);
+			j.at("infinite_stamina").get_to(infinite_stamina);
+			j.at("god_mode").get_to(god_mode);
+			j.at("player_fov").get_to(player_fov);
+			j.at("fast_melee").get_to(fast_melee);
+			j.at("cast_time").get_to(cast_time);
+			j.at("recover_time").get_to(recover_time);
+			j.at("stun").get_to(stun);
+			j.at("cost").get_to(cost);
+			j.at("infinite_melee_range").get_to(infinite_melee_range);
+			j.at("range").get_to(range);
+			j.at("max_damage").get_to(max_damage);
+			j.at("auto_fire").get_to(auto_fire);
+			j.at("rapid_fire").get_to(rapid_fire);
+			j.at("rapid_fire_rate").get_to(rapid_fire_rate);
+			j.at("no_recoil").get_to(no_recoil);
+			j.at("movement_osc").get_to(movement_osc);
+			j.at("osc_reactivity").get_to(osc_reactivity);
+			j.at("infinite_ammo").get_to(infinite_ammo);
+			j.at("ammo_count").get_to(ammo_count);
+			j.at("can_inventory").get_to(can_inventory);
+			j.at("aimbot").get_to(aimbot);
+			j.at("target_filter").get_to(target_filter);
+			j.at("target_closest").get_to(target_closest);
+			j.at("smooth_factor").get_to(smooth_factor);
+			j.at("aim_target").get_to(aim_target);
+			j.at("aimbot_fov").get_to(aimbot_fov);
+
+			// Load ESP-related settings
+			j.at("esp_enabled").get_to(esp_enabled);
+			j.at("esp_max_distance").get_to(esp_max_distance);
+			j.at("esp_radar").get_to(esp_radar);
+			j.at("esp_radar_position").get_to(esp_radar_position);
+			j.at("esp_radar_scale").get_to(esp_radar_scale);
+			j.at("player_esp").get_to(player_esp);
+			j.at("player_distance").get_to(player_distance);
+			j.at("player_inventory").get_to(player_inventory);
+			j.at("player_box").get_to(player_box);
+			j.at("player_ghost").get_to(player_ghost);
+			j.at("player_radar").get_to(player_radar);
+			j.at("ghost_radar").get_to(ghost_radar);
+			j.at("player_list").get_to(player_list);
+			j.at("player_list_locked").get_to(player_list_locked);
+			j.at("player_list_x").get_to(player_list_x);
+			j.at("player_list_y").get_to(player_list_y);
+			j.at("weapon_esp").get_to(weapon_esp);
+			j.at("weapon_case_esp").get_to(weapon_case_esp);
+			j.at("weapon_item_state").get_to(weapon_item_state);
+			j.at("weapon_case_state").get_to(weapon_case_state);
+			j.at("weapon_case_info").get_to(weapon_case_info);
+			j.at("weapon_distance").get_to(weapon_distance);
+			j.at("weapon_case_distance").get_to(weapon_case_distance);
+			j.at("weapon_radar").get_to(weapon_radar);
+			j.at("primary_object_esp").get_to(primary_object_esp);
+			j.at("primary_item_state").get_to(primary_item_state);
+			j.at("primary_distance").get_to(primary_distance);
+			j.at("primary_radar").get_to(primary_radar);
+			j.at("secondary_item_state").get_to(secondary_item_state);
+			j.at("secondary_distance").get_to(secondary_distance);
+			j.at("secondary_object_esp").get_to(secondary_object_esp);
+			j.at("secondary_radar").get_to(secondary_radar);
+			j.at("task_object_esp").get_to(task_object_esp);
+			j.at("task_object_distance").get_to(task_object_distance);
+			j.at("task_object_state").get_to(task_object_state);
+			j.at("task_delivery").get_to(task_delivery);
+			j.at("task_machine").get_to(task_machine);
+			j.at("task_vent").get_to(task_vent);
+			j.at("task_alim").get_to(task_alim);
+			j.at("task_pizzushi").get_to(task_pizzushi);
+			j.at("task_computers").get_to(task_computers);
+			j.at("task_scanners").get_to(task_scanners);
+
+			// Colors (individually unpack RGBA components for each color if present)
+			if (j.contains("employee_color")) {
+				employee_color.x = j["employee_color"].at("r").get<float>();
+				employee_color.y = j["employee_color"].at("g").get<float>();
+				employee_color.z = j["employee_color"].at("b").get<float>();
+				employee_color.w = j["employee_color"].at("a").get<float>();
+			}
+
+			if (j.contains("dissident_color")) {
+				dissident_color.x = j["dissident_color"].at("r").get<float>();
+				dissident_color.y = j["dissident_color"].at("g").get<float>();
+				dissident_color.z = j["dissident_color"].at("b").get<float>();
+				dissident_color.w = j["dissident_color"].at("a").get<float>();
+			}
+			if (j.contains("ghost_employee_color")) {
+				employee_color.x = j["ghost_employee_color"].at("r").get<float>();
+				employee_color.y = j["ghost_employee_color"].at("g").get<float>();
+				employee_color.z = j["ghost_employee_color"].at("b").get<float>();
+				employee_color.w = j["ghost_employee_color"].at("a").get<float>();
+			}
+
+			if (j.contains("ghost_dissident_color")) {
+				dissident_color.x = j["ghost_dissident_color"].at("r").get<float>();
+				dissident_color.y = j["ghost_dissident_color"].at("g").get<float>();
+				dissident_color.z = j["ghost_dissident_color"].at("b").get<float>();
+				dissident_color.w = j["ghost_dissident_color"].at("a").get<float>();
+			}
+
+			if (j.contains("task_delivery_color")) {
+				task_delivery_color.x = j["task_delivery_color"].at("r").get<float>();
+				task_delivery_color.y = j["task_delivery_color"].at("g").get<float>();
+				task_delivery_color.z = j["task_delivery_color"].at("b").get<float>();
+				task_delivery_color.w = j["task_delivery_color"].at("a").get<float>();
+			}
+
+			if (j.contains("task_machine_color")) {
+				task_machine_color.x = j["task_machine_color"].at("r").get<float>();
+				task_machine_color.y = j["task_machine_color"].at("g").get<float>();
+				task_machine_color.z = j["task_machine_color"].at("b").get<float>();
+				task_machine_color.w = j["task_machine_color"].at("a").get<float>();
+			}
+
+			if (j.contains("task_vent_color")) {
+				task_vent_color.x = j["task_vent_color"].at("r").get<float>();
+				task_vent_color.y = j["task_vent_color"].at("g").get<float>();
+				task_vent_color.z = j["task_vent_color"].at("b").get<float>();
+				task_vent_color.w = j["task_vent_color"].at("a").get<float>();
+			}
+
+			if (j.contains("task_alim_color")) {
+				task_alim_color.x = j["task_alim_color"].at("r").get<float>();
+				task_alim_color.y = j["task_alim_color"].at("g").get<float>();
+				task_alim_color.z = j["task_alim_color"].at("b").get<float>();
+				task_alim_color.w = j["task_alim_color"].at("a").get<float>();
+			}
+
+			if (j.contains("task_pizzushi_color")) {
+				task_pizzushi_color.x = j["task_pizzushi_color"].at("r").get<float>();
+				task_pizzushi_color.y = j["task_pizzushi_color"].at("g").get<float>();
+				task_pizzushi_color.z = j["task_pizzushi_color"].at("b").get<float>();
+				task_pizzushi_color.w = j["task_pizzushi_color"].at("a").get<float>();
+			}
+
+			if (j.contains("task_computer_color")) {
+				task_computer_color.x = j["task_computer_color"].at("r").get<float>();
+				task_computer_color.y = j["task_computer_color"].at("g").get<float>();
+				task_computer_color.z = j["task_computer_color"].at("b").get<float>();
+				task_computer_color.w = j["task_computer_color"].at("a").get<float>();
+			}
+
+			if (j.contains("task_scanner_color")) {
+				task_scanner_color.x = j["task_scanner_color"].at("r").get<float>();
+				task_scanner_color.y = j["task_scanner_color"].at("g").get<float>();
+				task_scanner_color.z = j["task_scanner_color"].at("b").get<float>();
+				task_scanner_color.w = j["task_scanner_color"].at("a").get<float>();
+			}
+
+			if (j.contains("weapon_color")) {
+				weapon_color.x = j["weapon_color"].at("r").get<float>();
+				weapon_color.y = j["weapon_color"].at("g").get<float>();
+				weapon_color.z = j["weapon_color"].at("b").get<float>();
+				weapon_color.w = j["weapon_color"].at("a").get<float>();
+			}
+
+
+			if (j.contains("weapon_case_color")) {
+				weapon_case_color.x = j["weapon_case_color"].at("r").get<float>();
+				weapon_case_color.y = j["weapon_case_color"].at("g").get<float>();
+				weapon_case_color.z = j["weapon_case_color"].at("b").get<float>();
+				weapon_case_color.w = j["weapon_case_color"].at("a").get<float>();
+			}
+
+			if (j.contains("fuse_color")) {
+				fuse_color.x = j["fuse_color"].at("r").get<float>();
+				fuse_color.y = j["fuse_color"].at("g").get<float>();
+				fuse_color.z = j["fuse_color"].at("b").get<float>();
+				fuse_color.w = j["fuse_color"].at("a").get<float>();
+			}
+
+			if (j.contains("battery_color")) {
+				battery_color.x = j["battery_color"].at("r").get<float>();
+				battery_color.y = j["battery_color"].at("g").get<float>();
+				battery_color.z = j["battery_color"].at("b").get<float>();
+				battery_color.w = j["battery_color"].at("a").get<float>();
+			}
+
+			if (j.contains("screw_driver_color")) {
+				screw_driver_color.x = j["screw_driver_color"].at("r").get<float>();
+				screw_driver_color.y = j["screw_driver_color"].at("g").get<float>();
+				screw_driver_color.z = j["screw_driver_color"].at("b").get<float>();
+				screw_driver_color.w = j["screw_driver_color"].at("a").get<float>();
+			}
+
+			if (j.contains("container_color")) {
+				container_color.x = j["container_color"].at("r").get<float>();
+				container_color.y = j["container_color"].at("g").get<float>();
+				container_color.z = j["container_color"].at("b").get<float>();
+				container_color.w = j["container_color"].at("a").get<float>();
+			}
+
+			if (j.contains("gaz_bottle_color")) {
+				gaz_bottle_color.x = j["gaz_bottle_color"].at("r").get<float>();
+				gaz_bottle_color.y = j["gaz_bottle_color"].at("g").get<float>();
+				gaz_bottle_color.z = j["gaz_bottle_color"].at("b").get<float>();
+				gaz_bottle_color.w = j["gaz_bottle_color"].at("a").get<float>();
+			}
+
+			if (j.contains("vent_filter_color")) {
+				vent_filter_color.x = j["vent_filter_color"].at("r").get<float>();
+				vent_filter_color.y = j["vent_filter_color"].at("g").get<float>();
+				vent_filter_color.z = j["vent_filter_color"].at("b").get<float>();
+				vent_filter_color.w = j["vent_filter_color"].at("a").get<float>();
+			}
+
+			if (j.contains("rice_color")) {
+				rice_color.x = j["rice_color"].at("r").get<float>();
+				rice_color.y = j["rice_color"].at("g").get<float>();
+				rice_color.z = j["rice_color"].at("b").get<float>();
+				rice_color.w = j["rice_color"].at("a").get<float>();
+			}
+
+			if (j.contains("package_color")) {
+				package_color.x = j["package_color"].at("r").get<float>();
+				package_color.y = j["package_color"].at("g").get<float>();
+				package_color.z = j["package_color"].at("b").get<float>();
+				package_color.w = j["package_color"].at("a").get<float>();
+			}
+
+			if (j.contains("sample_color")) {
+				sample_color.x = j["sample_color"].at("r").get<float>();
+				sample_color.y = j["sample_color"].at("g").get<float>();
+				sample_color.z = j["sample_color"].at("b").get<float>();
+				sample_color.w = j["sample_color"].at("a").get<float>();
+			}
+
+			if (j.contains("fov_color")) {
+				sample_color.x = j["fov_color"].at("r").get<float>();
+				sample_color.y = j["fov_color"].at("g").get<float>();
+				sample_color.z = j["fov_color"].at("b").get<float>();
+				sample_color.w = j["fov_color"].at("a").get<float>();
+			}
+
+			std::cerr << "Config loaded." << std::endl;
+		}
+		catch (const std::exception& e) {
+			std::cerr << "Error loading config file: " << e.what() << std::endl;
+			std::cerr << "Recreating config file with defaults." << std::endl;
+
+			// Delete the invalid config file
+			std::filesystem::remove(filePath);
+
+			// Save a new config file with default settings
 			SaveConfig();
-			return;  // If file doesn't exist, load defaults and return
 		}
-
-		nlohmann::json j;
-		file >> j;
-		file.close();
-
-		// Load hotkey settings
-		j.at("menu_hotkey").get_to(menu_hotkey);
-		j.at("esp_hotkey").get_to(esp_hotkey);
-		j.at("speedhack_hotkey").get_to(speedhack_hotkey);
-		j.at("god_mode_hotkey").get_to(god_mode_hotkey);
-		j.at("infinite_stamina_hotkey").get_to(infinite_stamina_hotkey);
-		j.at("fast_melee_hotkey").get_to(fast_melee_hotkey);
-		j.at("infinite_melee_range_hotkey").get_to(infinite_melee_range_hotkey);
-		j.at("auto_fire_hotkey").get_to(auto_fire_hotkey);
-		j.at("rapid_fire_hotkey").get_to(rapid_fire_hotkey);
-		j.at("no_recoil_hotkey").get_to(no_recoil_hotkey);
-		j.at("max_damage_hotkey").get_to(max_damage_hotkey);
-		j.at("aimbot_hotkey").get_to(aimbot_hotkey);
-		j.at("aimbot_hold_key").get_to(aimbot_hold_key);
-		j.at("player_list_hotkey").get_to(player_list_hotkey);
-
-		// Load boolean settings
-		j.at("speedhack").get_to(speedhack);
-		j.at("max_speed").get_to(max_speed);
-		j.at("friction").get_to(friction);
-		j.at("infinite_stamina").get_to(infinite_stamina);
-		j.at("god_mode").get_to(god_mode);
-		j.at("player_fov").get_to(player_fov);
-		j.at("fast_melee").get_to(fast_melee);
-		j.at("cast_time").get_to(cast_time);
-		j.at("recover_time").get_to(recover_time);
-		j.at("stun").get_to(stun);
-		j.at("cost").get_to(cost);
-		j.at("infinite_melee_range").get_to(infinite_melee_range);
-		j.at("range").get_to(range);
-		j.at("max_damage").get_to(max_damage);
-		j.at("auto_fire").get_to(auto_fire);
-		j.at("rapid_fire").get_to(rapid_fire);
-		j.at("rapid_fire_rate").get_to(rapid_fire_rate);
-		j.at("no_recoil").get_to(no_recoil);
-		j.at("movement_osc").get_to(movement_osc);
-		j.at("osc_reactivity").get_to(osc_reactivity);
-		j.at("infinite_ammo").get_to(infinite_ammo);
-		j.at("ammo_count").get_to(ammo_count);
-		j.at("can_inventory").get_to(can_inventory);
-		j.at("aimbot").get_to(aimbot);
-		j.at("target_filter").get_to(target_filter);
-		j.at("target_closest").get_to(target_closest);
-		j.at("smooth_factor").get_to(smooth_factor);
-		j.at("aim_target").get_to(aim_target);
-		j.at("aimbot_fov").get_to(aimbot_fov);
-
-		// Load ESP-related settings
-		j.at("esp_enabled").get_to(esp_enabled);
-		j.at("esp_max_distance").get_to(esp_max_distance);
-		j.at("esp_radar").get_to(esp_radar);
-		j.at("esp_radar_position").get_to(esp_radar_position);
-		j.at("esp_radar_scale").get_to(esp_radar_scale);
-		j.at("player_esp").get_to(player_esp);
-		j.at("player_distance").get_to(player_distance);
-		j.at("player_inventory").get_to(player_inventory);
-		j.at("player_box").get_to(player_box);
-		j.at("player_ghost").get_to(player_ghost);
-		j.at("player_radar").get_to(player_radar);
-		j.at("ghost_radar").get_to(ghost_radar);
-		j.at("player_list").get_to(player_list);
-		j.at("player_list_locked").get_to(player_list_locked);
-		j.at("player_list_x").get_to(player_list_x);
-		j.at("player_list_y").get_to(player_list_y);
-		j.at("weapon_esp").get_to(weapon_esp);
-		j.at("weapon_case_esp").get_to(weapon_case_esp);
-		j.at("weapon_item_state").get_to(weapon_item_state);
-		j.at("weapon_case_state").get_to(weapon_case_state);
-		j.at("weapon_case_info").get_to(weapon_case_info);
-		j.at("weapon_distance").get_to(weapon_distance);
-		j.at("weapon_case_distance").get_to(weapon_case_distance);
-		j.at("weapon_radar").get_to(weapon_radar);
-		j.at("primary_object_esp").get_to(primary_object_esp);
-		j.at("primary_item_state").get_to(primary_item_state);
-		j.at("primary_distance").get_to(primary_distance);
-		j.at("primary_radar").get_to(primary_radar);
-		j.at("secondary_item_state").get_to(secondary_item_state);
-		j.at("secondary_distance").get_to(secondary_distance);
-		j.at("secondary_object_esp").get_to(secondary_object_esp);
-		j.at("secondary_radar").get_to(secondary_radar);
-		j.at("task_object_esp").get_to(task_object_esp);
-		j.at("task_object_distance").get_to(task_object_distance);
-		j.at("task_object_state").get_to(task_object_state);
-		j.at("task_delivery").get_to(task_delivery);
-		j.at("task_machine").get_to(task_machine);
-		j.at("task_vent").get_to(task_vent);
-		j.at("task_alim").get_to(task_alim);
-		j.at("task_pizzushi").get_to(task_pizzushi);
-		j.at("task_computers").get_to(task_computers);
-		j.at("task_scanners").get_to(task_scanners);
-
-		// Colors (individually unpack RGBA components for each color if present)
-		if (j.contains("employee_color")) {
-			employee_color.x = j["employee_color"].at("r").get<float>();
-			employee_color.y = j["employee_color"].at("g").get<float>();
-			employee_color.z = j["employee_color"].at("b").get<float>();
-			employee_color.w = j["employee_color"].at("a").get<float>();
-		}
-
-		if (j.contains("dissident_color")) {
-			dissident_color.x = j["dissident_color"].at("r").get<float>();
-			dissident_color.y = j["dissident_color"].at("g").get<float>();
-			dissident_color.z = j["dissident_color"].at("b").get<float>();
-			dissident_color.w = j["dissident_color"].at("a").get<float>();
-		}
-		if (j.contains("ghost_employee_color")) {
-			employee_color.x = j["ghost_employee_color"].at("r").get<float>();
-			employee_color.y = j["ghost_employee_color"].at("g").get<float>();
-			employee_color.z = j["ghost_employee_color"].at("b").get<float>();
-			employee_color.w = j["ghost_employee_color"].at("a").get<float>();
-		}
-
-		if (j.contains("ghost_dissident_color")) {
-			dissident_color.x = j["ghost_dissident_color"].at("r").get<float>();
-			dissident_color.y = j["ghost_dissident_color"].at("g").get<float>();
-			dissident_color.z = j["ghost_dissident_color"].at("b").get<float>();
-			dissident_color.w = j["ghost_dissident_color"].at("a").get<float>();
-		}
-
-		if (j.contains("task_delivery_color")) {
-			task_delivery_color.x = j["task_delivery_color"].at("r").get<float>();
-			task_delivery_color.y = j["task_delivery_color"].at("g").get<float>();
-			task_delivery_color.z = j["task_delivery_color"].at("b").get<float>();
-			task_delivery_color.w = j["task_delivery_color"].at("a").get<float>();
-		}
-
-		if (j.contains("task_machine_color")) {
-			task_machine_color.x = j["task_machine_color"].at("r").get<float>();
-			task_machine_color.y = j["task_machine_color"].at("g").get<float>();
-			task_machine_color.z = j["task_machine_color"].at("b").get<float>();
-			task_machine_color.w = j["task_machine_color"].at("a").get<float>();
-		}
-
-		if (j.contains("task_vent_color")) {
-			task_vent_color.x = j["task_vent_color"].at("r").get<float>();
-			task_vent_color.y = j["task_vent_color"].at("g").get<float>();
-			task_vent_color.z = j["task_vent_color"].at("b").get<float>();
-			task_vent_color.w = j["task_vent_color"].at("a").get<float>();
-		}
-
-		if (j.contains("task_alim_color")) {
-			task_alim_color.x = j["task_alim_color"].at("r").get<float>();
-			task_alim_color.y = j["task_alim_color"].at("g").get<float>();
-			task_alim_color.z = j["task_alim_color"].at("b").get<float>();
-			task_alim_color.w = j["task_alim_color"].at("a").get<float>();
-		}
-
-		if (j.contains("task_pizzushi_color")) {
-			task_pizzushi_color.x = j["task_pizzushi_color"].at("r").get<float>();
-			task_pizzushi_color.y = j["task_pizzushi_color"].at("g").get<float>();
-			task_pizzushi_color.z = j["task_pizzushi_color"].at("b").get<float>();
-			task_pizzushi_color.w = j["task_pizzushi_color"].at("a").get<float>();
-		}
-
-		if (j.contains("task_computer_color")) {
-			task_computer_color.x = j["task_computer_color"].at("r").get<float>();
-			task_computer_color.y = j["task_computer_color"].at("g").get<float>();
-			task_computer_color.z = j["task_computer_color"].at("b").get<float>();
-			task_computer_color.w = j["task_computer_color"].at("a").get<float>();
-		}
-
-		if (j.contains("task_scanner_color")) {
-			task_scanner_color.x = j["task_scanner_color"].at("r").get<float>();
-			task_scanner_color.y = j["task_scanner_color"].at("g").get<float>();
-			task_scanner_color.z = j["task_scanner_color"].at("b").get<float>();
-			task_scanner_color.w = j["task_scanner_color"].at("a").get<float>();
-		}
-
-		if (j.contains("weapon_color")) {
-			weapon_color.x = j["weapon_color"].at("r").get<float>();
-			weapon_color.y = j["weapon_color"].at("g").get<float>();
-			weapon_color.z = j["weapon_color"].at("b").get<float>();
-			weapon_color.w = j["weapon_color"].at("a").get<float>();
-		}
-
-
-		if (j.contains("weapon_case_color")) {
-			weapon_case_color.x = j["weapon_case_color"].at("r").get<float>();
-			weapon_case_color.y = j["weapon_case_color"].at("g").get<float>();
-			weapon_case_color.z = j["weapon_case_color"].at("b").get<float>();
-			weapon_case_color.w = j["weapon_case_color"].at("a").get<float>();
-		}
-
-		if (j.contains("fuse_color")) {
-			fuse_color.x = j["fuse_color"].at("r").get<float>();
-			fuse_color.y = j["fuse_color"].at("g").get<float>();
-			fuse_color.z = j["fuse_color"].at("b").get<float>();
-			fuse_color.w = j["fuse_color"].at("a").get<float>();
-		}
-
-		if (j.contains("battery_color")) {
-			battery_color.x = j["battery_color"].at("r").get<float>();
-			battery_color.y = j["battery_color"].at("g").get<float>();
-			battery_color.z = j["battery_color"].at("b").get<float>();
-			battery_color.w = j["battery_color"].at("a").get<float>();
-		}
-
-		if (j.contains("screw_driver_color")) {
-			screw_driver_color.x = j["screw_driver_color"].at("r").get<float>();
-			screw_driver_color.y = j["screw_driver_color"].at("g").get<float>();
-			screw_driver_color.z = j["screw_driver_color"].at("b").get<float>();
-			screw_driver_color.w = j["screw_driver_color"].at("a").get<float>();
-		}
-
-		if (j.contains("container_color")) {
-			container_color.x = j["container_color"].at("r").get<float>();
-			container_color.y = j["container_color"].at("g").get<float>();
-			container_color.z = j["container_color"].at("b").get<float>();
-			container_color.w = j["container_color"].at("a").get<float>();
-		}
-
-		if (j.contains("gaz_bottle_color")) {
-			gaz_bottle_color.x = j["gaz_bottle_color"].at("r").get<float>();
-			gaz_bottle_color.y = j["gaz_bottle_color"].at("g").get<float>();
-			gaz_bottle_color.z = j["gaz_bottle_color"].at("b").get<float>();
-			gaz_bottle_color.w = j["gaz_bottle_color"].at("a").get<float>();
-		}
-
-		if (j.contains("vent_filter_color")) {
-			vent_filter_color.x = j["vent_filter_color"].at("r").get<float>();
-			vent_filter_color.y = j["vent_filter_color"].at("g").get<float>();
-			vent_filter_color.z = j["vent_filter_color"].at("b").get<float>();
-			vent_filter_color.w = j["vent_filter_color"].at("a").get<float>();
-		}
-
-		if (j.contains("rice_color")) {
-			rice_color.x = j["rice_color"].at("r").get<float>();
-			rice_color.y = j["rice_color"].at("g").get<float>();
-			rice_color.z = j["rice_color"].at("b").get<float>();
-			rice_color.w = j["rice_color"].at("a").get<float>();
-		}
-
-		if (j.contains("package_color")) {
-			package_color.x = j["package_color"].at("r").get<float>();
-			package_color.y = j["package_color"].at("g").get<float>();
-			package_color.z = j["package_color"].at("b").get<float>();
-			package_color.w = j["package_color"].at("a").get<float>();
-		}
-
-		if (j.contains("sample_color")) {
-			sample_color.x = j["sample_color"].at("r").get<float>();
-			sample_color.y = j["sample_color"].at("g").get<float>();
-			sample_color.z = j["sample_color"].at("b").get<float>();
-			sample_color.w = j["sample_color"].at("a").get<float>();
-		}
-
-		std::cerr << "Config loaded." << std::endl;
 	}
 }

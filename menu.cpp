@@ -93,7 +93,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.1 UNRELEASED");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.2 - UNRELEASED");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -1347,9 +1347,11 @@ void menu::draw()
 
 					ImGui::Checkbox("Target Closest", &target_closest);
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					ImGui::SliderFloat("FOV##AimbotFOV", &aimbot_fov, 0.0f, 500.0f, "Aimbot FOV: %.01f");
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					ImGui::SliderFloat("##smooth_factor", &smooth_factor, 0.01f, 1.0f, "Smooth Factor: %.02f");
+
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderFloat("FOV##AimbotFOV", &aimbot_fov, 0.0f, 500.0f, "Aimbot FOV: %.01f");
+					ImGui::ColorEdit4("FOV Color", (float*)&fov_color, ImGuiColorEditFlags_AlphaBar);
 				}
 
 				ImGui::EndChild();

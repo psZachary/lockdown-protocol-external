@@ -334,8 +334,9 @@ static void render_callback() {
 		int screen_height = GetSystemMetrics(SM_CYSCREEN);
 		ImVec2 screen_center = ImVec2(screen_width / 2.0f, screen_height / 2.0f);
 
-		// Semi-transparent circle
-		ImU32 circle_color = IM_COL32(255, 255, 255, 100); // White with transparency
+		// Convert ImVec4 to IM_COL32 for the circle
+		ImU32 circle_color = ImGui::ColorConvertFloat4ToU32(fov_color);
+
 		overlay->draw_circle(screen_center, aimbot_fov, circle_color, 64, 1.5f);
 	}
 	if (aimbot && GetAsyncKeyState(aimbot_hold_key) & 0x8000) {
@@ -349,57 +350,54 @@ static void render_callback() {
 		auto player_position = ConvertFVectorToVector3(player_position_fvector);
 
 		mec_pawn* best_target = nullptr;
-		float best_value = 999999.0f; // Use this to store the closest distance or the smallest screen offset
+		float best_value = 999999.0f; // Closest distance or smallest screen offset
 		vector3 best_target_screen_position;
 
-		// Get screen dimensions
+		// Screen dimensions and center
 		int screen_width = GetSystemMetrics(SM_CXSCREEN);
 		int screen_height = GetSystemMetrics(SM_CYSCREEN);
 		vector2 screen_center = { screen_width / 2.0f, screen_height / 2.0f };
 
-		// Find the best target based on the toggle
+		// Iterate through all cached players to find the best target
 		for (auto mec : player_cache) {
 			auto state = mec->player_state();
 			if (!state) continue;
 
 			auto role = mec->get_player_role();
 
-			// Filter based on target_filter
-			if (target_filter == "Employees" && role != 3) continue; // Skip if not an Employee
-			if (target_filter == "Dissidents" && role != 4) continue; // Skip if not a Dissident
+			// Apply target filter
+			if (target_filter == "Employees" && role != 3) continue;
+			if (target_filter == "Dissidents" && role != 4) continue;
 
 			if (mec != local_mec) {
-				// Check if the player is dead by comparing ghost distance
+				// Check if the player is dead
 				auto ghost_root = mec->get_ghost_root();
 				if (!ghost_root) continue;
 
-				auto ghost_position = ghost_root->get_relative_location(); // Ghost location
-				auto player_position = mec->get_root_component()->get_relative_location(); // Player position
+				auto ghost_position = ghost_root->get_relative_location();
+				auto current_position = mec->get_root_component()->get_relative_location();
 
-				double ghost_distance = CalculateDistanceMeters(player_position, ghost_position);
-
+				double ghost_distance = CalculateDistanceMeters(current_position, ghost_position);
 				if (ghost_distance > 2) continue; // Skip dead bodies
 
-				// Adjust the position based on the selected aim target
-				float aim_height_offset = 165.0f; // Default to head
-				if (aim_target == "Neck") aim_height_offset = 145.0f;
-				else if (aim_target == "Body") aim_height_offset = 125.0f;
-
-				vector3 target_position = player_position + vector3{ 0, 0, aim_height_offset }; // Adjust for selected target
+				// Adjust for selected aim target
+				float aim_height_offset = (aim_target == "Neck") ? 145.0f : (aim_target == "Body") ? 125.0f : 165.0f;
+				vector3 target_position = current_position + vector3{ 0, 0, aim_height_offset };
 
 				vector3 screen_position{};
 				bool visible = util::w2s(target_position, last_frame_cached.pov, screen_position);
 
 				if (visible) {
-					// Calculate distance from screen center
-					float screen_distance = sqrtf(powf(screen_position.x - screen_width / 2.0f, 2) +
-						powf(screen_position.y - screen_height / 2.0f, 2));
+					// Calculate distances
+					float distance_to_player = CalculateDistanceFloat(player_position, target_position);
+					float screen_distance = sqrtf(powf(screen_position.x - screen_center.x, 2) +
+						powf(screen_position.y - screen_center.y, 2));
 
-					if (screen_distance > aimbot_fov) continue; // Skip if outside FOV
+					// Skip targets outside FOV
+					if (screen_distance > aimbot_fov) continue;
 
 					if (target_closest) {
-						// Target closest to the player
-						float distance_to_player = CalculateDistanceFloat(player_position, target_position);
+						// Prioritize closest to the player
 						if (distance_to_player < best_value) {
 							best_value = distance_to_player;
 							best_target = mec;
@@ -407,14 +405,7 @@ static void render_callback() {
 						}
 					}
 					else {
-						// Target closest to the center of the screen
-
-						// Calculate distance from screen center
-						float screen_distance = sqrtf(powf(screen_position.x - screen_width / 2.0f, 2) +
-							powf(screen_position.y - screen_height / 2.0f, 2));
-
-						if (screen_distance > aimbot_fov) continue; // Skip if outside FOV
-
+						// Prioritize closest to the center of the screen
 						if (screen_distance < best_value) {
 							best_value = screen_distance;
 							best_target = mec;
@@ -425,7 +416,7 @@ static void render_callback() {
 			}
 		}
 
-		// If a best target was found and is visible, smooth the cursor movement
+		// Smoothly move the cursor to the best target
 		if (best_target) {
 			int target_x = static_cast<int>(best_target_screen_position.x);
 			int target_y = static_cast<int>(best_target_screen_position.y);
@@ -433,11 +424,11 @@ static void render_callback() {
 			int center_x = static_cast<int>(screen_center.x);
 			int center_y = static_cast<int>(screen_center.y);
 
-			// Calculate the relative movement offsets
+			// Calculate relative movement offsets
 			float delta_x = static_cast<float>(target_x - center_x);
 			float delta_y = static_cast<float>(target_y - center_y);
 
-			// Apply smoothing to cursor movement
+			// Apply smoothing
 			delta_x *= smooth_factor;
 			delta_y *= smooth_factor;
 
@@ -446,9 +437,9 @@ static void render_callback() {
 			input.type = INPUT_MOUSE;
 			input.mi.dx = static_cast<LONG>(delta_x);
 			input.mi.dy = static_cast<LONG>(delta_y);
-			input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_MOVE_NOCOALESCE; // Relative movement
+			input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_MOVE_NOCOALESCE;
 
-			// Send the input to the game
+			// Send the input
 			SendInput(1, &input, sizeof(INPUT));
 		}
 	}
@@ -816,7 +807,7 @@ static void render_callback() {
 										info.text = "Ammo: " + std::to_string(item_state.Value_8);
 										info.color = ImGui::ColorConvertFloat4ToU32(weapon_color);
 									}
-									else if (item_name == "KNIFE") {
+									else if (item_name == "KNIFE" || item_name == "C4" || item_name == "DETONATOR") {
 										info.text = "";
 										info.color = ImGui::ColorConvertFloat4ToU32(weapon_color);
 									}
