@@ -414,6 +414,7 @@ namespace protocol {
 			public:
 				OFFSET(0x178, jump_z_velocity, float);
 				OFFSET(0x170, gravity_scale, float);
+				OFFSET(0x1A4, movement_mode, int); //0:none | 1:walk | 2:navwalk | 3:fall | 4:swim | 5:fly | 6:custom
 			};
 
 			class a_actor : public u_object {
@@ -890,6 +891,7 @@ namespace protocol {
 				OFFSET(0x0DD0, friction, double);
 				OFFSET(0x970, body_armor_color, double);
 				OFFSET(0xC9B, request_fly, bool);
+				OFFSET(0x1050, lock_movements, bool);
 				OFFSET(0x6A8, move_input, FVector);
 				OFFSET(0x6A1, move_input_state, int);
 				OFFSET(0x6C0, net_move_input_state, int);

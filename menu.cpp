@@ -388,9 +388,13 @@ void menu::draw()
 				ImGui::SameLine();
 				ImHotkey("##GodmodeHotkey", &god_mode_hotkey);
 
+				ImGui::Checkbox("Fast HP Recovery", &fast_hp_recovery);
+
 				ImGui::Checkbox("Infinite Stamina", &infinite_stamina);
 				ImGui::SameLine();
 				ImHotkey("##InfstamHotkey", &infinite_stamina_hotkey);
+
+				ImGui::Checkbox("Fast Stam Recovery", &fast_stam_recovery);
 
 				if (ImGui::Button("Revive")) {
 					local_mec->set_alive(true);
@@ -416,6 +420,17 @@ void menu::draw()
 					if (ImGui::SliderFloat("##friction", &friction_float, 0.0f, 100000.0f, "Friction: %.1f")) {
 						friction = static_cast<double>(friction_float);
 					}
+				}
+
+				ImGui::Separator();
+
+				if (fast_hp_recovery) {
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderInt("##hp_covery_rate", &hp_recovery_rate, 10, 500, "HP Tick Rate: %d");
+				}
+				if (fast_stam_recovery) {
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderInt("##stam_covery_rate", &stam_recovery_rate, 10, 500, "Stam Tick Rate: %d");
 				}
 
 				ImGui::Separator();
@@ -1315,6 +1330,13 @@ void menu::draw()
 				ImGui::SameLine();
 				ImHotkey("##AimbotHoldKey", &aimbot_hold_key);
 				ImGui::SameLine(); MenuTooltip("Hold button for aim lock.");
+
+				ImGui::Separator();
+
+				ImGui::Checkbox("Anti Weapon Drop", &anti_weapon_drop);
+				if (aimbot) {
+					ImGui::ColorEdit4("FOV Color", (float*)&fov_color, ImGuiColorEditFlags_AlphaBar);
+				}
 			}
 			ImGui::EndChild();
 
@@ -1351,7 +1373,11 @@ void menu::draw()
 
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					ImGui::SliderFloat("FOV##AimbotFOV", &aimbot_fov, 0.0f, 500.0f, "Aimbot FOV: %.01f");
-					ImGui::ColorEdit4("FOV Color", (float*)&fov_color, ImGuiColorEditFlags_AlphaBar);
+
+					if (anti_weapon_drop) {
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						ImGui::SliderFloat("##drop_threshold", &drop_threshold, 1.0f, 100.0f, "Drop Threshold: %.1f");
+					}
 				}
 
 				ImGui::EndChild();

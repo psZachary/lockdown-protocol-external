@@ -30,6 +30,10 @@ namespace config {
 	inline double friction = 100000.00; // 0.0 is default value friction
 	inline bool infinite_stamina = false;
 	inline bool god_mode = false;
+	inline bool fast_hp_recovery = false;
+	inline bool fast_stam_recovery = false;
+	inline int hp_recovery_rate = 100;
+	inline int stam_recovery_rate = 100;
 	inline int player_fov = 103;
 
 	// Aimbot
@@ -40,6 +44,8 @@ namespace config {
 	inline float smooth_factor = 0.50;
 	inline float aimbot_fov = 120.0;
 	inline ImVec4 fov_color = ImVec4(1.0f, 1.0f, 1.0f, 0.392f);  // White transparent
+	inline bool anti_weapon_drop = true;
+	inline float drop_threshold = 25.0;
 
 	// Weapons
 	// Melee
@@ -198,6 +204,10 @@ namespace config {
 		j["friction"] = friction;
 		j["infinite_stamina"] = infinite_stamina;
 		j["god_mode"] = god_mode;
+		j["fast_hp_recovery"] = fast_hp_recovery;
+		j["fast_stam_recovery"] = fast_stam_recovery;
+		j["hp_recovery_rate"] = hp_recovery_rate;
+		j["stam_recovery_rate"] = stam_recovery_rate;
 		j["player_fov"] = player_fov;
 		j["fast_melee"] = fast_melee;
 		j["cast_time"] = cast_time;
@@ -222,6 +232,8 @@ namespace config {
 		j["smooth_factor"] = smooth_factor;
 		j["aim_target"] = aim_target;
 		j["aimbot_fov"] = aimbot_fov;
+		j["anti_weapon_drop"] = anti_weapon_drop;
+		j["drop_threshold"] = drop_threshold;
 
 		// Save ESP-related settings
 		j["esp_enabled"] = esp_enabled;
@@ -348,6 +360,10 @@ namespace config {
 			j.at("friction").get_to(friction);
 			j.at("infinite_stamina").get_to(infinite_stamina);
 			j.at("god_mode").get_to(god_mode);
+			j.at("fast_hp_recovery").get_to(fast_hp_recovery);
+			j.at("fast_stam_recovery").get_to(fast_stam_recovery);
+			j.at("hp_recovery_rate").get_to(hp_recovery_rate);
+			j.at("stam_recovery_rate").get_to(stam_recovery_rate);
 			j.at("player_fov").get_to(player_fov);
 			j.at("fast_melee").get_to(fast_melee);
 			j.at("cast_time").get_to(cast_time);
@@ -372,6 +388,8 @@ namespace config {
 			j.at("smooth_factor").get_to(smooth_factor);
 			j.at("aim_target").get_to(aim_target);
 			j.at("aimbot_fov").get_to(aimbot_fov);
+			j.at("anti_weapon_drop").get_to(anti_weapon_drop);
+			j.at("drop_threshold").get_to(drop_threshold);
 
 			// Load ESP-related settings
 			j.at("esp_enabled").get_to(esp_enabled);

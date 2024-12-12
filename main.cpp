@@ -463,8 +463,70 @@ static void render_callback() {
 		local_mec->set_stamina(1.);
 	}
 
+	if (anti_weapon_drop) {
+		// Retrieve the current stamina
+		double current_stamina = local_mec->get_stamina();
+
+		// Convert user-friendly threshold to actual stamina value
+		double adjusted_threshold = 100.0 - drop_threshold;
+
+		// If stamina is greater than or equal to the adjusted threshold and not already at 1.0
+		if (current_stamina >= adjusted_threshold && current_stamina != 1.0) {
+			local_mec->set_stamina(1.0);
+		}
+	}
+
 	if (god_mode) {
 		local_mec->set_health(10000);
+	}
+
+	// Track the last tick time for incremental healing
+	static auto last_hp_tick = std::chrono::steady_clock::now();
+	static auto last_stam_tick = std::chrono::steady_clock::now();
+
+	if (fast_hp_recovery || fast_stam_recovery) {
+		// Get the current time
+		auto current_time = std::chrono::steady_clock::now();
+
+		// Check for HP recovery
+		if (fast_hp_recovery) {
+			// Calculate the time difference in milliseconds
+			auto elapsed_hp_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_hp_tick).count();
+
+			// Check if the recovery rate has passed
+			if (elapsed_hp_time >= hp_recovery_rate) {
+				// Get current health
+				int current_health = local_mec->get_health();
+
+				// Increment health if it's less than 100
+				if (current_health < 100) {
+					local_mec->set_health(current_health + 1); // Increase health by 1
+				}
+
+				// Update the last HP tick time
+				last_hp_tick = current_time;
+			}
+		}
+
+		// Check for Stamina recovery
+		if (fast_stam_recovery) {
+			// Calculate the time difference in milliseconds
+			auto elapsed_stam_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_stam_tick).count();
+
+			// Check if the recovery rate has passed
+			if (elapsed_stam_time >= stam_recovery_rate) {
+				// Get current stamina
+				double current_stamina = local_mec->get_stamina();
+
+				// Decrement stamina if it's greater than 1.0
+				if (current_stamina > 1.0) {
+					local_mec->set_stamina(current_stamina - 1.0); // Decrease stamina by 1.0
+				}
+
+				// Update the last Stamina tick time
+				last_stam_tick = current_time;
+			}
+		}
 	}
 
 	if (player_fov != 103) {
