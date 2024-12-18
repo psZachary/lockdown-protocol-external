@@ -21,7 +21,9 @@ inline std::unordered_map<std::string, std::string> item_class_map = {
 	{"SMG", "DA_SMG"},
 	{"RIFLE", "DA_Rifle"},
 	{"DETONATOR", "DA_Detonator"},
-	{"C4", "DA_C4"}
+	{"C4", "DA_C4"},
+	{"FISH", "DA_Fish"},
+	{"PIZZUSHI", "DA_Pizzushi"}
 };
 
 std::vector<uintptr_t> find_objects(const std::string& name_find);
@@ -84,7 +86,6 @@ inline std::vector<uintptr_t> find_objects(const std::string& name_find) {
 }
 
 // Assign item data
-// Assign item data
 inline u_data_item* AssignToItemData(const std::string& target_name) {
 	// Convert target_name to uppercase
 	std::string upper_name = ToUpperCase(target_name);
@@ -107,6 +108,14 @@ inline u_data_item* AssignToItemData(const std::string& target_name) {
 
 	if (upper_name == "C4") {
 		found_objects = find_objects("C4");  // Explicit fallback for C4
+	}
+
+	if (upper_name == "FISH") {
+		found_objects = find_objects("Fish");  // Explicit fallback for fish
+	}
+
+	if (upper_name == "PIZZUSHI") {
+		found_objects = find_objects("Pizzushi");  // Explicit fallback for fish
 	}
 
 	if (found_objects.empty()) {
@@ -138,6 +147,18 @@ inline u_data_item* AssignToItemData(const std::string& target_name) {
 			selected_object = obj_addr;
 			break; // Stop searching once a valid match is found
 		}
+
+		if ((upper_name == "FISH" && is_a(obj_addr, "Data_Melee_C")) ||
+			(is_a(obj_addr, "Data_Gun_C") && upper_name != "FISH")) {
+			selected_object = obj_addr;
+			break; // Stop searching once a valid match is found
+		}
+
+		if ((upper_name == "PIZZUSHI" && is_a(obj_addr, "Data_Melee_C")) ||
+			(is_a(obj_addr, "Data_Gun_C") && upper_name != "PIZZUSHI")) {
+			selected_object = obj_addr;
+			break; // Stop searching once a valid match is found
+		}
 	}
 
 	if (selected_object != 0) {
@@ -147,39 +168,6 @@ inline u_data_item* AssignToItemData(const std::string& target_name) {
 	}
 
 	return nullptr;
-}
-
-using NetSpawnNewItemFunc = void(__fastcall*)(
-	FVector,         // Location
-	FVector,         // Mec Velocity
-	FVector,         // Drop Direction
-	u_data_item*,   // Data
-	FStr_ItemState   // Item State
-	);
-
-// Inline function to call NetSpawnNewItem
-inline void NetSpawnNewItem(
-	FVector location,
-	FVector mec_velocity,
-	FVector drop_direction,
-	u_data_item* data,
-	FStr_ItemState item_state
-) {
-	// Resolve the function pointer using the offset
-	auto spawn_item_func = reinterpret_cast<NetSpawnNewItemFunc>(mem::module_base + 0x1CF0950);
-
-	if (!spawn_item_func) {
-		std::cerr << "NetSpawnNewItem function not found!" << std::endl;
-		return;
-	}
-
-	if (!data) {
-		std::cerr << "Invalid UData_Item_C pointer. Aborting spawn." << std::endl;
-		return;
-	}
-
-	// Call the function
-	spawn_item_func(location, mec_velocity, drop_direction, data, item_state);
 }
 
 #endif

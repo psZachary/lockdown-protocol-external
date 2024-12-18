@@ -852,7 +852,7 @@ namespace protocol {
 			};
 			class mec_pawn : public a_pawn {
 			public:
-				GET_OFFSET(0x0C09, player_role, int);
+				OFFSET(0x0C09, player_role, int);
 				OFFSET(0x0C38, stamina, double);
 				OFFSET(0x570, aim_location, FVector);
 				OFFSET(0x5B8, net_aim_target, FVector);

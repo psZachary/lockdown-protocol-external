@@ -37,6 +37,7 @@ std::unordered_map<std::string, ItemProperties> itemData;
 static int current_target_index = 0;
 
 void InitializeItems() {
+	std::cout << "Initializing item data..." << std::endl;
 	itemData["KNIFE"] = ItemProperties(0.1, 0.4, 0.4, 130, 20);
 	itemData["PACKAGE"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["GAZ BOTTLE"] = ItemProperties(0.3, 1, -1, 180, 40);
@@ -306,6 +307,7 @@ static void render_callback() {
 	if (GetAsyncKeyState(aimbot_hotkey) & 1) {
 		aimbot = !aimbot;
 	}
+
 
 	auto hand_item = local_mec->get_hand_item();
 	auto melee_item_data = (u_data_melee*)hand_item;
@@ -682,6 +684,8 @@ static void render_callback() {
 
 			if (mec != local_mec) {
 				auto name = state->get_player_name_private().read_string();
+				//std::string name = "Женечка";
+
 				auto role = mec->get_player_role();
 
 				ImU32 color = (role == 4)

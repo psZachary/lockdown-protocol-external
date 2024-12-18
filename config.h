@@ -44,7 +44,7 @@ namespace config {
 	inline float smooth_factor = 0.50;
 	inline float aimbot_fov = 120.0;
 	inline ImVec4 fov_color = ImVec4(1.0f, 1.0f, 1.0f, 0.392f);  // White transparent
-	inline bool anti_weapon_drop = true;
+	inline bool anti_weapon_drop = false;
 	inline float drop_threshold = 25.0;
 
 	// Weapons
@@ -100,6 +100,7 @@ namespace config {
 	inline bool player_list_locked = false;
 	inline float player_list_x = 530;
 	inline float player_list_y = 20;
+	inline bool list_inv = false;
 
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
@@ -252,6 +253,7 @@ namespace config {
 		j["player_list_locked"] = player_list_locked;
 		j["player_list_x"] = player_list_x;
 		j["player_list_y"] = player_list_y;
+		j["list_inv"] = list_inv;
 		j["weapon_esp"] = weapon_esp;
 		j["weapon_case_esp"] = weapon_case_esp;
 		j["weapon_item_state"] = weapon_item_state;
@@ -408,6 +410,7 @@ namespace config {
 			j.at("player_list_locked").get_to(player_list_locked);
 			j.at("player_list_x").get_to(player_list_x);
 			j.at("player_list_y").get_to(player_list_y);
+			j.at("list_inv").get_to(list_inv);
 			j.at("weapon_esp").get_to(weapon_esp);
 			j.at("weapon_case_esp").get_to(weapon_case_esp);
 			j.at("weapon_item_state").get_to(weapon_item_state);
@@ -591,10 +594,10 @@ namespace config {
 			}
 
 			if (j.contains("fov_color")) {
-				sample_color.x = j["fov_color"].at("r").get<float>();
-				sample_color.y = j["fov_color"].at("g").get<float>();
-				sample_color.z = j["fov_color"].at("b").get<float>();
-				sample_color.w = j["fov_color"].at("a").get<float>();
+				fov_color.x = j["fov_color"].at("r").get<float>();
+				fov_color.y = j["fov_color"].at("g").get<float>();
+				fov_color.z = j["fov_color"].at("b").get<float>();
+				fov_color.w = j["fov_color"].at("a").get<float>();
 			}
 
 			std::cerr << "Config loaded." << std::endl;

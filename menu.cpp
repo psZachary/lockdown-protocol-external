@@ -420,9 +420,8 @@ void menu::draw()
 					if (ImGui::SliderFloat("##friction", &friction_float, 0.0f, 100000.0f, "Friction: %.1f")) {
 						friction = static_cast<double>(friction_float);
 					}
+					ImGui::Separator();
 				}
-
-				ImGui::Separator();
 
 				if (fast_hp_recovery) {
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -592,7 +591,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Ensure all special items are added to the list if missing
 						for (const auto& special_item : special_items) {
@@ -865,7 +864,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Ensure all special items are added to the list if missing
 						for (const auto& special_item : special_items) {
@@ -929,7 +928,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Ensure all special items are added to the list if missing
 						for (const auto& special_item : special_items) {
@@ -1202,7 +1201,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of items that require AssignToItemData
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Ensure all special items are added to the list if missing
 						for (const auto& special_item : special_items) {
@@ -1326,7 +1325,7 @@ void menu::draw()
 				ImGui::Checkbox("Aimbot", &aimbot);
 				ImGui::SameLine();
 				ImHotkey("##AimbotHotkey", &aimbot_hotkey);
-				ImGui::Text("Hold Key:");
+				ImGui::Text("Key:");
 				ImGui::SameLine();
 				ImHotkey("##AimbotHoldKey", &aimbot_hold_key);
 				ImGui::SameLine(); MenuTooltip("Hold button for aim lock.");
@@ -1499,15 +1498,17 @@ void menu::draw()
 		ImVec2 menu_position = ImGui::GetWindowPos(); // Get the current menu position (X, Y)
 
 		ImGui::Text("Location:");
-		ImGui::Separator();
+		ImGui::SameLine();
 		ImGui::Text("X: %.1f", menu_position.x); // Display the X coordinate
 		ImGui::SameLine();
 		ImGui::Text("Y: %.1f", menu_position.y); // Display the Y coordinate
+		ImGui::Separator();
 
 		if (ImGui::Checkbox("Lock List##LockList", &player_list_locked)) {
 			player_list_x = menu_position.x;
 			player_list_y = menu_position.y;
 		}
+		ImGui::SameLine();
 
 		// Render Dissidents
 		if (ImGui::CollapsingHeader("Dissidents", ImGuiTreeNodeFlags_DefaultOpen)) {

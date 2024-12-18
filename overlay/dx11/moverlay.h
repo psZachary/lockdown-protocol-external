@@ -53,13 +53,9 @@ public:
 
     void exit();
 
-
-
     inline void draw_text(const ImVec2& pos, ImU32 col, const char* text_begin, bool outline = false, float font_size = 0.0f, const char* end = 0) {
-        // Extract the alpha value from 'col'
-        ImU8 alpha = (col >> IM_COL32_A_SHIFT) & 0xFF;  // Extract the alpha channel (0-255)
-
-        // Create a black color with the same alpha as 'col'
+        // Extract the alpha value
+        ImU8 alpha = (col >> IM_COL32_A_SHIFT) & 0xFF;
         ImU32 black_with_alpha = IM_COL32(0, 0, 0, alpha);
 
         if (outline) {
@@ -69,8 +65,7 @@ public:
             draw_list->AddText(NULL, font_size, ImVec2(pos.x - 1, pos.y + 1), black_with_alpha, text_begin, end);
         }
 
-        // Draw the main text with the original color
-        draw_list->AddText(NULL, font_size, pos, col, text_begin);
+        draw_list->AddText(NULL, font_size, pos, col, text_begin, end);
     }
     inline void draw_rect(const ImVec2& pos1, const ImVec2& pos2, ImU32 col, bool outline = false, float rounding = 0.0f, int rounding_corners_flags = 0x0F, float thickness = 0.1f) {
         if (outline) {
