@@ -22,9 +22,12 @@
 namespace protocol {
 	namespace engine {
 
-		constexpr uintptr_t GWORLD = 110330272;
+		constexpr uintptr_t GWORLD = 110340816;
 		constexpr uintptr_t GNAMES = 108260480;
 		constexpr uintptr_t GOBJECTS = 108940512;
+		constexpr uintptr_t PROCESSEVENT = 30360624;
+		constexpr uintptr_t PROCESSEVENT_INDEX = 77;
+		constexpr uintptr_t APPENDSTRING = 28692960;
 
 		namespace sdk {
 			struct fuobjectitem
@@ -113,7 +116,8 @@ namespace protocol {
 			};
 
 			struct FStr_SkinSet {
-
+				int Color_8; // 0 through 10
+				INT32 Skin_18;
 			};
 
 			template <typename T>
@@ -570,7 +574,7 @@ namespace protocol {
 			};
 			class u_save_skin : public u_object {
 			public:
-
+				OFFSET(0x28, setting, FStr_SkinSet);
 			};
 			class u_data_item_throwtype : public u_object {
 			public:
@@ -917,7 +921,7 @@ namespace protocol {
 				OFFSET(0x11D8, skin_set, FStr_SkinSet);
 				OFFSET(0x408, body_collider, u_capsule_component*);
 				OFFSET(0x410, head_collider, u_sphere_component*);
-				OFFSET(0x370, ghost_root, u_scene_component*);
+				OFFSET(0x378, ghost_root, u_scene_component*);
 				OFFSET(0x810, audio_voice, a_voice_source*);
 				OFFSET(0x808, pc_ref, a_pc_c*);
 

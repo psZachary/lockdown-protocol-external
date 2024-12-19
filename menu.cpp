@@ -93,7 +93,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.2 - UNRELEASED");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.2");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -800,6 +800,43 @@ void menu::draw()
 
 						hand_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
 						local_mec->set_hand_state(hand_state);
+					}
+					else if (hand_item_name == "PIZZUSHI") {
+						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
+						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
+						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
+
+						// Default value for Value_8 (1st option for rice, fish, and container)
+						if (hand_state.Value_8 <= 0) {
+							hand_state.Value_8 = 111; // Default to "White Rice", "Salmon", "Green"
+							local_mec->set_hand_state(hand_state); // Ensure it's set in-game
+						}
+
+						int value = hand_state.Value_8;
+						int rice_value = value / 100;
+						int fish_value = (value / 10) % 10;
+						int container_value = value % 10;
+
+						// Initialize indices with default values (0 for the first option)
+						int rice_index = (rice_value > 0) ? rice_value - 1 : 0;
+						int fish_index = (fish_value > 0) ? fish_value - 1 : 0;
+						int container_index = (container_value > 0) ? container_value - 1 : 0;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##HandRice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
+							rice_value = rice_index + 1;
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##HandFish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
+							fish_value = fish_index + 1;
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##HandContainerColor", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
+							container_value = container_index + 1;
+						}
+
+						hand_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
+						local_mec->set_hand_state(hand_state);
 					} // Pizzushi
 					else if (hand_item_name == "CASSETTE") {
 						const char* cassette_titles[] = {
@@ -1101,6 +1138,43 @@ void menu::draw()
 						}
 					}
 					else if (bag_item_name == "NAME") { // Pizzushi
+						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
+						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
+						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
+
+						// Default value for Value_8 (1st option for rice, fish, and container)
+						if (bag_state.Value_8 <= 0) {
+							bag_state.Value_8 = 111; // Default to "White Rice", "Salmon", "Green"
+							local_mec->set_bag_state(bag_state); // Ensure it's set in-game
+						}
+
+						int value = bag_state.Value_8;
+						int rice_value = value / 100;
+						int fish_value = (value / 10) % 10;
+						int container_value = value % 10;
+
+						// Initialize indices with default values (0 for the first option)
+						int rice_index = (rice_value > 0) ? rice_value - 1 : 0;
+						int fish_index = (fish_value > 0) ? fish_value - 1 : 0;
+						int container_index = (container_value > 0) ? container_value - 1 : 0;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##Rice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
+							rice_value = rice_index + 1;
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##Fish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
+							fish_value = fish_index + 1;
+						}
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##Container Color", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
+							container_value = container_index + 1;
+						}
+
+						bag_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
+						local_mec->set_bag_state(bag_state);
+					}
+					else if (bag_item_name == "PIZZUSHI") { // Pizzushi
 						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
 						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
 						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
@@ -1508,7 +1582,6 @@ void menu::draw()
 			player_list_x = menu_position.x;
 			player_list_y = menu_position.y;
 		}
-		ImGui::SameLine();
 
 		// Render Dissidents
 		if (ImGui::CollapsingHeader("Dissidents", ImGuiTreeNodeFlags_DefaultOpen)) {
