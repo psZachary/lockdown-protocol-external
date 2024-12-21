@@ -1,4 +1,7 @@
 #include "../overlay.h"
+#include "../globals.h"
+
+using namespace globals;
 
 constexpr int menu_anim_time = 350;
 constexpr int breath_anim_time = 1000;
@@ -13,11 +16,6 @@ public:
     ID3D11DeviceContext* device_context;
     IDXGISwapChain* swap_chain;
     ID3D11RenderTargetView* render_target_view;
-
-    struct s_font {
-        ImFont* im_font;
-        FLOAT font_size;
-    };
 
     template <typename T>
     inline VOID safe_release(T*& p);
@@ -53,19 +51,51 @@ public:
 
     void exit();
 
-    inline void draw_text(const ImVec2& pos, ImU32 col, const char* text_begin, bool outline = false, float font_size = 0.0f, const char* end = 0) {
-        // Extract the alpha value
-        ImU8 alpha = (col >> IM_COL32_A_SHIFT) & 0xFF;
+    void load_font() {
+        ImGuiIO& io = ImGui::GetIO();
+        ImFontConfig cfg;
+        cfg.OversampleH = cfg.OversampleV = 1;
+        cfg.PixelSnapH = true;
+
+        static const ImWchar ranges[] =
+        {
+            0x0020, 0x00FF, // Basic Latin + Latin Supplement
+            0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
+            0x2DE0, 0x2DFF, // Cyrillic Extended-A
+            0xA640, 0xA69F, // Cyrillic Extended-B
+            0x1C80, 0x1C88, // Cyrillic Extended-C
+            0x3040, 0x30FF, // Hiragana
+            0x30A0, 0x30FF, // Katakana
+            0x4E00, 0x9FFF, // CJK Unified Ideographs (Most common Han characters)
+            0xAC00, 0xD7AF, // Hangul Syllables
+            0x0,
+        };
+
+        default_font.im_font = io.Fonts->AddFontFromFileTTF("fonts/MSYH.TTC", 14.0f, &cfg, ranges); // Load msyh
+       default_font.font_size = 14.0f; // Store the font size
+
+        if (default_font.im_font == nullptr) {
+            default_font.im_font = io.Fonts->AddFontDefault();
+            if (default_font.im_font == nullptr) {
+                std::cout << "Failed to load any font!" << std::endl;
+                return;
+            }
+            std::cout << "Failed to load msyh.ttc, using default font" << std::endl;
+        }
+    }
+
+    inline void draw_text(const ImVec2& pos, ImU32 col, const char* text_begin, bool outline = false, float font_size = 14.0f, const char* end = nullptr) {
+              ImU8 alpha = (col >> IM_COL32_A_SHIFT) & 0xFF;
         ImU32 black_with_alpha = IM_COL32(0, 0, 0, alpha);
 
         if (outline) {
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x + 1, pos.y + 1), black_with_alpha, text_begin, end);
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x - 1, pos.y - 1), black_with_alpha, text_begin, end);
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x + 1, pos.y - 1), black_with_alpha, text_begin, end);
-            draw_list->AddText(NULL, font_size, ImVec2(pos.x - 1, pos.y + 1), black_with_alpha, text_begin, end);
+            draw_list->AddText(default_font.im_font, font_size, ImVec2(pos.x + 1, pos.y + 1), black_with_alpha, text_begin, end);
+            draw_list->AddText(default_font.im_font, font_size, ImVec2(pos.x - 1, pos.y - 1), black_with_alpha, text_begin, end);
+            draw_list->AddText(default_font.im_font, font_size, ImVec2(pos.x + 1, pos.y - 1), black_with_alpha, text_begin, end);
+            draw_list->AddText(default_font.im_font, font_size, ImVec2(pos.x - 1, pos.y + 1), black_with_alpha, text_begin, end);
         }
 
-        draw_list->AddText(NULL, font_size, pos, col, text_begin, end);
+        draw_list->AddText(default_font.im_font, font_size, pos, col, text_begin, end);
     }
     inline void draw_rect(const ImVec2& pos1, const ImVec2& pos2, ImU32 col, bool outline = false, float rounding = 0.0f, int rounding_corners_flags = 0x0F, float thickness = 0.1f) {
         if (outline) {

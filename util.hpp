@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.hpp" 
 #include "game_math.hpp"
 #include <Windows.h>
 #include "mem.hpp"

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ufield.hpp"
+#include "macros.hpp"
 #include "game_math.hpp"
 #include <vector>
 #include <cwchar> 
@@ -8,16 +10,10 @@
 #include "mem.hpp"
 #include "fstr_color_link.hpp"
 
-#define pthis (uintptr_t)this
-// Does not add get_##name to the front and uses the direct name
-#define GET_OFFSET_NAMED(offset, name, type) type name() { return mem::rpm<type>((uintptr_t)this + offset); }
-// Does not add set_##name to the front and uses the direct name
-#define SET_OFFSET_NAMED(offset, name, type) void name(type value) { mem::wpm<type>((uintptr_t)this + offset, value); }
-// Adds get_##name to the front
-#define GET_OFFSET(offset, name, type) GET_OFFSET_NAMED(offset, get_##name, type)
-// Adds set_##name to the front
-#define SET_OFFSET(offset, name, type) SET_OFFSET_NAMED(offset, set_##name, type)
-#define OFFSET(offset, name, type) GET_OFFSET(offset, name, type) SET_OFFSET(offset, name, type)
+
+namespace util {
+	std::string get_name_from_fname(int key);
+}
 
 namespace protocol {
 	namespace engine {
@@ -61,33 +57,33 @@ namespace protocol {
 				wchar_t data[250];
 			};
 
-			class u_object
-			{
+			class u_struct : public u_field {
 			public:
-				virtual ~u_object() {} // Virtual destructor for polymorphism
+				// Pointer to the parent struct (if any)
+				GET_OFFSET(0x40, super_struct, u_struct*);
 
-				static u_object* get_object(uintptr_t process_base) {
-					return mem::rpm<u_object*>(process_base + GOBJECTS);
-				}
-				int fname_index() {
-					return mem::rpm<int>(pthis + 0x18); // name private FName
-				}
-				u_object* super() {
-					// 0x30
-					return mem::rpm<u_object*>(pthis + 0x40); // ??
-				}
-				u_object* class_private() {
-					return mem::rpm<u_object*>(pthis + 0x10); // class private UClass
-				}
-				u_object* outer() {
-					return mem::rpm<u_object*>(pthis + 0x20); // outer private UObject
-				}
-				uint64_t vtable() {
-					return mem::rpm<uint64_t>(pthis + 0x00); // vtable uint64_t
-				}
-				int internal_index() {
-					return mem::rpm<int>(pthis + 0xC); // index int
-				}
+				// Linked list of fields (properties, functions, etc.)
+				GET_OFFSET(0x48, children, u_field*);
+
+				// Child properties (additional fields specific to this struct)
+				GET_OFFSET(0x50, child_properties, void*); // Use `void*` or define `f_field` if available.
+
+				// Total size of the struct
+				GET_OFFSET(0x58, size, int32_t);
+
+				// Minimum alignment for the struct
+				GET_OFFSET(0x5C, min_alignment, int32_t);
+			};
+
+			class u_function : public u_struct {
+			public:
+				using FNativeFuncPtr = void (*)(void* Context, void* TheStack, void* Result);
+
+				// Function flags (e.g., blueprint callable, server, client, etc.)
+				GET_OFFSET(0xB0, function_flags, uint32_t);
+
+				// Native function execution pointer (if applicable)
+				GET_OFFSET(0xD8, exec_function, FNativeFuncPtr);
 			};
 
 			struct f_bone_node {
@@ -297,17 +293,23 @@ namespace protocol {
 			class fstring : public t_array<wchar_t> {
 			public:
 				std::string read_string() {
-					if (count <= 0 || count > 500)
-					{
+					if (count <= 0 || count > 500) {
 						return std::string();
 					}
 
+					// Read the wide character string from memory
 					auto test = mem::rpm<wchar_holder>(_data);
-					char ch[260];
-					char DefChar = ' ';
-					WideCharToMultiByte(CP_ACP, 0, test.data, -1, ch, 260, &DefChar, NULL);
-					std::string ss(ch);
-					return ss;
+
+					// Convert from wide string to UTF-8
+					int utf8_len = WideCharToMultiByte(CP_UTF8, 0, test.data, -1, nullptr, 0, nullptr, nullptr);
+					if (utf8_len <= 0) {
+						return std::string();
+					}
+
+					std::string utf8_string(utf8_len - 1, '\0'); // -1 to exclude the null terminator
+					WideCharToMultiByte(CP_UTF8, 0, test.data, -1, &utf8_string[0], utf8_len, nullptr, nullptr);
+
+					return utf8_string;
 				}
 			};
 
@@ -914,7 +916,7 @@ namespace protocol {
 				OFFSET(0x878, bag_item, u_data_item*);
 				OFFSET(0x1168, net_bag_item, u_data_item*);
 				OFFSET(0x1188, net_bag_item_new, FStr_Item);
-				OFFSET(0x3A0, camera, u_camera_component*);
+				OFFSET(0x3A8, camera, u_camera_component*);
 				OFFSET(0x388, absolute_rotation, u_scene_component*);
 				OFFSET(0x420, orientation, u_scene_component*);
 				OFFSET(0x1228, skin_save, u_save_skin*);

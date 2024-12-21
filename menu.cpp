@@ -10,15 +10,19 @@
 #include <unordered_set>
 #include "util.hpp"
 #include "game_function.hpp"
+#include "game_locations.h"
 
 using namespace globals;
 using namespace config;
 
 int selected_tab = 1;
+static int selected_location_index = 0;
+
 
 // Global containers for item names and item data mapping
 std::vector<std::string> item_names;
 std::unordered_map<std::string, u_data_item*> unique_item_data;
+static std::unordered_set<std::string> manually_added_items;
 
 void MenuTooltip(const char* text) {
 	ImGui::SameLine();
@@ -34,7 +38,7 @@ void MenuTooltip(const char* text) {
 }
 
 void PopulateUniqueItems() {
-	static std::unordered_set<std::string> seen_names;
+	static std::unordered_set<std::string> seen_names; // Tracks all items already added to the list
 
 	for (auto& item : world_item_cache) {
 		if (!item) continue;
@@ -42,10 +46,12 @@ void PopulateUniqueItems() {
 		auto item_data = item->get_data();
 		std::string name = item_data->get_name().read_string();
 
-		if (seen_names.find(name) != seen_names.end()) {
+		// Skip if the item is already manually added or seen
+		if (manually_added_items.find(name) != manually_added_items.end() || seen_names.find(name) != seen_names.end()) {
 			continue;
 		}
 
+		// Add the item to the unique list
 		seen_names.insert(name);
 		unique_item_data[name] = item_data;
 		item_names.push_back(name);
@@ -588,26 +594,27 @@ void menu::draw()
 							local_mec->set_hand_item(nullptr); // Clear the hand item
 						}
 
+						// Populate world items
 						PopulateUniqueItems();
 
-						// List of items that require AssignToItemData
+						// List of manually added items
 						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
-						// Ensure all special items are added to the list if missing
+						// Add special items if not already present
 						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								item_names.push_back(special_item); // Add missing special items
+							if (manually_added_items.find(special_item) == manually_added_items.end()) {
+								manually_added_items.insert(special_item);
+								item_names.push_back(special_item);
 							}
 						}
 
-						// Now list all the items
+						// Render dropdown items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Check if the item is one of the special ones
+								// Handle special items
 								if (special_items.find(item_name) != special_items.end()) {
-									// Use AssignToItemData for these items
 									auto item_data = AssignToItemData(item_name);
 									if (item_data) {
 										local_mec->set_hand_item(item_data);
@@ -617,15 +624,15 @@ void menu::draw()
 									}
 								}
 								else {
-									// Use unique_item_data for regular items
+									// Handle items from world cache
 									auto item_data = unique_item_data[item_name];
 									if (item_data) {
 										local_mec->set_hand_item(item_data);
 									}
 								}
 
-								// Reset combo box selection after changing the item
-								selected_item_name = "";
+								// Reset selection
+								selected_item_name.clear();
 							}
 						}
 
@@ -900,24 +907,24 @@ void menu::draw()
 
 						PopulateUniqueItems();
 
-						// List of items that require AssignToItemData
+						// List of manually added items
 						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
-						// Ensure all special items are added to the list if missing
+						// Add special items if not already present
 						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								item_names.push_back(special_item); // Add missing special items
+							if (manually_added_items.find(special_item) == manually_added_items.end()) {
+								manually_added_items.insert(special_item);
+								item_names.push_back(special_item);
 							}
 						}
 
-						// Now list all the items
+						// Render dropdown items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Check if the item is one of the special ones
+								// Handle special items
 								if (special_items.find(item_name) != special_items.end()) {
-									// Use AssignToItemData for these items
 									auto item_data = AssignToItemData(item_name);
 									if (item_data) {
 										local_mec->set_hand_item(item_data);
@@ -927,15 +934,15 @@ void menu::draw()
 									}
 								}
 								else {
-									// Use unique_item_data for regular items
+									// Handle items from world cache
 									auto item_data = unique_item_data[item_name];
 									if (item_data) {
 										local_mec->set_hand_item(item_data);
 									}
 								}
 
-								// Reset combo box selection after changing the item
-								selected_item_name = "";
+								// Reset selection
+								selected_item_name.clear();
 							}
 						}
 
@@ -964,24 +971,24 @@ void menu::draw()
 
 						PopulateUniqueItems();
 
-						// List of items that require AssignToItemData
+						// List of manually added items
 						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
-						// Ensure all special items are added to the list if missing
+						// Add special items if not already present
 						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								item_names.push_back(special_item); // Add missing special items
+							if (manually_added_items.find(special_item) == manually_added_items.end()) {
+								manually_added_items.insert(special_item);
+								item_names.push_back(special_item);
 							}
 						}
 
-						// Now list all the items
+						// Render dropdown items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Check if the item is one of the special ones
+								// Handle special items
 								if (special_items.find(item_name) != special_items.end()) {
-									// Use AssignToItemData for these items
 									auto item_data = AssignToItemData(item_name);
 									if (item_data) {
 										local_mec->set_bag_item(item_data);
@@ -991,15 +998,15 @@ void menu::draw()
 									}
 								}
 								else {
-									// Use unique_item_data for regular items
+									// Handle items from world cache
 									auto item_data = unique_item_data[item_name];
 									if (item_data) {
 										local_mec->set_bag_item(item_data);
 									}
 								}
 
-								// Reset combo box selection after changing the item
-								selected_item_name = "";
+								// Reset selection
+								selected_item_name.clear();
 							}
 						}
 
@@ -1274,24 +1281,24 @@ void menu::draw()
 
 						PopulateUniqueItems();
 
-						// List of items that require AssignToItemData
+						// List of manually added items
 						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
-						// Ensure all special items are added to the list if missing
+						// Add special items if not already present
 						for (const auto& special_item : special_items) {
-							if (std::find(item_names.begin(), item_names.end(), special_item) == item_names.end()) {
-								item_names.push_back(special_item); // Add missing special items
+							if (manually_added_items.find(special_item) == manually_added_items.end()) {
+								manually_added_items.insert(special_item);
+								item_names.push_back(special_item);
 							}
 						}
 
-						// Now list all the items
+						// Render dropdown items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Check if the item is one of the special ones
+								// Handle special items
 								if (special_items.find(item_name) != special_items.end()) {
-									// Use AssignToItemData for these items
 									auto item_data = AssignToItemData(item_name);
 									if (item_data) {
 										local_mec->set_bag_item(item_data);
@@ -1301,15 +1308,15 @@ void menu::draw()
 									}
 								}
 								else {
-									// Use unique_item_data for regular items
+									// Handle items from world cache
 									auto item_data = unique_item_data[item_name];
 									if (item_data) {
 										local_mec->set_bag_item(item_data);
 									}
 								}
 
-								// Reset combo box selection after changing the item
-								selected_item_name = "";
+								// Reset selection
+								selected_item_name.clear();
 							}
 						}
 
@@ -1409,6 +1416,20 @@ void menu::draw()
 				ImGui::Checkbox("Anti Weapon Drop", &anti_weapon_drop);
 				if (aimbot) {
 					ImGui::ColorEdit4("FOV Color", (float*)&fov_color, ImGuiColorEditFlags_AlphaBar);
+				}
+
+				// Render the location dropdown
+				if (ImGui::BeginCombo("Teleport Locations", orderedLocationNames[selected_location_index].c_str())) {
+					for (int i = 0; i < orderedLocationNames.size(); ++i) {
+						bool is_selected = (selected_location_index == i);
+						if (ImGui::Selectable(orderedLocationNames[i].c_str(), is_selected)) {
+							selected_location_index = i; // Update selected location
+						}
+						if (is_selected) {
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+					ImGui::EndCombo();
 				}
 			}
 			ImGui::EndChild();
@@ -1583,6 +1604,9 @@ void menu::draw()
 			player_list_y = menu_position.y;
 		}
 
+		ImGui::PushFont(globals::default_font.im_font);
+		
+
 		// Render Dissidents
 		if (ImGui::CollapsingHeader("Dissidents", ImGuiTreeNodeFlags_DefaultOpen)) {
 			for (const auto& [display_name, color] : dissidents) {
@@ -1597,6 +1621,7 @@ void menu::draw()
 			}
 		}
 
+		ImGui::PopFont();
 		ImGui::PopStyleColor();
 		ImGui::End();
 	}

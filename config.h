@@ -75,6 +75,8 @@ namespace config {
 	inline bool can_inventory = false;
 	inline bool lock_hand_item = false;
 	inline bool lock_bag_item = false;
+	inline bool item_puke = false;
+
 	// Inventory Lock Variables
 	inline u_data_item* locked_hand_item = nullptr; // Store the locked hand item
 	inline FStr_ItemState locked_hand_state;        // Store the locked item state

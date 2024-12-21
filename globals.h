@@ -8,6 +8,9 @@ namespace globals {
 	using namespace protocol::engine::sdk;
 	using namespace protocol::game::sdk;
 
+	using tProcessEvent = void(*)(u_object*, u_function*, void*);
+	inline tProcessEvent process_event = nullptr;
+
 	inline u_world* gworld = 0;
 	inline a_game_state_base* game_state = 0;
 	inline u_game_instance* owning_instance = 0;
@@ -26,4 +29,11 @@ namespace globals {
 	inline std::vector < task_data* > task_data_cache{};
 	inline std::vector < task_scanner* > task_scanner_cache{};
 	inline std::vector < a_weapon_case_code_c* > weapon_case_cache{};
+
+	struct s_font {
+		ImFont* im_font = nullptr;
+		float font_size = 14.0f;
+	};
+
+	inline s_font default_font;
 }

@@ -143,14 +143,17 @@
     <ClCompile Include="radar.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common.hpp" />
     <ClInclude Include="config.h" />
     <ClInclude Include="data_cache.h" />
     <ClInclude Include="fstr_color_link.hpp" />
     <ClInclude Include="game_function.hpp" />
+    <ClInclude Include="game_locations.h" />
     <ClInclude Include="game_structures.hpp" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="ItemProperties.h" />
     <ClInclude Include="keybinds.hpp" />
+    <ClInclude Include="macros.hpp" />
     <ClInclude Include="mem.hpp" />
     <ClInclude Include="game_math.hpp" />
     <ClInclude Include="menu.h" />
@@ -168,6 +171,8 @@
     <ClInclude Include="overlay\imgui\VKDefs.hh" />
     <ClInclude Include="overlay\overlay.h" />
     <ClInclude Include="radar.h" />
+    <ClInclude Include="ufield.hpp" />
+    <ClInclude Include="uobject.hpp" />
     <ClInclude Include="util.hpp" />
   </ItemGroup>
   <ItemGroup>
