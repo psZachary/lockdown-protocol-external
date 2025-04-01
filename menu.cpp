@@ -11,6 +11,7 @@
 #include "util.hpp"
 #include "game_function.hpp"
 #include "game_locations.h"
+#include <thread>
 
 using namespace globals;
 using namespace config;
@@ -23,6 +24,32 @@ static int selected_location_index = 0;
 std::vector<std::string> item_names;
 std::unordered_map<std::string, u_data_item*> unique_item_data;
 static std::unordered_set<std::string> manually_added_items;
+
+void SaveClasses() {
+	// Open file for writing
+	std::ofstream file("classnames.txt", std::ios::out | std::ios::app); // Append mode to preserve data
+	if (!file.is_open()) {
+		std::cerr << "Failed to open file for writing class names." << std::endl;
+		return;
+	}
+
+	for (auto level : gworld->get_levels().list()) {
+		if (!level) continue;
+		auto actors = level->get_actors();
+		for (int i = 0; i < actors.count; i++) {
+			auto actor = actors.at(i);
+			if (!actor) continue;
+
+			auto class_name = util::get_name_from_fname(actor->class_private()->fname_index());
+
+			// Write class name to the file
+			file << "Class Name: " << class_name << std::endl;
+		}
+	}
+
+	// Close the file when done
+	file.close();
+}
 
 void MenuTooltip(const char* text) {
 	ImGui::SameLine();
@@ -99,7 +126,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.2");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.4");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -126,6 +153,12 @@ void menu::draw()
 		if (ImGui::Button("Reload")) {
 			LoadConfig();
 		}
+		/*
+		if (ImGui::Button("Save Classes")) {
+			std::thread save_classes_thread(SaveClasses);
+			save_classes_thread.detach();
+		}
+		*/
 		ImGui::EndChild();
 
 		ImGui::SameLine();
@@ -1416,20 +1449,6 @@ void menu::draw()
 				ImGui::Checkbox("Anti Weapon Drop", &anti_weapon_drop);
 				if (aimbot) {
 					ImGui::ColorEdit4("FOV Color", (float*)&fov_color, ImGuiColorEditFlags_AlphaBar);
-				}
-
-				// Render the location dropdown
-				if (ImGui::BeginCombo("Teleport Locations", orderedLocationNames[selected_location_index].c_str())) {
-					for (int i = 0; i < orderedLocationNames.size(); ++i) {
-						bool is_selected = (selected_location_index == i);
-						if (ImGui::Selectable(orderedLocationNames[i].c_str(), is_selected)) {
-							selected_location_index = i; // Update selected location
-						}
-						if (is_selected) {
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-					ImGui::EndCombo();
 				}
 			}
 			ImGui::EndChild();

@@ -18,12 +18,12 @@ namespace util {
 namespace protocol {
 	namespace engine {
 
-		constexpr uintptr_t GWORLD = 110340816;
-		constexpr uintptr_t GNAMES = 108260480;
-		constexpr uintptr_t GOBJECTS = 108940512;
-		constexpr uintptr_t PROCESSEVENT = 30360624;
-		constexpr uintptr_t PROCESSEVENT_INDEX = 77;
-		constexpr uintptr_t APPENDSTRING = 28692960;
+		constexpr uintptr_t GWORLD = 142770416;
+		constexpr uintptr_t GNAMES = 140280000;
+		constexpr uintptr_t GOBJECTS = 141211696;
+		constexpr uintptr_t PROCESSEVENT = 21281968;
+		constexpr uintptr_t PROCESSEVENT_INDEX = 79;
+		constexpr uintptr_t APPENDSTRING = 19027936;
 
 		namespace sdk {
 			struct fuobjectitem
@@ -425,56 +425,56 @@ namespace protocol {
 
 			class a_actor : public u_object {
 			public:
-				GET_OFFSET(0x140, owner, a_actor*);
-				GET_OFFSET(0x198, root_component, u_scene_component*);
-				OFFSET(0x0064, custom_time_dilation, float);
+				GET_OFFSET(0x0158, owner, a_actor*);
+				GET_OFFSET(0x01B8, root_component, u_scene_component*);
+				OFFSET(0x0068, custom_time_dilation, float);
 			};
 
 			class a_pawn : public a_actor {
 			public:
 				class a_player_state* player_state() {
-					return mem::rpm<a_player_state*>(pthis + 0x02B0);
+					return mem::rpm<a_player_state*>(pthis + 0x02C8);
 				}
 			};
 
 			class a_player_camera_manager {
 			public:
-				OFFSET(0x22B0, cached_frame_private, f_camera_cache);
-				OFFSET(0x2A80, last_cached_frame_private, f_camera_cache);
-				OFFSET(0x12C0, view_target, ft_view_target);
-				OFFSET(0x3314, view_pitch_min, float);
-				OFFSET(0x3318, view_pitch_max, float);
-				OFFSET(0x331C, view_yaw_min, float);
-				OFFSET(0x3320, view_yaw_max, float);
-				OFFSET(0x3324, view_roll_min, float);
-				OFFSET(0x3328, view_roll_max, float);
+				OFFSET(0x1410, cached_frame_private, f_camera_cache);
+				OFFSET(0x1C50, last_cached_frame_private, f_camera_cache);
+				OFFSET(0x0340, view_target, ft_view_target);
+				OFFSET(0x256C, view_pitch_min, float);
+				OFFSET(0x2570, view_pitch_max, float);
+				OFFSET(0x2574, view_yaw_min, float);
+				OFFSET(0x2578, view_yaw_max, float);
+				OFFSET(0x257C, view_roll_min, float);
+				OFFSET(0x2580, view_roll_max, float);
 			};
 
 			class a_player_state : public a_actor {
 			public:
-				GET_OFFSET(0x308, pawn_private, a_pawn*);
-				GET_OFFSET(0x0388, player_name_private, fstring);
-				GET_OFFSET(0x02B0, saved_network_address, fstring);
+				GET_OFFSET(0x0320, pawn_private, a_pawn*);
+				GET_OFFSET(0x0340, player_name_private, fstring);
+				GET_OFFSET(0x02F8, saved_network_address, fstring);
 			};
 
 			class a_game_state_base {
 			public:
 				t_array<a_player_state*> player_array() {
-					return mem::rpm<t_array<a_player_state*>>(pthis + 0x02A8);
+					return mem::rpm<t_array<a_player_state*>>(pthis + 0x02C0);
 				}
 			};
 
 			class a_controller : public a_actor {
 			public:
-				OFFSET(0x0308, control_rotation, vector3);
+				OFFSET(0x0320, control_rotation, vector3);
 			};
 
 			class a_player_controller : public a_controller {
 			public:
-				GET_OFFSET(0x0348, camera_manager, a_player_camera_manager*);
-				GET_OFFSET(0x360, target_view_rotation, FRotator);
-				GET_OFFSET(0x390, smooth_target_view_rotation_speed, float);
-				GET_OFFSET(0x0338, pawn, a_pawn*);
+				GET_OFFSET(0x0360, camera_manager, a_player_camera_manager*);
+				GET_OFFSET(0x0378, target_view_rotation, FRotator);
+				GET_OFFSET(0x03A8, smooth_target_view_rotation_speed, float);
+				GET_OFFSET(0x0350, pawn, a_pawn*);
 			};
 
 			class u_player : public u_object {
@@ -497,7 +497,7 @@ namespace protocol {
 
 			class u_level {
 			public:
-				GET_OFFSET(0x98, actors, t_array<a_actor*>);
+				GET_OFFSET(0x00A0, actors, t_array<a_actor*>);
 			};
 
 			class u_world {
@@ -506,11 +506,10 @@ namespace protocol {
 					return mem::rpm<u_world*>(process_base + GWORLD);
 				}
 				GET_OFFSET(0x30, persistent_level, u_level*);
-				GET_OFFSET(0x0158, game_state, a_game_state_base*);
-				GET_OFFSET(0x01B8, owning_game_instance, u_game_instance*);
-				GET_OFFSET(0x0170, levels, t_array<u_level*>);
+				GET_OFFSET(0x0160, game_state, a_game_state_base*);
+				GET_OFFSET(0x01D8, owning_game_instance, u_game_instance*);
+				GET_OFFSET(0x0178, levels, t_array<u_level*>);
 			};
-
 
 			class u_skeletal_mesh_component : public u_scene_component {
 			public:
@@ -561,9 +560,9 @@ namespace protocol {
 		namespace sdk {
 			class u_camera_component : public u_object {
 			public:
-				OFFSET(0x2A0, field_of_view, float);
-				OFFSET(0x2A4, ortho_width, float);
-				OFFSET(0x2B0, aspect_ratio, float);
+				OFFSET(0x0230, field_of_view, float);
+				OFFSET(0x023C, ortho_width, float);
+				OFFSET(0x0254, aspect_ratio, float);
 			};
 			class u_static_mesh : public u_object {
 			public:
@@ -662,25 +661,23 @@ namespace protocol {
 				GET_OFFSET(0x3B0, pattern_spread, uintptr_t);
 				GET_OFFSET(0x3B8, pattern_effects, uintptr_t);
 			};
-
 			class world_item : public a_actor {
 			public:
-				GET_OFFSET(0x3B8, data, u_data_item*);
-				GET_OFFSET(0x448, distance, float);
-				OFFSET(0x320, location, FVector);
-				OFFSET(0x3C8, item_state, FStr_ItemState);
+				GET_OFFSET(0x03D8, data, u_data_item*);
+				GET_OFFSET(0x0468, distance, float);
+				OFFSET(0x0338, location, FVector);
+				OFFSET(0x03E8, item_state, FStr_ItemState);
 			};
-
 			class a_itemslot_c : public a_actor {
 			public:
-				OFFSET(0x2D8, item_state, FStr_ItemState);
+				OFFSET(0x02F0, item_state, FStr_ItemState);
 			};
 			class a_weapon_case_box_c : public a_actor {
 			public:
-				OFFSET(0x02E0, case_open, bool);
-				OFFSET(0x02F0, item_slot, a_itemslot_c*);
-				OFFSET(0x02E8, selected_weapon_qsdsf, u_data_gun*);
-				OFFSET(0x02F8, selected_weapon, int);
+				OFFSET(0x02F8, case_open, bool);
+				OFFSET(0x0308, item_slot, a_itemslot_c*);
+				OFFSET(0x0300, selected_weapon_qsdsf, u_data_gun*);
+				OFFSET(0x0310, selected_weapon, int);
 			};
 			class uw_weaponcase_ui_c : public u_object {
 			public:
@@ -691,75 +688,75 @@ namespace protocol {
 			};
 			class a_weapon_case_code_c : public a_actor {
 			public:
-				OFFSET(0x02B8, default_scene_root, u_scene_component*);
-				OFFSET(0x0318, target_values, t_array<UINT8>);
-				OFFSET(0x02D8, process_values, t_array<UINT8>);
-				OFFSET(0x0328, process_index, INT32);
-				OFFSET(0x0348, result_values, t_array<UINT8>);
-				OFFSET(0x0370, box_to_open, a_weapon_case_box_c*);
-				OFFSET(0x0340, step, FStr_WeaponCase_Step);
-				OFFSET(0x02E8, result, FStr_WeaponCase_Result);
-				OFFSET(0x2C0, screen, uw_weaponcase_ui_c*);
-				OFFSET(0x380, open_delay, INT32);
-				OFFSET(0x388, opening_timer, FTimerHandle);
+				OFFSET(0x02D8, default_scene_root, u_scene_component*);
+				OFFSET(0x0330, target_values, t_array<UINT8>);
+				OFFSET(0x02F0, process_values, t_array<UINT8>);
+				OFFSET(0x0340, process_index, INT32);
+				OFFSET(0x0360, result_values, t_array<UINT8>);
+				OFFSET(0x0388, box_to_open, a_weapon_case_box_c*);
+				OFFSET(0x0358, step, FStr_WeaponCase_Step);
+				OFFSET(0x0300, result, FStr_WeaponCase_Result);
+				OFFSET(0x02E0, screen, uw_weaponcase_ui_c*);
+				OFFSET(0x0398, open_delay, INT32);
+				OFFSET(0x03A0, opening_timer, FTimerHandle);
 			};
 			class a_vent_c : public a_actor {
 			public:
-				GET_OFFSET(0x348, task_vent, bool);
-				GET_OFFSET(0x308, filter, a_itemslot_c*);
-				GET_OFFSET(0x2E8, root, u_scene_component*);
-				OFFSET(0x338, lock_state, int);
-				OFFSET(0x35D, sector, int);
-				OFFSET(0x33C, clean_request, int32_t);
-				OFFSET(0x330, energy, int32_t);
+				GET_OFFSET(0x0360, task_vent, bool);
+				GET_OFFSET(0x0320, filter, a_itemslot_c*);
+				GET_OFFSET(0x0300, root, u_scene_component*);
+				OFFSET(0x0350, lock_state, int);
+				OFFSET(0x0375, sector, int);
+				OFFSET(0x0354, clean_request, int32_t);
+				OFFSET(0x0318, energy, int32_t);
 			};
 			class task_vents : public a_actor {
 			public:
-				GET_OFFSET(0x378, task_vents, t_array<a_vent_c*>);
+				GET_OFFSET(0x0390, task_vents, t_array<a_vent_c*>);
 			};
 			class a_bottle_slot_c : public a_actor {
 			public:
-				GET_OFFSET(0x304, request_level, int32_t);
-				GET_OFFSET(0x2DC, level, int32_t);
-				GET_OFFSET(0x2D0, root, u_scene_component*);
+				GET_OFFSET(0x031C, request_level, int32_t);
+				GET_OFFSET(0x02F4, level, int32_t);
+				GET_OFFSET(0x02D0, root, u_scene_component*);
 			};
 			class a_machine_pannel_c : public a_actor {
 			public:
-				GET_OFFSET(0x318, bottles, t_array<a_bottle_slot_c*>);
+				GET_OFFSET(0x0330, bottles, t_array<a_bottle_slot_c*>);
 			};
 			class task_machines : public a_actor {
 			public:
-				GET_OFFSET(0x380, machines, t_array<a_machine_pannel_c*>);
+				GET_OFFSET(0x0398, machines, t_array<a_machine_pannel_c*>);
 			};
 			class a_scanner_machine_c : public a_actor {
 			public:
-				GET_OFFSET(0x2A0, mecs, t_array<a_pawn*>);
-				GET_OFFSET(0x2B8, scan_rotation, FRotator);
-				GET_OFFSET(0x298, default_scene_root, u_scene_component*);
+				GET_OFFSET(0x02B8, mecs, t_array<a_pawn*>);
+				GET_OFFSET(0x02D0, scan_rotation, FRotator);
+				GET_OFFSET(0x02B0, default_scene_root, u_scene_component*);
 			};
 			class uw_scanner_targetdot_c : public u_object {
 			public:
-				GET_OFFSET(0x2D0, location, vector2);
-				GET_OFFSET(0x2C8, radius, double);
-				GET_OFFSET(0x2A8, rotation, FRotator);
+				GET_OFFSET(0x0320, location, vector2);
+				GET_OFFSET(0x0318, radius, double);
+				GET_OFFSET(0x02F8, rotation, FRotator);
 			};
 			class a_scanner_screen_c : public a_actor {
 			public:
-				GET_OFFSET(0x3A8, targets, t_array<FStr_ScannerDot>);
-				GET_OFFSET(0x3C8, nearest_dot, double);
-				GET_OFFSET(0x320, timeline_value, float);
-				GET_OFFSET(0x324, timeline_direction, int); // 0 forward | 1 backward
-				GET_OFFSET(0x33C, process, int32_t);
-				GET_OFFSET(0x390, main_rotation, FRotator);
-				GET_OFFSET(0x3B8, h_angles, t_array<int32_t>);
-				GET_OFFSET(0x3F8, targets_process, t_array<int32_t>);
-				GET_OFFSET(0x408, old_targets_process, t_array<int32_t>);
-				GET_OFFSET(0x3D8, main_rotation_target, FRotator);
+				GET_OFFSET(0x03C0, targets, t_array<FStr_ScannerDot>);
+				GET_OFFSET(0x03E0, nearest_dot, double);
+				GET_OFFSET(0x0338, timeline_value, float);
+				GET_OFFSET(0x033C, timeline_direction, int); // 0 forward | 1 backward
+				GET_OFFSET(0x0354, process, int32_t);
+				GET_OFFSET(0x03A8, main_rotation, FRotator);
+				GET_OFFSET(0x03D0, h_angles, t_array<int32_t>);
+				GET_OFFSET(0x0410, targets_process, t_array<int32_t>);
+				GET_OFFSET(0x0420, old_targets_process, t_array<int32_t>);
+				GET_OFFSET(0x03F0, main_rotation_target, FRotator);
 			};
 			class task_scanner : public a_actor {
 			public:
-				GET_OFFSET(0x360, scanner_ref, a_scanner_machine_c*);
-				GET_OFFSET(0x368, screen_ref, a_scanner_screen_c*);
+				GET_OFFSET(0x0378, scanner_ref, a_scanner_machine_c*);
+				GET_OFFSET(0x0380, screen_ref, a_scanner_screen_c*);
 			};
 			class u_text_block : public u_object {
 			public:
@@ -771,67 +768,66 @@ namespace protocol {
 			};
 			class a_data_pc_c : public a_actor {
 			public:
-				GET_OFFSET(0x300, root, u_scene_component*);
-				GET_OFFSET(0x2C0, map_position, u_scene_component*);
-				GET_OFFSET(0x310, state, int);
-				GET_OFFSET(0x314, process, int32_t);
-				GET_OFFSET(0x330, room, int32_t);
-				GET_OFFSET(0x334, index_message, int32_t);
-				GET_OFFSET(0x348, other_pc, a_data_pc_c*);
-				GET_OFFSET(0x308, w_screen, uw_datapc_ui_c*);
+				GET_OFFSET(0x0318, root, u_scene_component*);
+				GET_OFFSET(0x02D8, map_position, u_scene_component*);
+				GET_OFFSET(0x0328, state, int);
+				GET_OFFSET(0x032C, process, int32_t);
+				GET_OFFSET(0x0348, room, int32_t);
+				GET_OFFSET(0x034C, index_message, int32_t);
+				GET_OFFSET(0x0360, other_pc, a_data_pc_c*);
+				GET_OFFSET(0x0320, w_screen, uw_datapc_ui_c*);
 			};
 			class task_data : public a_actor {
 			public:
-				GET_OFFSET(0x358, source_pc, t_array<a_data_pc_c*>);
-				GET_OFFSET(0x368, target_pc, t_array<a_data_pc_c*>);
-				GET_OFFSET(0x378, task_source_pc, t_array<a_data_pc_c*>);
-				GET_OFFSET(0x388, task_target_pc, t_array<a_data_pc_c*>);
+				GET_OFFSET(0x0370, source_pc, t_array<a_data_pc_c*>);
+				GET_OFFSET(0x0380, target_pc, t_array<a_data_pc_c*>);
+				GET_OFFSET(0x0390, task_source_pc, t_array<a_data_pc_c*>);
+				GET_OFFSET(0x03A0, task_target_pc, t_array<a_data_pc_c*>);
 			};
 			class a_alimbox_c : public a_actor {
 			public:
-				GET_OFFSET(0x300, root, u_scene_component*);
-				GET_OFFSET(0x344, battery_value, int32_t);
-				GET_OFFSET(0x380, batteries_count, int32_t);
-				GET_OFFSET(0x338, in_color, int32_t);
-				GET_OFFSET(0x33C, out_color, int32_t);
-				GET_OFFSET(0x3B8, task_value, int32_t);
-				GET_OFFSET(0x408, finished, bool);
-				GET_OFFSET(0x350, alimented, bool);
+				GET_OFFSET(0x0318, root, u_scene_component*);
+				GET_OFFSET(0x035C, battery_value, int32_t);
+				GET_OFFSET(0x0398, batteries_count, int32_t);
+				GET_OFFSET(0x0350, in_color, int32_t);
+				GET_OFFSET(0x0354, out_color, int32_t);
+				GET_OFFSET(0x03D0, task_value, int32_t);
+				GET_OFFSET(0x0420, finished, bool);
+				GET_OFFSET(0x0368, alimented, bool);
 			};
 			class task_alimentations : public a_actor {
 			public:
-				GET_OFFSET(0x3A8, task_alims, t_array<a_alimbox_c*>);
+				GET_OFFSET(0x03C0, task_alims, t_array<a_alimbox_c*>);
 			};
-
 			class a_deliverycase_c : public a_actor {
 			public:
-				GET_OFFSET(0x2D8, root, u_scene_component*);
-				GET_OFFSET(0x330, good_package, uint8_t);
+				GET_OFFSET(0x02F0, root, u_scene_component*);
+				GET_OFFSET(0x0348, good_package, uint8_t);
 			};
 			class task_deliveries : public a_actor {
 			public:
-				GET_OFFSET(0x368, task_cases, t_array<a_deliverycase_c*>);
+				GET_OFFSET(0x0380, task_cases, t_array<a_deliverycase_c*>);
 			};
 			class a_pizzushi_table_c : public a_actor {
 			public:
-				GET_OFFSET(0x300, root, u_scene_component*);
-				GET_OFFSET(0x30C, rice_type, int32_t);
-				GET_OFFSET(0x310, fish_type, int32_t);
-				GET_OFFSET(0x314, topping_type, int32_t);
-				GET_OFFSET(0x338, finished, bool);
-				GET_OFFSET(0x320, request_state, int32_t);
+				GET_OFFSET(0x0318, root, u_scene_component*);
+				GET_OFFSET(0x0324, rice_type, int32_t);
+				GET_OFFSET(0x0328, fish_type, int32_t);
+				GET_OFFSET(0x032C, topping_type, int32_t);
+				GET_OFFSET(0x0350, finished, bool);
+				GET_OFFSET(0x0338, request_state, int32_t);
 			};
 			class task_pizzushis : public a_actor {
 			public:
-				GET_OFFSET(0x370, task_tables, t_array<a_pizzushi_table_c*>);
+				GET_OFFSET(0x0388, task_tables, t_array<a_pizzushi_table_c*>);
 			};
 			class a_gm_c : public u_object {
 			public:
-				GET_OFFSET(0x458, player_colors_app, t_array<FStr_ColorLink>);
+				GET_OFFSET(0x0468, player_colors_app, t_array<FStr_ColorLink>);
 			};
 			class a_pc_c : public u_object {
 			public:
-				GET_OFFSET(0x990, gm_ref, a_gm_c*);
+				GET_OFFSET(0x0998, gm_ref, a_gm_c*);
 			};
 			class u_data_player : public u_object {
 			public:
@@ -858,74 +854,74 @@ namespace protocol {
 			};
 			class mec_pawn : public a_pawn {
 			public:
-				OFFSET(0x0C09, player_role, int);
-				OFFSET(0x0C38, stamina, double);
-				OFFSET(0x570, aim_location, FVector);
-				OFFSET(0x5B8, net_aim_target, FVector);
-				OFFSET(0x5D8, net_aim, FVector);
-				OFFSET(0x858, interaction_aim, FVector);
-				OFFSET(0x980, aim_offset_smooth, FVector);
-				OFFSET(0x998, aim_offset, FVector);
-				OFFSET(0x9E8, aim_offset_target, FVector);
-				OFFSET(0x770, target_lock_rotation, FRotator);
-				OFFSET(0xA00, aim_oscilation_factor, double);
-				OFFSET(0x800, health, int);
-				OFFSET(0xC99, alive, bool);
-				OFFSET(0x4D4, on_floor, bool);
-				OFFSET(0x5D0, net_floor, bool);
-				OFFSET(0xD72, can_play, bool);
-				OFFSET(0x1058, in_game, bool);
-				OFFSET(0x568, run, bool);
-				OFFSET(0x569, walk, bool);
-				OFFSET(0x0710, acceleration, vector2);
-				OFFSET(0x05A0, net_velocity, FVector);
-				OFFSET(0x0608, fire_spread, double);
-				OFFSET(0x0618, vertical_recoil, double);
-				OFFSET(0x0620, horizontal_recoil, double);
-				OFFSET(0x08C8, max_speed, double);
-				OFFSET(0x0B28, recoil_offset, vector3);
-				OFFSET(0x0B40, recoil_offset_target, vector3);
-				OFFSET(0x0FF8, final_recoil, vector3);
-				OFFSET(0x1018, shot_spread, double);
-				OFFSET(0x07A0, walk_spread, double);
-				OFFSET(0x07A8, jump_spread, double);
-				OFFSET(0x0BE8, walk_spread_ratio, double);
-				OFFSET(0x07B0, walk_spread_target, double);
-				OFFSET(0x0A10, lateral_spread, double);
-				OFFSET(0x0B80, mec_speed, double);
-				OFFSET(0x0610, recovery, double);
-				OFFSET(0x0DD0, friction, double);
-				OFFSET(0x970, body_armor_color, double);
-				OFFSET(0xC9B, request_fly, bool);
-				OFFSET(0x1050, lock_movements, bool);
-				OFFSET(0x6A8, move_input, FVector);
-				OFFSET(0x6A1, move_input_state, int);
-				OFFSET(0x6C0, net_move_input_state, int);
-				OFFSET(0xEB4, voice_steps, int32_t);
-				OFFSET(0xEB8, max_voice_steps, int32_t);
-				OFFSET(0x588, net_location, FVector);
-				OFFSET(0x1134, skin_color, int32_t);
-				OFFSET(0x870, hand_state, FStr_ItemState);
-				OFFSET(0x89C, net_item_state, FStr_ItemState);
-				OFFSET(0x950, net_cammo, double);
-				OFFSET(0x880, bag_state, FStr_ItemState);
+				OFFSET(0x0C19, player_role, int);
+				OFFSET(0x0C48, stamina, double);
+				OFFSET(0x0580, aim_location, FVector);
+				OFFSET(0x05C8, net_aim_target, FVector);
+				OFFSET(0x05E8, net_aim, FVector);
+				OFFSET(0x0868, interaction_aim, FVector);
+				OFFSET(0x0990, aim_offset_smooth, FVector);
+				OFFSET(0x09A8, aim_offset, FVector);
+				OFFSET(0x09F8, aim_offset_target, FVector);
+				OFFSET(0x0780, target_lock_rotation, FRotator);
+				OFFSET(0x0A10, aim_oscilation_factor, double);
+				OFFSET(0x0810, health, int);
+				OFFSET(0x0CA9, alive, bool);
+				OFFSET(0x04E4, on_floor, bool);
+				OFFSET(0x05E0, net_floor, bool);
+				OFFSET(0x0D82, can_play, bool);
+				OFFSET(0x1068, in_game, bool);
+				OFFSET(0x0578, run, bool);
+				OFFSET(0x0579, walk, bool);
+				OFFSET(0x0720, acceleration, vector2);
+				OFFSET(0x05B0, net_velocity, FVector);
+				OFFSET(0x0618, fire_spread, double);
+				OFFSET(0x0628, vertical_recoil, double);
+				OFFSET(0x0630, horizontal_recoil, double);
+				OFFSET(0x08D8, max_speed, double);
+				OFFSET(0x0B38, recoil_offset, vector3);
+				OFFSET(0x0B50, recoil_offset_target, vector3);
+				OFFSET(0x1008, final_recoil, vector3);
+				OFFSET(0x1028, shot_spread, double);
+				OFFSET(0x07B0, walk_spread, double);
+				OFFSET(0x07B8, jump_spread, double);
+				OFFSET(0x0BF8, walk_spread_ratio, double);
+				OFFSET(0x07C0, walk_spread_target, double);
+				OFFSET(0x0A20, lateral_spread, double);
+				OFFSET(0x0B90, mec_speed, double);
+				OFFSET(0x0620, recovery, double);
+				OFFSET(0x0DE0, friction, double);
+				OFFSET(0x0980, body_armor_color, double);
+				OFFSET(0x0CAB, request_fly, bool);
+				OFFSET(0x1060, lock_movements, bool);
+				OFFSET(0x06B8, move_input, FVector);
+				OFFSET(0x06B1, move_input_state, int);
+				OFFSET(0x06D0, net_move_input_state, int);
+				OFFSET(0x0EC4, voice_steps, int32_t);
+				OFFSET(0x0EC8, max_voice_steps, int32_t);
+				OFFSET(0x0598, net_location, FVector);
+				OFFSET(0x1144, skin_color, int32_t);
+				OFFSET(0x0880, hand_state, FStr_ItemState);
+				OFFSET(0x08AC, net_item_state, FStr_ItemState);
+				OFFSET(0x0960, net_cammo, double);
+				OFFSET(0x0890, bag_state, FStr_ItemState);
 				OFFSET(0x0A40, player_data, u_data_player*);
-				OFFSET(0x0690, hand_item, u_data_item*);
-				OFFSET(0x838, net_hand_item, u_data_item*);
-				OFFSET(0x10D8, net_hand_item_new, FStr_Item);
-				OFFSET(0x878, bag_item, u_data_item*);
-				OFFSET(0x1168, net_bag_item, u_data_item*);
-				OFFSET(0x1188, net_bag_item_new, FStr_Item);
-				OFFSET(0x3A8, camera, u_camera_component*);
-				OFFSET(0x388, absolute_rotation, u_scene_component*);
-				OFFSET(0x420, orientation, u_scene_component*);
-				OFFSET(0x1228, skin_save, u_save_skin*);
-				OFFSET(0x11D8, skin_set, FStr_SkinSet);
-				OFFSET(0x408, body_collider, u_capsule_component*);
-				OFFSET(0x410, head_collider, u_sphere_component*);
-				OFFSET(0x378, ghost_root, u_scene_component*);
-				OFFSET(0x810, audio_voice, a_voice_source*);
-				OFFSET(0x808, pc_ref, a_pc_c*);
+				OFFSET(0x06A0, hand_item, u_data_item*);
+				OFFSET(0x0848, net_hand_item, u_data_item*);
+				OFFSET(0x10E8, net_hand_item_new, FStr_Item);
+				OFFSET(0x0888, bag_item, u_data_item*);
+				OFFSET(0x1178, net_bag_item, u_data_item*);
+				OFFSET(0x1198, net_bag_item_new, FStr_Item);
+				OFFSET(0x03B0, camera, u_camera_component*);
+				OFFSET(0x0398, absolute_rotation, u_scene_component*);
+				OFFSET(0x0430, orientation, u_scene_component*);
+				OFFSET(0x1250, skin_save, u_save_skin*);
+				OFFSET(0x11E8, skin_set, FStr_SkinSet);
+				OFFSET(0x0418, body_collider, u_capsule_component*);
+				OFFSET(0x0420, head_collider, u_sphere_component*);
+				OFFSET(0x0388, ghost_root, u_scene_component*);
+				OFFSET(0x0820, audio_voice, a_voice_source*);
+				OFFSET(0x0818, pc_ref, a_pc_c*);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);

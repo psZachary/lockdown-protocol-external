@@ -1,0 +1,232 @@
+{
+    "aim_target": "Neck",
+    "aimbot": true,
+    "aimbot_fov": 198.8000030517578,
+    "aimbot_hold_key": 5,
+    "aimbot_hotkey": 33,
+    "ammo_count": 12,
+    "anti_weapon_drop": false,
+    "auto_fire": false,
+    "auto_fire_hotkey": 119,
+    "battery_color": {
+        "a": 1.0,
+        "b": 0.7411764860153198,
+        "g": 0.7411764860153198,
+        "r": 0.7411764860153198
+    },
+    "can_inventory": false,
+    "cast_time": 0.0,
+    "container_color": {
+        "a": 1.0,
+        "b": 0.5686274766921997,
+        "g": 0.0,
+        "r": 0.5333333611488342
+    },
+    "cost": 0,
+    "dissident_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 1.0
+    },
+    "drop_threshold": 25.0,
+    "employee_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 0.0
+    },
+    "esp_enabled": true,
+    "esp_hotkey": 113,
+    "esp_max_distance": 70.0,
+    "esp_radar": true,
+    "esp_radar_position": "Middle Right",
+    "esp_radar_scale": 0.06,
+    "fast_hp_recovery": true,
+    "fast_melee": false,
+    "fast_melee_hotkey": 117,
+    "fast_stam_recovery": true,
+    "fov_color": {
+        "a": 0.14649683237075806,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 0.9554139971733093
+    },
+    "friction": 100000.0,
+    "fuse_color": {
+        "a": 1.0,
+        "b": 0.4117647111415863,
+        "g": 0.4117647111415863,
+        "r": 0.4117647111415863
+    },
+    "gaz_bottle_color": {
+        "a": 1.0,
+        "b": 0.9803921580314636,
+        "g": 0.32549020648002625,
+        "r": 0.0
+    },
+    "ghost_dissident_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 1.0
+    },
+    "ghost_employee_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 0.0
+    },
+    "ghost_radar": false,
+    "god_mode": false,
+    "god_mode_hotkey": 115,
+    "hp_recovery_rate": 100,
+    "infinite_ammo": false,
+    "infinite_melee_range": false,
+    "infinite_melee_range_hotkey": 118,
+    "infinite_stamina": false,
+    "infinite_stamina_hotkey": 116,
+    "list_inv": false,
+    "max_damage": true,
+    "max_damage_hotkey": 46,
+    "max_speed": 2000.0,
+    "menu_hotkey": 112,
+    "movement_osc": 0.0,
+    "no_recoil": true,
+    "no_recoil_hotkey": 45,
+    "osc_reactivity": 0.0,
+    "package_color": {
+        "a": 1.0,
+        "b": 0.0941176488995552,
+        "g": 0.18431372940540314,
+        "r": 0.34117648005485535
+    },
+    "player_box": true,
+    "player_distance": true,
+    "player_esp": true,
+    "player_fov": 103,
+    "player_ghost": true,
+    "player_inventory": true,
+    "player_list": true,
+    "player_list_hotkey": 34,
+    "player_list_locked": true,
+    "player_list_x": 1685.0,
+    "player_list_y": 605.0,
+    "player_radar": true,
+    "primary_distance": true,
+    "primary_item_state": true,
+    "primary_object_esp": true,
+    "primary_radar": false,
+    "range": 10000,
+    "rapid_fire": false,
+    "rapid_fire_hotkey": 120,
+    "rapid_fire_rate": 0.02,
+    "recover_time": 0.0,
+    "rice_color": {
+        "a": 1.0,
+        "b": 0.47843137383461,
+        "g": 0.6627451181411743,
+        "r": 0.7882353067398071
+    },
+    "sample_color": {
+        "a": 1.0,
+        "b": 0.7834395170211792,
+        "g": 0.0,
+        "r": 0.5489066243171692
+    },
+    "screw_driver_color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+    },
+    "secondary_distance": true,
+    "secondary_item_state": true,
+    "secondary_object_esp": true,
+    "secondary_radar": false,
+    "smooth_factor": 0.5,
+    "speedhack": false,
+    "speedhack_hotkey": 114,
+    "stam_recovery_rate": 100,
+    "stun": 1.0,
+    "target_closest": true,
+    "target_filter": "All",
+    "task_alim": true,
+    "task_alim_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 1.0
+    },
+    "task_computer_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 1.0
+    },
+    "task_computers": true,
+    "task_delivery": true,
+    "task_delivery_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 1.0
+    },
+    "task_machine": true,
+    "task_machine_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 1.0
+    },
+    "task_object_distance": true,
+    "task_object_esp": false,
+    "task_object_state": true,
+    "task_pizzushi": true,
+    "task_pizzushi_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 1.0
+    },
+    "task_scanner_color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 0.0
+    },
+    "task_scanners": true,
+    "task_vent": true,
+    "task_vent_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 1.0,
+        "r": 1.0
+    },
+    "vent_filter_color": {
+        "a": 1.0,
+        "b": 0.8509804010391235,
+        "g": 0.45098039507865906,
+        "r": 0.2549019753932953
+    },
+    "weapon_case_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.3607843220233917,
+        "r": 0.9803921580314636
+    },
+    "weapon_case_distance": true,
+    "weapon_case_esp": true,
+    "weapon_case_info": true,
+    "weapon_case_state": false,
+    "weapon_color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.3607843220233917,
+        "r": 0.9803921580314636
+    },
+    "weapon_distance": true,
+    "weapon_esp": true,
+    "weapon_item_state": true,
+    "weapon_radar": true
+}
