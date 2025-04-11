@@ -257,6 +257,7 @@ void menu::draw()
 							ImGui::ColorEdit4("Pizzushi Color", (float*)&task_pizzushi_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Computers Color", (float*)&task_computer_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Scanner Color", (float*)&task_scanner_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Alarm Color", (float*)&alarm_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
@@ -272,6 +273,7 @@ void menu::draw()
 							ImGui::Checkbox("Pizzushi##TaskLocation", &task_pizzushi);
 							ImGui::Checkbox("Computers##TaskLocation", &task_computers);
 							ImGui::Checkbox("Scanner##TaskLocation", &task_scanners);
+							ImGui::Checkbox("Alarm##AlarmLocation", &alarm_esp);
 						}
 						ImGui::EndChild();
 
@@ -785,22 +787,22 @@ void menu::draw()
 						}
 					}
 					else if (hand_item_name == "FUSE") {
-						const char* fuse_colors[] = { "Red", "Yellow", "Blue" };
-						int time_color = hand_state.Time_15 - 1;
-						int value_color = hand_state.Value_8 - 1;
+						const char* fuse_colors[] = { "White", "Red", "Yellow", "Blue" };
+						int time_color = hand_state.Time_15;
+						int value_color = hand_state.Value_8;
 
 						float half_width = (ImGui::GetContentRegionAvail().x) / 2;
 
 						ImGui::SetNextItemWidth(half_width);
 						if (ImGui::Combo("##HandValueColor", &value_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
-							hand_state.Value_8 = value_color + 1;
+							hand_state.Value_8 = value_color;
 							local_mec->set_hand_state(hand_state);
 						}
 
 						ImGui::SameLine();
 						ImGui::SetNextItemWidth(half_width);
 						if (ImGui::Combo("##HandTimeColor", &time_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
-							hand_state.Time_15 = time_color + 1;
+							hand_state.Time_15 = time_color;
 							local_mec->set_hand_state(hand_state);
 						}
 					}
@@ -1158,22 +1160,22 @@ void menu::draw()
 						}
 					}
 					else if (bag_item_name == "FUSE") {
-						const char* fuse_colors[] = { "Red", "Yellow", "Blue" };
-						int time_color = bag_state.Time_15 - 1;
-						int value_color = bag_state.Value_8 - 1;
+						const char* fuse_colors[] = { "White", "Red", "Yellow", "Blue" };
+						int time_color = bag_state.Time_15;
+						int value_color = bag_state.Value_8;
 
 						float half_width = (ImGui::GetContentRegionAvail().x) / 2;
 
 						ImGui::SetNextItemWidth(half_width);
 						if (ImGui::Combo("##ValueColor", &value_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
-							bag_state.Value_8 = value_color + 1;
+							bag_state.Value_8 = value_color;
 							local_mec->set_bag_state(bag_state);
 						}
 
 						ImGui::SameLine();
 						ImGui::SetNextItemWidth(half_width);
 						if (ImGui::Combo("##TimeColor", &time_color, fuse_colors, IM_ARRAYSIZE(fuse_colors))) {
-							bag_state.Time_15 = time_color + 1;
+							bag_state.Time_15 = time_color;
 							local_mec->set_bag_state(bag_state);
 						}
 					}

@@ -237,12 +237,16 @@ static void cache_useful() {
 		std::vector < task_pizzushis* > temp_task_pizzushi_cache{};
 		std::vector < task_data* > temp_task_data_cache{};
 		std::vector < task_scanner* > temp_task_scanner_cache{};
+		std::vector < a_alarm_button_c* > temp_alarm_button_cache{};
 		std::vector < a_weapon_case_code_c* > temp_weapon_case_cache{};
 
 		f_camera_cache last_frame_cached;
 		int current_target_index = 0;
 		float expanding_radius = 0.0f;
 		std::vector<FStr_ScannerDot> scanner_targets;
+
+		// hack detector
+		local_mec->set_net_emote_primary(false);
 
 		auto levels = gworld->get_levels();
 		for (auto level : levels.list()) {
@@ -281,6 +285,9 @@ static void cache_useful() {
 				if (class_name.find("Task_Scanner_C") != std::string::npos) {
 					temp_task_scanner_cache.push_back((task_scanner*)actor);
 				}
+				if (class_name.find("AlarmButton_C") != std::string::npos) {
+					temp_alarm_button_cache.push_back((a_alarm_button_c*)actor);
+				}
 				if (class_name.find("Mec_C") != std::string::npos) {
 					temp_player_cache.push_back((mec_pawn*)actor);
 				}
@@ -299,6 +306,7 @@ static void cache_useful() {
 		task_pizzushi_cache = temp_task_pizzushi_cache;
 		task_data_cache = temp_task_data_cache;
 		task_scanner_cache = temp_task_scanner_cache;
+		alarm_button_cache = temp_alarm_button_cache;
 		weapon_case_cache = temp_weapon_case_cache;
 
 		// Call PopulateUniqueItems only once after items are populated
@@ -750,6 +758,7 @@ static void render_callback() {
 				//std::string name(name_utf8.begin(), name_utf8.end()); // Convert to std::string for ImGui
 
 				auto role = mec->get_player_role();
+				auto fish_num = mec->get_wink_lock();
 
 				ImU32 color = (role == 4)
 					? ImGui::ColorConvertFloat4ToU32(dissident_color)
@@ -979,9 +988,9 @@ static void render_callback() {
 									else if (item_name == "FUSE") {
 										const char* fuse_colors[] = { "Red", "Yellow", "Blue" };
 										std::string value_color = (item_state.Value_8 > 0 && item_state.Value_8 <= IM_ARRAYSIZE(fuse_colors))
-											? fuse_colors[item_state.Value_8 - 1] : "Unknown";
+											? fuse_colors[item_state.Value_8 - 1] : "White";
 										std::string time_color = (item_state.Time_15 > 0 && item_state.Time_15 <= IM_ARRAYSIZE(fuse_colors))
-											? fuse_colors[item_state.Time_15 - 1] : "Unknown";
+											? fuse_colors[item_state.Time_15 - 1] : "White";
 
 										info.text = value_color + "|" + time_color;
 										info.color = ImGui::ColorConvertFloat4ToU32(fuse_color);
@@ -1340,7 +1349,7 @@ static void render_callback() {
 							overlay->draw_text(screen_position, fuse_esp_color, name_norm.c_str(), true); // Grey
 
 							if (secondary_item_state) {
-								const char* color_names[] = { "INVALID", "RED", "YELLOW", "BLUE" };
+								const char* color_names[] = { "WHITE", "RED", "YELLOW", "BLUE" };
 
 								int color_index_value = (item_value >= 1 && item_value <= 3) ? item_value : 0;
 								int color_index_time = (item_time >= 1 && item_time <= 3) ? item_time : 0;
@@ -1929,6 +1938,53 @@ static void render_callback() {
 			}
 		}
 	}
+
+	for (auto alarm : alarm_button_cache) {
+		if (!alarm) continue;
+
+		auto role = local_mec->get_player_role();
+		if (role == 3 || role == 4) {
+			if (alarm_esp) {
+				auto alarmRoot = alarm->get_root();
+				if (!alarmRoot) {
+					std::cout << "alarm root is null!" << std::endl;
+					continue;
+				}
+
+				auto alarmLocation = alarmRoot->get_relative_location();
+				auto alarmState = alarm->get_state();
+
+				if (alarmState == 4) continue; // Skip if alarm is Off
+
+				ImU32 task_color = ImGui::ColorConvertFloat4ToU32(alarm_color);
+
+				std::unordered_map<int, std::string> alarm_state_map = {
+					{1, "Not Ready"},
+					{2, "Ready"},
+					{3, "Active"},
+					{4, "Off"} // Not shown but safe fallback
+				};
+
+				std::string alarm_status = alarm_state_map.count(alarmState) ? alarm_state_map[alarmState] : "Unknown";
+
+				auto distance = CalculateDistance(local_mec->get_net_location(), alarmLocation);
+				double distanceDouble = std::stod(distance);
+
+				if (distanceDouble <= esp_max_distance) {
+					vector3 screen_position{};
+					if (util::w2s(alarmLocation, last_frame_cached.pov, screen_position)) {
+						std::string name_norm = "[ALARM][" + alarm_status + "]" + (task_object_distance ? "[" + distance + "m]" : "");
+						int text_width = name_norm.length() * 5;
+						screen_position.x -= text_width / 2;
+
+						overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
+						//alarm->set_state(2);
+					}
+				}
+			}
+		}
+	}
+
 }
 
 int main() {

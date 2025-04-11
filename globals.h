@@ -28,6 +28,7 @@ namespace globals {
 	inline std::vector < task_pizzushis* > task_pizzushi_cache{};
 	inline std::vector < task_data* > task_data_cache{};
 	inline std::vector < task_scanner* > task_scanner_cache{};
+	inline std::vector < a_alarm_button_c* > alarm_button_cache{};
 	inline std::vector < a_weapon_case_code_c* > weapon_case_cache{};
 
 	struct s_font {

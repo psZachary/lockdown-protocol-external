@@ -18,12 +18,12 @@ namespace util {
 namespace protocol {
 	namespace engine {
 
-		constexpr uintptr_t GWORLD = 142770416;
-		constexpr uintptr_t GNAMES = 140280000;
-		constexpr uintptr_t GOBJECTS = 141211696;
-		constexpr uintptr_t PROCESSEVENT = 21281968;
+		constexpr uintptr_t GWORLD = 142783216;
+		constexpr uintptr_t GNAMES = 140292800;
+		constexpr uintptr_t GOBJECTS = 141224496;
+		constexpr uintptr_t PROCESSEVENT = 21281648;
 		constexpr uintptr_t PROCESSEVENT_INDEX = 79;
-		constexpr uintptr_t APPENDSTRING = 19027936;
+		constexpr uintptr_t APPENDSTRING = 19027616;
 
 		namespace sdk {
 			struct fuobjectitem
@@ -455,6 +455,8 @@ namespace protocol {
 				GET_OFFSET(0x0320, pawn_private, a_pawn*);
 				GET_OFFSET(0x0340, player_name_private, fstring);
 				GET_OFFSET(0x02F8, saved_network_address, fstring);
+				OFFSET(0x02A8, score, float);
+				OFFSET(0x02AC, player_id, int);
 			};
 
 			class a_game_state_base {
@@ -728,6 +730,11 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x0398, machines, t_array<a_machine_pannel_c*>);
 			};
+			class a_alarm_button_c : public a_actor {
+			public:
+				OFFSET(0x02E0, state, int);
+				OFFSET(0x02C8, root, u_scene_component*);
+			};
 			class a_scanner_machine_c : public a_actor {
 			public:
 				GET_OFFSET(0x02B8, mecs, t_array<a_pawn*>);
@@ -922,6 +929,11 @@ namespace protocol {
 				OFFSET(0x0388, ghost_root, u_scene_component*);
 				OFFSET(0x0820, audio_voice, a_voice_source*);
 				OFFSET(0x0818, pc_ref, a_pc_c*);
+				OFFSET(0x1328, net_fish, int);
+				OFFSET(0x1143, new_var, bool);
+				OFFSET(0x900, heal_buff, int);
+				OFFSET(0x1315, wink_lock, bool);
+				OFFSET(0x1142, net_emote_primary, bool);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);
