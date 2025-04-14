@@ -56,6 +56,7 @@ namespace config {
 	inline int cost = 0; // avg is 20 : 40
 	inline bool infinite_melee_range = false;
 	inline int range = 10000; // avg is 130 : 180
+
 	// Guns
 	inline bool max_damage = false;
 	inline bool auto_fire = false;
@@ -163,6 +164,9 @@ namespace config {
 
 	inline bool task_scanners = true;
 	inline ImVec4 task_scanner_color = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
+
+	inline bool alarm_esp = true;
+	inline ImVec4 alarm_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
 
 	// Function to convert ImVec4 to JSON and vice versa
 	inline void to_json(nlohmann::json& j, const ImVec4& color) {
@@ -282,6 +286,8 @@ namespace config {
 		j["task_pizzushi"] = task_pizzushi;
 		j["task_computers"] = task_computers;
 		j["task_scanners"] = task_scanners;
+		j["alarm_esp"] = alarm_esp;
+
 
 		// Colors (individually serialize RGBA components for each color)
 		j["employee_color"] = { {"r", employee_color.x}, {"g", employee_color.y}, {"b", employee_color.z}, {"a", employee_color.w} };
@@ -307,6 +313,7 @@ namespace config {
 		j["package_color"] = { {"r", package_color.x}, {"g", package_color.y}, {"b", package_color.z}, {"a", package_color.w} };
 		j["sample_color"] = { {"r", sample_color.x}, {"g", sample_color.y}, {"b", sample_color.z}, {"a", sample_color.w} };
 		j["fov_color"] = { {"r", fov_color.x}, {"g", fov_color.y}, {"b", fov_color.z}, {"a", fov_color.w} };
+		j["alarm_color"] = { {"r", fov_color.x}, {"g", fov_color.y}, {"b", fov_color.z}, {"a", fov_color.w} };
 
 		std::ofstream file(filePath);  // This will create the file if it doesn't exist
 		if (file.is_open()) {
@@ -439,6 +446,7 @@ namespace config {
 			j.at("task_pizzushi").get_to(task_pizzushi);
 			j.at("task_computers").get_to(task_computers);
 			j.at("task_scanners").get_to(task_scanners);
+			j.at("alarm_esp").get_to(alarm_esp);
 
 			// Colors (individually unpack RGBA components for each color if present)
 			if (j.contains("employee_color")) {
@@ -530,6 +538,13 @@ namespace config {
 				weapon_case_color.y = j["weapon_case_color"].at("g").get<float>();
 				weapon_case_color.z = j["weapon_case_color"].at("b").get<float>();
 				weapon_case_color.w = j["weapon_case_color"].at("a").get<float>();
+			}
+
+			if (j.contains("alarm_color")) {
+				alarm_color.x = j["alarm_color"].at("r").get<float>();
+				alarm_color.y = j["alarm_color"].at("g").get<float>();
+				alarm_color.z = j["alarm_color"].at("b").get<float>();
+				alarm_color.w = j["alarm_color"].at("a").get<float>();
 			}
 
 			if (j.contains("fuse_color")) {
