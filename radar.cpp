@@ -167,7 +167,7 @@ void radar::draw() {
 
 				if (mec != local_mec) {
 					auto role = mec->get_player_role(); // Get player role
-					ImU32 color = (role == 4) ? dissidentColor : employeeColor; // Use config colors
+					ImU32 playercolor = (role == 4) ? dissidentColor : employeeColor; // Use config colors
 
 					auto root_component = mec->get_root_component();
 					if (!root_component) continue;
@@ -184,7 +184,7 @@ void radar::draw() {
 					if (radarPos.magnitude() < radarSize / 2) {
 						vector2 pointPos = radarCenter + radarPos; // Map to radar space
 						ImGui::GetForegroundDrawList()->AddCircleFilled(
-							toImVec2(pointPos), 3.0f, color); // Use role color
+							toImVec2(pointPos), 3.0f, playercolor); // Use role color
 					}
 				}
 			}
@@ -195,7 +195,7 @@ void radar::draw() {
 			for (auto mec : player_cache) {
 				if (mec != local_mec) {
 					auto role = mec->get_player_role(); // Get player role
-					ImU32 color = (role == 4) ? ghostDissidentColor : ghostEmployeeColor; // Use config colors
+					ImU32 ghostcolor = (role == 4) ? ghostDissidentColor : ghostEmployeeColor; // Use config colors
 
 					auto ghost_root = mec->get_ghost_root();
 					if (!ghost_root) continue;
@@ -212,7 +212,7 @@ void radar::draw() {
 					if (radarPos.magnitude() < radarSize / 2) {
 						vector2 pointPos = radarCenter + radarPos; // Map to radar space
 						ImGui::GetForegroundDrawList()->AddCircleFilled(
-							toImVec2(pointPos), 3.0f, color); // Use role color
+							toImVec2(pointPos), 3.0f, ghostcolor); // Use role color
 					}
 				}
 			}
