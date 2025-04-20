@@ -67,6 +67,14 @@ ItemProperties GetItemProperties(const std::string& itemName) {
 	}
 }
 
+double CalculateDistanceMeters(const vector3& location1, const vector3& location2) {
+	double dx = location1.x - location2.x;
+	double dy = location1.y - location2.y;
+	double dz = location1.z - location2.z;
+
+	return std::sqrt(dx * dx + dy * dy + dz * dz) / 100.0;
+}
+
 void initialize_process_event() {
 	uintptr_t process_event_address = mem::module_base + protocol::engine::PROCESSEVENT;
 	globals::process_event = reinterpret_cast<tProcessEvent>(process_event_address);
@@ -129,14 +137,6 @@ std::string CalculateDistance(const FVector& location1, const vector3& location2
 	std::ostringstream stream;
 	stream << std::fixed << std::setprecision(2) << distance;
 	return stream.str();
-}
-
-double CalculateDistanceMeters(const vector3& location1, const vector3& location2) {
-	double dx = location1.x - location2.x;
-	double dy = location1.y - location2.y;
-	double dz = location1.z - location2.z;
-
-	return std::sqrt(dx * dx + dy * dy + dz * dz) / 100.0;
 }
 
 // Function to convert FVector to vector3

@@ -32,6 +32,14 @@ std::vector<ImVec2> compute_triangle(const vector2& center, double size, double 
 	return points;
 }
 
+double CalculateDistanceMetersRadar(const vector3& location1, const vector3& location2) {
+	double dx = location1.x - location2.x;
+	double dy = location1.y - location2.y;
+	double dz = location1.z - location2.z;
+
+	return std::sqrt(dx * dx + dy * dy + dz * dz) / 100.0;
+}
+
 void radar::draw() {
 	if (esp_radar) {
 		// Define scale
@@ -200,20 +208,31 @@ void radar::draw() {
 					auto ghost_root = mec->get_ghost_root();
 					if (!ghost_root) continue;
 
+					auto root_component = mec->get_root_component();
+					if (!root_component) continue;
+
 					auto relative_location = ghost_root->get_relative_location();
-					vector3 position = relative_location;
-					vector3 relativePos = position - local_pos; // Calculate relative position
-					vector2 radarPos = { relativePos.x * scaleFactor, relativePos.y * scaleFactor }; // Map to radar space
+					auto mec_loc = root_component->get_relative_location();
 
-					// Rotate radar points based on player facing angle
-					radarPos = rotate_point(radarPos, player_facing_angle);
+					// Calculate the distance between ghost and player
+					double ghost_distance = CalculateDistanceMetersRadar(mec_loc, relative_location);
 
-					// Only draw players within radar bounds
-					if (radarPos.magnitude() < radarSize / 2) {
-						vector2 pointPos = radarCenter + radarPos; // Map to radar space
-						ImGui::GetForegroundDrawList()->AddCircleFilled(
-							toImVec2(pointPos), 3.0f, ghostcolor); // Use role color
+					if (ghost_distance > 2) { // If ghost moved away from the body
+						vector3 position = relative_location;
+						vector3 relativePos = position - local_pos; // Calculate relative position
+						vector2 radarPos = { relativePos.x * scaleFactor, relativePos.y * scaleFactor }; // Map to radar space
+
+						// Rotate radar points based on player facing angle
+						radarPos = rotate_point(radarPos, player_facing_angle);
+
+						// Only draw players within radar bounds
+						if (radarPos.magnitude() < radarSize / 2) {
+							vector2 pointPos = radarCenter + radarPos; // Map to radar space
+							ImGui::GetForegroundDrawList()->AddCircleFilled(
+								toImVec2(pointPos), 3.0f, ghostcolor); // Use role color
+						}
 					}
+
 				}
 			}
 		}
