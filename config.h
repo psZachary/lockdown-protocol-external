@@ -139,6 +139,7 @@ namespace config {
 	inline ImVec4 battery_color = ImVec4(189.0f / 255.0f, 189.0f / 255.0f, 189.0f / 255.0f, 1.0f); // Light Grey
 	inline ImVec4 screw_driver_color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f); // White
 	inline ImVec4 container_color = ImVec4(136.0f / 255.0f, 0.0f / 255.0f, 145.0f / 255.0f, 1.0f); // Magenta
+	inline ImVec4 egg_color = ImVec4(67.0f / 255.0f, 140.0f / 255.0f, 95.0f / 255.0f, 1.0f); // Egg Green (#438c5f)
 
 	inline bool task_object_esp = true;
 	inline bool task_object_distance = true;
@@ -164,6 +165,10 @@ namespace config {
 
 	inline bool task_scanners = true;
 	inline ImVec4 task_scanner_color = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
+
+	inline bool rez_esp = true;
+	inline ImVec4 rez_color = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
+	inline ImVec4 defib_color = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
 
 	inline bool alarm_esp = true;
 	inline ImVec4 alarm_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
@@ -287,6 +292,7 @@ namespace config {
 		j["task_computers"] = task_computers;
 		j["task_scanners"] = task_scanners;
 		j["alarm_esp"] = alarm_esp;
+		j["rez_esp"] = rez_esp;
 
 
 		// Colors (individually serialize RGBA components for each color)
@@ -306,6 +312,7 @@ namespace config {
 		j["fuse_color"] = { {"r", fuse_color.x}, {"g", fuse_color.y}, {"b", fuse_color.z}, {"a", fuse_color.w} };
 		j["battery_color"] = { {"r", battery_color.x}, {"g", battery_color.y}, {"b", battery_color.z}, {"a", battery_color.w} };
 		j["screw_driver_color"] = { {"r", screw_driver_color.x}, {"g", screw_driver_color.y}, {"b", screw_driver_color.z}, {"a", screw_driver_color.w} };
+		j["egg_color"] = { {"r", egg_color.x}, {"g", egg_color.y}, {"b", egg_color.z}, {"a", egg_color.w} };
 		j["container_color"] = { {"r", container_color.x}, {"g", container_color.y}, {"b", container_color.z}, {"a", container_color.w} };
 		j["gaz_bottle_color"] = { {"r", gaz_bottle_color.x}, {"g", gaz_bottle_color.y}, {"b", gaz_bottle_color.z}, {"a", gaz_bottle_color.w} };
 		j["vent_filter_color"] = { {"r", vent_filter_color.x}, {"g", vent_filter_color.y}, {"b", vent_filter_color.z}, {"a", vent_filter_color.w} };
@@ -314,6 +321,8 @@ namespace config {
 		j["sample_color"] = { {"r", sample_color.x}, {"g", sample_color.y}, {"b", sample_color.z}, {"a", sample_color.w} };
 		j["fov_color"] = { {"r", fov_color.x}, {"g", fov_color.y}, {"b", fov_color.z}, {"a", fov_color.w} };
 		j["alarm_color"] = { {"r", fov_color.x}, {"g", fov_color.y}, {"b", fov_color.z}, {"a", fov_color.w} };
+		j["rez_color"] = { {"r", rez_color.x}, {"g", rez_color.y}, {"b", rez_color.z}, {"a", rez_color.w} };
+		j["defib_color"] = { {"r", defib_color.x}, {"g", defib_color.y}, {"b", defib_color.z}, {"a", defib_color.w} };
 
 		std::ofstream file(filePath);  // This will create the file if it doesn't exist
 		if (file.is_open()) {
@@ -447,6 +456,7 @@ namespace config {
 			j.at("task_computers").get_to(task_computers);
 			j.at("task_scanners").get_to(task_scanners);
 			j.at("alarm_esp").get_to(alarm_esp);
+			j.at("rez_esp").get_to(rez_esp);
 
 			// Colors (individually unpack RGBA components for each color if present)
 			if (j.contains("employee_color")) {
@@ -547,6 +557,20 @@ namespace config {
 				alarm_color.w = j["alarm_color"].at("a").get<float>();
 			}
 
+			if (j.contains("rez_color")) {
+				rez_color.x = j["rez_color"].at("r").get<float>();
+				rez_color.y = j["rez_color"].at("g").get<float>();
+				rez_color.z = j["rez_color"].at("b").get<float>();
+				rez_color.w = j["rez_color"].at("a").get<float>();
+			}
+
+			if (j.contains("defib_color")) {
+				defib_color.x = j["defib_color"].at("r").get<float>();
+				defib_color.y = j["defib_color"].at("g").get<float>();
+				defib_color.z = j["defib_color"].at("b").get<float>();
+				defib_color.w = j["defib_color"].at("a").get<float>();
+			}
+
 			if (j.contains("fuse_color")) {
 				fuse_color.x = j["fuse_color"].at("r").get<float>();
 				fuse_color.y = j["fuse_color"].at("g").get<float>();
@@ -566,6 +590,13 @@ namespace config {
 				screw_driver_color.y = j["screw_driver_color"].at("g").get<float>();
 				screw_driver_color.z = j["screw_driver_color"].at("b").get<float>();
 				screw_driver_color.w = j["screw_driver_color"].at("a").get<float>();
+			}
+
+			if (j.contains("egg_color")) {
+				egg_color.x = j["egg_color"].at("r").get<float>();
+				egg_color.y = j["egg_color"].at("g").get<float>();
+				egg_color.z = j["egg_color"].at("b").get<float>();
+				egg_color.w = j["egg_color"].at("a").get<float>();
 			}
 
 			if (j.contains("container_color")) {

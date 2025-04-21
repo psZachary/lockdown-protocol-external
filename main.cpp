@@ -238,6 +238,7 @@ static void cache_useful() {
 		std::vector < task_data* > temp_task_data_cache{};
 		std::vector < task_scanner* > temp_task_scanner_cache{};
 		std::vector < a_alarm_button_c* > temp_alarm_button_cache{};
+		std::vector < a_rez_charger_c* > temp_rez_charger_cache{};
 		std::vector < a_weapon_case_code_c* > temp_weapon_case_cache{};
 
 		f_camera_cache last_frame_cached;
@@ -288,6 +289,9 @@ static void cache_useful() {
 				if (class_name.find("AlarmButton_C") != std::string::npos) {
 					temp_alarm_button_cache.push_back((a_alarm_button_c*)actor);
 				}
+				if (class_name.find("RezCharger_C") != std::string::npos) {
+					temp_rez_charger_cache.push_back((a_rez_charger_c*)actor);
+				}
 				if (class_name.find("Mec_C") != std::string::npos) {
 					temp_player_cache.push_back((mec_pawn*)actor);
 				}
@@ -307,6 +311,7 @@ static void cache_useful() {
 		task_data_cache = temp_task_data_cache;
 		task_scanner_cache = temp_task_scanner_cache;
 		alarm_button_cache = temp_alarm_button_cache;
+		rez_charger_cache = temp_rez_charger_cache;
 		weapon_case_cache = temp_weapon_case_cache;
 
 		// Call PopulateUniqueItems only once after items are populated
@@ -1128,6 +1133,8 @@ static void render_callback() {
 		ImU32 fuse_esp_color = ImGui::ColorConvertFloat4ToU32(fuse_color);
 		ImU32 battery_esp_color = ImGui::ColorConvertFloat4ToU32(battery_color);
 		ImU32 screw_driver_esp_color = ImGui::ColorConvertFloat4ToU32(screw_driver_color);
+		ImU32 egg_esp_color = ImGui::ColorConvertFloat4ToU32(egg_color);
+		ImU32 defib_esp_color = ImGui::ColorConvertFloat4ToU32(defib_color);
 		ImU32 container_esp_color = ImGui::ColorConvertFloat4ToU32(container_color);
 
 		if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
@@ -1328,7 +1335,7 @@ static void render_callback() {
 			}
 		}
 
-		if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER") {
+		if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER" || item_name == "EGG" || item_name == "DEFIBRILLATOR") {
 			auto item_root = item->get_root_component();
 			if (!item_root) continue;
 
@@ -1370,6 +1377,16 @@ static void render_callback() {
 						}
 						else if (item_name == "SCREW DRIVER") {
 							overlay->draw_text(screen_position, screw_driver_esp_color, name_norm.c_str(), true); // White
+						}
+						else if (item_name == "EGG") {
+							overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true); // green
+						}
+						else if (item_name == "DEFIBRILLATOR") {
+							overlay->draw_text(screen_position, defib_esp_color, name_norm.c_str(), true); // cyan
+							if (secondary_item_state) {
+								screen_position.y += 15;
+								overlay->draw_text(screen_position, defib_esp_color, ("[Charge: " + std::to_string(item_value) + "%]").c_str(), true);
+							}
 						}
 						else if (item_name == "CONTAINER") {
 							overlay->draw_text(screen_position, container_esp_color, name_norm.c_str(), true); // Pink-sih purple
@@ -1432,13 +1449,9 @@ static void render_callback() {
 						auto ventRoot = taskVent->get_root();
 						auto filter = taskVent->get_filter();
 						if (!ventRoot) {
-							std::cout << "vent root is null!" << std::endl;
-							continue;
 						}
 
 						if (!filter) {
-							std::cout << "Filter is null for vent!" << std::endl;
-							continue;
 						}
 
 						if (ventRoot && filter) {
@@ -1616,8 +1629,6 @@ static void render_callback() {
 						if (!deliveryCase) continue;
 						auto caseRoot = deliveryCase->get_root();
 						if (!caseRoot) {
-							std::cout << "delivery case root is null!" << std::endl;
-							continue;
 						}
 
 						auto deliveryLocation = caseRoot->get_relative_location();
@@ -1939,49 +1950,98 @@ static void render_callback() {
 		}
 	}
 
+	for (auto rez : rez_charger_cache) {
+		if (!rez) continue;
+
+		auto role = local_mec->get_player_role();
+		if (role == 3 || role == 4) {
+			if (task_object_esp) {
+				if (rez_esp) {
+					auto rezRoot = rez->get_root();
+					if (!rezRoot) {
+					}
+
+					auto defib = rez->get_rez();
+					if (!defib) {
+					}
+
+					auto rezLocation = rezRoot->get_relative_location();
+
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(rez_color);
+
+					auto distance = CalculateDistance(local_mec->get_net_location(), rezLocation);
+					double distanceDouble = std::stod(distance);
+
+					auto defibState = defib->get_item_state();
+					if (distanceDouble <= esp_max_distance) {
+						vector3 screen_position{};
+						if (util::w2s(rezLocation, last_frame_cached.pov, screen_position)) {
+							std::string name_norm = "[RezCharger]" + (task_object_distance ? "[" + distance + "m]" : "");
+							int text_width = name_norm.length() * 5;
+							screen_position.x -= text_width / 2;
+							overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
+
+							// Charge percentage display
+							if (defibState.Value_8 >= 0) {
+								if (task_object_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, task_color, ("[Charge: " + std::to_string(defibState.Value_8) + "%]").c_str(), true);
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
+
 	for (auto alarm : alarm_button_cache) {
 		if (!alarm) continue;
 
 		auto role = local_mec->get_player_role();
 		if (role == 3 || role == 4) {
-			if (alarm_esp) {
-				auto alarmRoot = alarm->get_root();
-				if (!alarmRoot) {
-					std::cout << "alarm root is null!" << std::endl;
-					continue;
-				}
+			if (task_object_esp) {
+				if (alarm_esp) {
+					auto alarmRoot = alarm->get_root();
+					if (!alarmRoot) {
+						std::cout << "alarm root is null!" << std::endl;
+						continue;
+					}
 
-				auto alarmLocation = alarmRoot->get_relative_location();
-				auto alarmState = alarm->get_state();
+					auto alarmLocation = alarmRoot->get_relative_location();
+					auto alarmState = alarm->get_state();
 
-				if (alarmState == 4) continue; // Skip if alarm is Off
+					if (alarmState == 4) continue; // Skip if alarm is Off
 
-				ImU32 task_color = ImGui::ColorConvertFloat4ToU32(alarm_color);
+					ImU32 task_color = ImGui::ColorConvertFloat4ToU32(alarm_color);
 
-				std::unordered_map<int, std::string> alarm_state_map = {
-					{1, "Not Ready"},
-					{2, "Ready"},
-					{3, "Active"},
-					{4, "Off"} // Not shown but safe fallback
-				};
+					std::unordered_map<int, std::string> alarm_state_map = {
+						{1, "Not Ready"},
+						{2, "Ready"},
+						{3, "Active"},
+						{4, "Off"} // Not shown but safe fallback
+					};
 
-				std::string alarm_status = alarm_state_map.count(alarmState) ? alarm_state_map[alarmState] : "Unknown";
+					std::string alarm_status = alarm_state_map.count(alarmState) ? alarm_state_map[alarmState] : "Unknown";
 
-				auto distance = CalculateDistance(local_mec->get_net_location(), alarmLocation);
-				double distanceDouble = std::stod(distance);
+					auto distance = CalculateDistance(local_mec->get_net_location(), alarmLocation);
+					double distanceDouble = std::stod(distance);
 
-				if (distanceDouble <= esp_max_distance) {
-					vector3 screen_position{};
-					if (util::w2s(alarmLocation, last_frame_cached.pov, screen_position)) {
-						std::string name_norm = "[ALARM][" + alarm_status + "]" + (task_object_distance ? "[" + distance + "m]" : "");
-						int text_width = name_norm.length() * 5;
-						screen_position.x -= text_width / 2;
+					if (distanceDouble <= esp_max_distance) {
+						vector3 screen_position{};
+						if (util::w2s(alarmLocation, last_frame_cached.pov, screen_position)) {
+							std::string name_norm = "[ALARM][" + alarm_status + "]" + (task_object_distance ? "[" + distance + "m]" : "");
+							int text_width = name_norm.length() * 5;
+							screen_position.x -= text_width / 2;
 
-						overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
-						//alarm->set_state(2);
+							overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
+							//alarm->set_state(2);
+						}
 					}
 				}
 			}
+
 		}
 	}
 

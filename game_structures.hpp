@@ -572,8 +572,8 @@ namespace protocol {
 			};
 			class u_data_skin_ghost : public u_object {
 			public:
-				OFFSET(0x50, mesh_h, u_static_mesh*);
-				OFFSET(0x58, mesh_v, u_static_mesh*);
+				OFFSET(0x70, mesh_h, u_static_mesh*);
+				OFFSET(0x78, mesh_v, u_static_mesh*);
 			};
 			class u_save_skin : public u_object {
 			public:
@@ -591,10 +591,10 @@ namespace protocol {
 			};
 			class u_data_item : public u_object {
 			public:
-				GET_OFFSET(0x30, name, fstring);
-				GET_OFFSET(0x120, use_name, fstring);
-				OFFSET(0x1A0, throw_type, u_data_item_throwtype*);
-				OFFSET(0x190, can_inventory, bool);
+				GET_OFFSET(0x38, name, fstring);
+				GET_OFFSET(0x128, use_name, fstring);
+				OFFSET(0x1A8, throw_type, u_data_item_throwtype*);
+				OFFSET(0x198, can_inventory, bool);
 			};
 			struct FStr_Item {
 				u_data_item* Data_18;
@@ -615,53 +615,53 @@ namespace protocol {
 			};
 			class a_voice_source : public u_object {
 			public:
-				OFFSET(0x2C8, target_distance, float);
-				OFFSET(0x310, deviation_ratio, double);
-				OFFSET(0x318, delta, float);
-				OFFSET(0x320, distance_factor, double);
+				OFFSET(0x2E0, target_distance, float);
+				OFFSET(0x328, deviation_ratio, double);
+				OFFSET(0x330, delta, float);
+				OFFSET(0x338, distance_factor, double);
 			};
 			class u_data_melee : public u_data_item {
 			public:
-				GET_OFFSET(0x02C8, melee_type, u_data_meleetype*)
+				GET_OFFSET(0x02D8, melee_type, u_data_meleetype*)
 			};
 			class u_data_gun : public u_data_item {
 			public:
-				GET_OFFSET(0x2B8, am_hand_fire, uintptr_t);
-				GET_OFFSET(0x2C0, am_body_fire, uintptr_t);
-				OFFSET(0x2C8, damage, int32_t);
-				OFFSET(0x2CC, crit, int32_t);
-				GET_OFFSET(0x2D0, stamina_damage, int32_t);
-				GET_OFFSET(0x2D4, crit_stamina, int32_t);
-				OFFSET(0x2D8, fire_rate, double);
-				OFFSET(0x2E0, auto_fire, bool);
-				GET_OFFSET(0x2E4, impact_type, int32_t);
-				OFFSET(0x2E8, recoil_spread, double);
-				OFFSET(0x2F0, recoil_interp, double);
-				OFFSET(0x2F8, recoil_recover, double);
-				OFFSET(0x300, offset_vertical, double);
-				OFFSET(0x308, offset_horizontal, double);
-				OFFSET(0x310, recoil_elevation, double);
-				OFFSET(0x318, shot_oscillation, double);
-				OFFSET(0x320, stand_precision, double);
-				OFFSET(0x328, stand_oscillation, double);
-				OFFSET(0x330, walk_precision, double);
-				OFFSET(0x338, walk_oscillation, double);
-				OFFSET(0x340, run_precision, double);
-				OFFSET(0x348, run_oscillation, double);
-				OFFSET(0x350, air_precision, double);
-				OFFSET(0x358, precision_exhausted, double);
-				OFFSET(0x360, precision_reactivity, double);
-				OFFSET(0x368, sprint_recover, double);
-				OFFSET(0x370, oscillation_reactivity, double);
-				OFFSET(0x378, recoil_reactivity, double);
-				GET_OFFSET(0x380, pattern, int32_t);
-				OFFSET(0x388, shake_intensity, double);
-				OFFSET(0x390, capacity, int32_t);
-				OFFSET(0x398, stun, double);
-				GET_OFFSET(0x3A0, stamina_usage, int32_t);
-				GET_OFFSET(0x3A8, pattern_recoil, uintptr_t);
-				GET_OFFSET(0x3B0, pattern_spread, uintptr_t);
-				GET_OFFSET(0x3B8, pattern_effects, uintptr_t);
+				GET_OFFSET(0x2C8, am_hand_fire, uintptr_t);
+				GET_OFFSET(0x2D0, am_body_fire, uintptr_t);
+				OFFSET(0x2D8, damage, int32_t);
+				OFFSET(0x2DC, crit, int32_t);
+				GET_OFFSET(0x2E0, stamina_damage, int32_t);
+				GET_OFFSET(0x2E4, crit_stamina, int32_t);
+				OFFSET(0x2E8, fire_rate, double);
+				OFFSET(0x2F0, auto_fire, bool);
+				GET_OFFSET(0x2F4, impact_type, int32_t);
+				OFFSET(0x2F8, recoil_spread, double);
+				OFFSET(0x300, recoil_interp, double);
+				OFFSET(0x308, recoil_recover, double);
+				OFFSET(0x310, offset_vertical, double);
+				OFFSET(0x318, offset_horizontal, double);
+				OFFSET(0x320, recoil_elevation, double);
+				OFFSET(0x328, shot_oscillation, double);
+				OFFSET(0x330, stand_precision, double);
+				OFFSET(0x338, stand_oscillation, double);
+				OFFSET(0x340, walk_precision, double);
+				OFFSET(0x348, walk_oscillation, double);
+				OFFSET(0x350, run_precision, double);
+				OFFSET(0x358, run_oscillation, double);
+				OFFSET(0x360, air_precision, double);
+				OFFSET(0x368, precision_exhausted, double);
+				OFFSET(0x370, precision_reactivity, double);
+				OFFSET(0x378, sprint_recover, double);
+				OFFSET(0x380, oscillation_reactivity, double);
+				OFFSET(0x388, recoil_reactivity, double);
+				GET_OFFSET(0x390, pattern, int32_t);
+				OFFSET(0x398, shake_intensity, double);
+				OFFSET(0x3A0, capacity, int32_t);
+				OFFSET(0x3A8, stun, double);
+				GET_OFFSET(0x3B0, stamina_usage, int32_t);
+				GET_OFFSET(0x3B8, pattern_recoil, uintptr_t);
+				GET_OFFSET(0x3C0, pattern_spread, uintptr_t);
+				GET_OFFSET(0x3C8, pattern_effects, uintptr_t);
 			};
 			class world_item : public a_actor {
 			public:
@@ -681,13 +681,6 @@ namespace protocol {
 				OFFSET(0x0300, selected_weapon_qsdsf, u_data_gun*);
 				OFFSET(0x0310, selected_weapon, int);
 			};
-			class uw_weaponcase_ui_c : public u_object {
-			public:
-				OFFSET(0x02E0, case_open, bool);
-				OFFSET(0x02F0, item_slot, a_itemslot_c*);
-				OFFSET(0x02E8, selected_weapon_qsdsf, u_data_gun*);
-				OFFSET(0x02F8, selected_weapon, int);
-			};
 			class a_weapon_case_code_c : public a_actor {
 			public:
 				OFFSET(0x02D8, default_scene_root, u_scene_component*);
@@ -698,7 +691,6 @@ namespace protocol {
 				OFFSET(0x0388, box_to_open, a_weapon_case_box_c*);
 				OFFSET(0x0358, step, FStr_WeaponCase_Step);
 				OFFSET(0x0300, result, FStr_WeaponCase_Result);
-				OFFSET(0x02E0, screen, uw_weaponcase_ui_c*);
 				OFFSET(0x0398, open_delay, INT32);
 				OFFSET(0x03A0, opening_timer, FTimerHandle);
 			};
@@ -790,6 +782,17 @@ namespace protocol {
 				GET_OFFSET(0x0380, target_pc, t_array<a_data_pc_c*>);
 				GET_OFFSET(0x0390, task_source_pc, t_array<a_data_pc_c*>);
 				GET_OFFSET(0x03A0, task_target_pc, t_array<a_data_pc_c*>);
+			};
+			class a_rez_charger_c : public a_actor {
+			public:
+				GET_OFFSET(0x0308, root, u_scene_component*);
+				GET_OFFSET(0x0360, rez, a_itemslot_c*);
+				GET_OFFSET(0x0358, battery_l, a_itemslot_c*);
+				GET_OFFSET(0x0340, battery_r, a_itemslot_c*);
+				GET_OFFSET(0x0368, charge_l, int);
+				GET_OFFSET(0x0350, charge_r, int);
+				GET_OFFSET(0x0318, process, int);
+				GET_OFFSET(0x0338, state, int); // 0, 1, 2, 3, 4, 5, 6, 7
 			};
 			class a_alimbox_c : public a_actor {
 			public:

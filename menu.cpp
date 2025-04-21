@@ -126,7 +126,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.4");
+		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.5");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -147,6 +147,7 @@ void menu::draw()
 		if (ImGui::Selectable("AIMBOT", selected_tab == 5)) selected_tab = 5;
 		ImGui::Separator();
 		ImGui::Text("SETTINGS");
+		ImHotkey("##MenuHotkey", &menu_hotkey);
 		if (ImGui::Button("Save")) {
 			SaveConfig();
 		}
@@ -258,6 +259,7 @@ void menu::draw()
 							ImGui::ColorEdit4("Computers Color", (float*)&task_computer_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Scanner Color", (float*)&task_scanner_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Alarm Color", (float*)&alarm_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("RezCharger Color", (float*)&rez_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
@@ -273,7 +275,10 @@ void menu::draw()
 							ImGui::Checkbox("Pizzushi##TaskLocation", &task_pizzushi);
 							ImGui::Checkbox("Computers##TaskLocation", &task_computers);
 							ImGui::Checkbox("Scanner##TaskLocation", &task_scanners);
+						}
+						if (ImGui::CollapsingHeader("Object Locations##WorldESPObject", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Checkbox("Alarm##AlarmLocation", &alarm_esp);
+							ImGui::Checkbox("RezCharger##RezLocation", &rez_esp);
 						}
 						ImGui::EndChild();
 
@@ -366,10 +371,12 @@ void menu::draw()
 							ImGui::ColorEdit4("Battery Color", (float*)&battery_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Screw Driver Color", (float*)&screw_driver_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Container Color", (float*)&container_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Egg Color", (float*)&egg_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Defib Color", (float*)&defib_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 7.5;
+						calculatedHeight += itemHeight * 8.5;
 
 						ImGui::EndTabItem();
 					}
@@ -633,7 +640,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
@@ -920,6 +927,15 @@ void menu::draw()
 							local_mec->set_hand_state(hand_state);
 						}
 					}
+					else if (hand_item_name == "DEFIBRILLATOR") {
+						int charge_percentage = hand_state.Value_8;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderInt("##HandCharge%", &charge_percentage, 0, 100, "Charge: %d%")) {
+							hand_state.Value_8 = charge_percentage;
+							local_mec->set_hand_state(hand_state);
+						}
+					}
 					else if (hand_item_name == "REVOLVER" || hand_item_name == "PISTOL" || hand_item_name == "SHORTY" || hand_item_name == "SMG" || hand_item_name == "RIFLE" || hand_item_name == "SHOTGUN") {
 						int ammo = hand_state.Value_8;
 
@@ -943,7 +959,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
@@ -1007,7 +1023,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
@@ -1294,6 +1310,15 @@ void menu::draw()
 							local_mec->set_bag_state(bag_state);
 						}
 					}
+					else if (bag_item_name == "DEFIBRILLATOR") {
+						int charge_percentage = bag_state.Value_8;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::SliderInt("##%", &charge_percentage, 0, 100, "Charge: %d%")) {
+							bag_state.Value_8 = charge_percentage;
+							local_mec->set_bag_state(bag_state);
+						}
+					}
 					else if (bag_item_name == "REVOLVER" || bag_item_name == "PISTOL" || bag_item_name == "SHORTY" || bag_item_name == "SMG" || bag_item_name == "RIFLE" || bag_item_name == "SHOTGUN") {
 						int ammo = bag_state.Value_8;
 
@@ -1317,7 +1342,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
