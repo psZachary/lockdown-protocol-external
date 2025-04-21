@@ -154,12 +154,15 @@ void menu::draw()
 		if (ImGui::Button("Reload")) {
 			LoadConfig();
 		}
-		/*
-		if (ImGui::Button("Save Classes")) {
-			std::thread save_classes_thread(SaveClasses);
-			save_classes_thread.detach();
+		ImGui::Separator;
+		ImGui::Checkbox("Debug##Debugginng", &isDebugging);
+		if (isDebugging) {
+			if (ImGui::Button("Actors")) {
+				std::thread save_classes_thread(SaveClasses);
+				save_classes_thread.detach();
+			}
 		}
-		*/
+
 		ImGui::EndChild();
 
 		ImGui::SameLine();
@@ -640,7 +643,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
@@ -732,6 +735,16 @@ void menu::draw()
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##HandRiceType", &rice_value, rice_types, IM_ARRAYSIZE(rice_types))) {
 							hand_state.Value_8 = rice_value + 1;
+							local_mec->set_hand_state(hand_state);
+						}
+					}
+					else if (hand_item_name == "EGG") {
+						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan" };
+						int egg_value = hand_state.Value_8;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##EggType", &egg_value, egg_types, IM_ARRAYSIZE(egg_types))) {
+							hand_state.Value_8 = egg_value;
 							local_mec->set_hand_state(hand_state);
 						}
 					}
@@ -959,7 +972,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
@@ -1023,7 +1036,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
@@ -1114,6 +1127,16 @@ void menu::draw()
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 						if (ImGui::Combo("##RiceType", &rice_value, rice_types, IM_ARRAYSIZE(rice_types))) {
 							bag_state.Value_8 = rice_value + 1;
+							local_mec->set_bag_state(bag_state);
+						}
+					}
+					else if (bag_item_name == "EGG") {
+						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan"};
+						int egg_value = bag_state.Value_8;
+
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						if (ImGui::Combo("##EggType", &egg_value, egg_types, IM_ARRAYSIZE(egg_types))) {
+							bag_state.Value_8 = egg_value;
 							local_mec->set_bag_state(bag_state);
 						}
 					}
@@ -1342,7 +1365,7 @@ void menu::draw()
 						PopulateUniqueItems();
 
 						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "DEFIBRILLATOR"};
+						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
 
 						// Add special items if not already present
 						for (const auto& special_item : special_items) {
@@ -1651,7 +1674,7 @@ void menu::draw()
 		}
 
 		ImGui::PushFont(globals::default_font.im_font);
-		
+
 
 		// Render Dissidents
 		if (ImGui::CollapsingHeader("Dissidents", ImGuiTreeNodeFlags_DefaultOpen)) {

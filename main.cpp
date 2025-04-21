@@ -39,19 +39,22 @@ static int current_target_index = 0;
 
 void InitializeItems() {
 	std::cout << "Initializing item data..." << std::endl;
-	itemData["KNIFE"] = ItemProperties(0.1, 0.4, 0.4, 130, 20);
+	itemData["KNIFE"] = ItemProperties(0.1, 0.4, 0.4, 82, 14);
 	itemData["PACKAGE"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["GAZ BOTTLE"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["FUSE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+	itemData["EGG"] = ItemProperties(0.2, 0.7, -0.8, 82, 14);
 	itemData["SCREW DRIVER"] = ItemProperties(0.1, 0.4, 0.1, 130, 15);
 	itemData["CASSETTE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["BATTERY"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["VENT FILTER"] = ItemProperties(0.3, 1, -1, 180, 40);
+	itemData["DEFIBRILLATOR"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["FISH"] = ItemProperties(0.2, 0.7, 1, 130, 20);
 	itemData["RICE"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["CONTAINER"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["C4"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["NAME"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
+	itemData["PIZZUSHI"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
 	itemData["SAMPLE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["PISTOL"] = ItemProperties(false, 0.1, 5, 1, 30, 0.8, 1.5, 0.3, 40, 0.5, 4, 1);
 	itemData["SHORTY"] = ItemProperties(false, 0.3, 5, 5, 10, 1, 2.5, 0.3, 20, 30, 0.6, 40);
@@ -383,23 +386,26 @@ static void render_callback() {
 	auto hand_item = local_mec->get_hand_item();
 	auto melee_item_data = (u_data_melee*)hand_item;
 
-	//if (hand_item) {
-	//    auto mtype = melee_item_data->get_melee_type();
-	//    // Retrieve the properties
-	//    double castTime = mtype->get_cast_time();
-	//    double recoverTime = mtype->get_recover_time();
-	//    double stun = mtype->get_stun();
-	//    int cost = mtype->get_cost();
-	//    int range = mtype->get_range();
+	if (isDebugging) {
+		if (hand_item) {
+			auto mtype = melee_item_data->get_melee_type();
+			// Retrieve the properties
+			double castTime = mtype->get_cast_time();
+			double recoverTime = mtype->get_recover_time();
+			double stun = mtype->get_stun();
+			int cost = mtype->get_cost();
+			int range = mtype->get_range();
 
-	//    // Format and output the string to the console
-	//    std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
-	//    << "ItemProperties(" << castTime << ", "
-	//    << recoverTime << ", "
-	//    << stun << ", "
-	//    << range << ", "
-	//    << cost << ");" << std::endl;
-	//}
+			// Format and output the string to the console
+			std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
+				<< "ItemProperties(" << castTime << ", "
+				<< recoverTime << ", "
+				<< stun << ", "
+				<< range << ", "
+				<< cost << ");" << std::endl;
+		}
+	}
+
 
 	if (aimbot) {
 		// Draw FOV circle

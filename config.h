@@ -24,6 +24,8 @@ namespace config {
 	inline int aimbot_hold_key = VK_LMENU;
 	inline int player_list_hotkey = VK_NEXT;
 
+	inline bool isDebugging = false;
+
 	// Player
 	inline bool speedhack = false;
 	inline double max_speed = 2000.00; // 800.0 is default value run speed
