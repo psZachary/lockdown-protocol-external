@@ -18,12 +18,12 @@ namespace util {
 namespace protocol {
 	namespace engine {
 
-		constexpr uintptr_t GWORLD = 142783216;
-		constexpr uintptr_t GNAMES = 140292800;
-		constexpr uintptr_t GOBJECTS = 141224496;
-		constexpr uintptr_t PROCESSEVENT = 21281648;
+		constexpr uintptr_t GWORLD = 143247552;
+		constexpr uintptr_t GNAMES = 140767680;
+		constexpr uintptr_t GOBJECTS = 141699376;
+		constexpr uintptr_t PROCESSEVENT = 21283536;
 		constexpr uintptr_t PROCESSEVENT_INDEX = 79;
-		constexpr uintptr_t APPENDSTRING = 19027616;
+		constexpr uintptr_t APPENDSTRING = 19029504;
 
 		namespace sdk {
 			struct fuobjectitem
