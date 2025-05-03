@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "game_structures.hpp"
 #include <d3d11.h>
+#include <unordered_set>
 
 namespace globals {
 	using namespace protocol::engine::sdk;
@@ -38,4 +39,6 @@ namespace globals {
 	};
 
 	inline s_font default_font;
+
+	inline std::unordered_set<std::string> inserted_names;
 }

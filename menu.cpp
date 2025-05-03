@@ -25,6 +25,8 @@ std::vector<std::string> item_names;
 std::unordered_map<std::string, u_data_item*> unique_item_data;
 static std::unordered_set<std::string> manually_added_items;
 
+static bool has_populated_items = false;
+
 void SaveClasses() {
 	// Open file for writing
 	std::ofstream file("classnames.txt", std::ios::out | std::ios::app); // Append mode to preserve data
@@ -64,24 +66,33 @@ void MenuTooltip(const char* text) {
 	}
 }
 
-void PopulateUniqueItems() {
-	static std::unordered_set<std::string> seen_names; // Tracks all items already added to the list
+void menu::PopulateUniqueItems(std::unordered_set<std::string>& inserted_names) {
+	// Set of names we know should ONLY come from GObjects, not world cache
+	static const std::unordered_set<std::string> exclude_from_world = {
+		"PIZZUSHI",
+		"DETONATOR"
+	};
 
 	for (auto& item : world_item_cache) {
 		if (!item) continue;
-
 		auto item_data = item->get_data();
+		if (!item_data) continue;
+
 		std::string name = item_data->get_name().read_string();
 
-		// Skip if the item is already manually added or seen
-		if (manually_added_items.find(name) != manually_added_items.end() || seen_names.find(name) != seen_names.end()) {
+		// Skip bad or fallback names
+		if (name.empty() || name == "NAME" || name.length() > 64)
 			continue;
-		}
 
-		// Add the item to the unique list
-		seen_names.insert(name);
-		unique_item_data[name] = item_data;
-		item_names.push_back(name);
+		// Skip if this item should only come from GObjects
+		if (exclude_from_world.contains(name))
+			continue;
+
+		// Insert unique entries
+		if (inserted_names.insert(name).second) {
+			unique_item_data[name] = item_data;
+			item_names.push_back(name);
+		}
 	}
 }
 
@@ -526,6 +537,8 @@ void menu::draw()
 				ImHotkey("##MaxDamageHotkey", &max_damage_hotkey);
 
 				ImGui::Checkbox("Infinite Ammo", &infinite_ammo);
+
+				ImGui::Checkbox("Impact Change", &impact_change);
 			}
 			ImGui::EndChild();
 
@@ -610,6 +623,14 @@ void menu::draw()
 					}
 				}
 			}
+			if (impact_change) {
+				float imact_float = static_cast<float>(impact_type);
+
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+				if (ImGui::SliderFloat("##imact_float", &imact_float, -500.0f, 1.0f, "impact: %.02f")) {
+					impact_type = static_cast<double>(imact_float);
+				}
+			}
 			ImGui::EndChild();
 			calculatedHeight += itemHeight * 12;
 		}
@@ -633,56 +654,68 @@ void menu::draw()
 					ImGui::Text("Hand Item: %s", display_name.c_str());
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 70);
+
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
-						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
-							selected_item_name = "EMPTY";
-							local_mec->set_hand_item(nullptr); // Clear the hand item
+						item_names.clear();
+						inserted_names.clear();
+
+						// Add special items
+						std::unordered_set<std::string> special_items = {
+							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+						};
+
+						for (const auto& special_item : special_items) {
+							item_names.push_back(special_item);
+							inserted_names.insert(special_item);
 						}
 
-						// Populate world items
-						PopulateUniqueItems();
+						// Populate world items only once
+						if (!has_populated_items && local_mec) {
+							PopulateUniqueItems(inserted_names);  // Appends to unique_item_data
+							has_populated_items = true;
+						}
 
-						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
-
-						// Add special items if not already present
-						for (const auto& special_item : special_items) {
-							if (manually_added_items.find(special_item) == manually_added_items.end()) {
-								manually_added_items.insert(special_item);
-								item_names.push_back(special_item);
+						// Add items from unique_item_data (cached)
+						for (const auto& [name, _] : unique_item_data) {
+							if (inserted_names.insert(name).second) {
+								item_names.push_back(name);
 							}
 						}
 
-						// Render dropdown items
+						// Always allow EMPTY
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_hand_item(nullptr); 
+						}
+
+						// Render all items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Handle special items
-								if (special_items.find(item_name) != special_items.end()) {
-									auto item_data = AssignToItemData(item_name);
-									if (item_data) {
-										local_mec->set_hand_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << item_name << std::endl;
-									}
+								u_data_item* item_data = nullptr;
+								if (special_items.count(item_name)) {
+									item_data = AssignToItemData(item_name);
 								}
-								else {
-									// Handle items from world cache
-									auto item_data = unique_item_data[item_name];
-									if (item_data) {
-										local_mec->set_hand_item(item_data);
-									}
+								else if (unique_item_data.count(item_name)) {
+									item_data = unique_item_data[item_name];
 								}
 
-								// Reset selection
+								if (item_data) {
+									local_mec->set_hand_item(item_data); 
+								}
+								else {
+									std::cout << "Failed to assign item data for: " << item_name << std::endl;
+								}
+
 								selected_item_name.clear();
 							}
 						}
 
 						ImGui::EndCombo();
 					}
+
 					// Show the checkbox for locking
 					ImGui::SameLine();
 					if (ImGui::Checkbox("Lock", &lock_hand_item)) {
@@ -738,7 +771,7 @@ void menu::draw()
 							local_mec->set_hand_state(hand_state);
 						}
 					}
-					else if (hand_item_name == "EGG") {
+					else if (hand_item_name == "EGG" || hand_item_name == "EASTEREGG") {
 						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan" };
 						int egg_value = hand_state.Value_8;
 
@@ -826,7 +859,7 @@ void menu::draw()
 							local_mec->set_hand_state(hand_state);
 						}
 					}
-					else if (hand_item_name == "NAME") {
+					else if (hand_item_name == "NAME" || hand_item_name == "PIZZUSHI") {
 						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
 						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
 						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
@@ -863,44 +896,7 @@ void menu::draw()
 						hand_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
 						local_mec->set_hand_state(hand_state);
 					}
-					else if (hand_item_name == "PIZZUSHI") {
-						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
-						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
-						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
-
-						// Default value for Value_8 (1st option for rice, fish, and container)
-						if (hand_state.Value_8 <= 0) {
-							hand_state.Value_8 = 111; // Default to "White Rice", "Salmon", "Green"
-							local_mec->set_hand_state(hand_state); // Ensure it's set in-game
-						}
-
-						int value = hand_state.Value_8;
-						int rice_value = value / 100;
-						int fish_value = (value / 10) % 10;
-						int container_value = value % 10;
-
-						// Initialize indices with default values (0 for the first option)
-						int rice_index = (rice_value > 0) ? rice_value - 1 : 0;
-						int fish_index = (fish_value > 0) ? fish_value - 1 : 0;
-						int container_index = (container_value > 0) ? container_value - 1 : 0;
-
-						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##HandRice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
-							rice_value = rice_index + 1;
-						}
-						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##HandFish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
-							fish_value = fish_index + 1;
-						}
-						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##HandContainerColor", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
-							container_value = container_index + 1;
-						}
-
-						hand_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
-						local_mec->set_hand_state(hand_state);
-					} // Pizzushi
-					else if (hand_item_name == "CASSETTE") {
+					else if (hand_item_name == "CASSETTE" || hand_item_name == "MUSIC") {
 						const char* cassette_titles[] = {
 							"KHARMA",
 							"Who Am I",
@@ -940,7 +936,7 @@ void menu::draw()
 							local_mec->set_hand_state(hand_state);
 						}
 					}
-					else if (hand_item_name == "DEFIBRILLATOR") {
+					else if (hand_item_name == "DEFIBRILLATOR" || hand_item_name == "REZ") {
 						int charge_percentage = hand_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -964,48 +960,59 @@ void menu::draw()
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeHandItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
-						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
-							selected_item_name = "EMPTY";
-							local_mec->set_hand_item(nullptr); // Clear the hand item
+						item_names.clear();
+						inserted_names.clear();
+
+						// Add special items
+						std::unordered_set<std::string> special_items = {
+							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+						};
+
+						for (const auto& special_item : special_items) {
+							item_names.push_back(special_item);
+							inserted_names.insert(special_item);
 						}
 
-						PopulateUniqueItems();
+						// Populate world items only once
+						if (!has_populated_items && local_mec) {
+							PopulateUniqueItems(inserted_names);  // Appends to unique_item_data
+							has_populated_items = true;
+						}
 
-						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
-
-						// Add special items if not already present
-						for (const auto& special_item : special_items) {
-							if (manually_added_items.find(special_item) == manually_added_items.end()) {
-								manually_added_items.insert(special_item);
-								item_names.push_back(special_item);
+						// Add items from unique_item_data (cached)
+						for (const auto& [name, _] : unique_item_data) {
+							if (inserted_names.insert(name).second) {
+								item_names.push_back(name);
 							}
 						}
 
-						// Render dropdown items
+						// Always allow EMPTY
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_hand_item(nullptr);
+						}
+
+						// Render all items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Handle special items
-								if (special_items.find(item_name) != special_items.end()) {
-									auto item_data = AssignToItemData(item_name);
-									if (item_data) {
-										local_mec->set_hand_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << item_name << std::endl;
-									}
+								u_data_item* item_data = nullptr;
+								if (special_items.count(item_name)) {
+									item_data = AssignToItemData(item_name);
 								}
-								else {
-									// Handle items from world cache
-									auto item_data = unique_item_data[item_name];
-									if (item_data) {
-										local_mec->set_hand_item(item_data);
-									}
+								else if (unique_item_data.count(item_name)) {
+									item_data = unique_item_data[item_name];
 								}
 
-								// Reset selection
+								if (item_data) {
+									local_mec->set_hand_item(item_data);
+								}
+								else {
+									std::cout << "Failed to assign item data for: " << item_name << std::endl;
+								}
+
 								selected_item_name.clear();
 							}
 						}
@@ -1026,56 +1033,69 @@ void menu::draw()
 					}
 					ImGui::Text("Bag Item: %s", display_name.c_str());
 					ImGui::SameLine();
+
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 70);
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
-						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
-							selected_item_name = "EMPTY";
-							local_mec->set_bag_item(nullptr); // Clear the bag item
+						item_names.clear();
+						inserted_names.clear();
+
+						// Add special items
+						std::unordered_set<std::string> special_items = {
+							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+						};
+
+						for (const auto& special_item : special_items) {
+							item_names.push_back(special_item);
+							inserted_names.insert(special_item);
 						}
 
-						PopulateUniqueItems();
+						// Populate world items only once
+						if (!has_populated_items && local_mec) {
+							PopulateUniqueItems(inserted_names);  // Appends to unique_item_data
+							has_populated_items = true;
+						}
 
-						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
-
-						// Add special items if not already present
-						for (const auto& special_item : special_items) {
-							if (manually_added_items.find(special_item) == manually_added_items.end()) {
-								manually_added_items.insert(special_item);
-								item_names.push_back(special_item);
+						// Add items from unique_item_data (cached)
+						for (const auto& [name, _] : unique_item_data) {
+							if (inserted_names.insert(name).second) {
+								item_names.push_back(name);
 							}
 						}
 
-						// Render dropdown items
+						// Always allow EMPTY
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_bag_item(nullptr);
+						}
+
+						// Render all items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Handle special items
-								if (special_items.find(item_name) != special_items.end()) {
-									auto item_data = AssignToItemData(item_name);
-									if (item_data) {
-										local_mec->set_bag_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << item_name << std::endl;
-									}
+								u_data_item* item_data = nullptr;
+								if (special_items.count(item_name)) {
+									item_data = AssignToItemData(item_name);
 								}
-								else {
-									// Handle items from world cache
-									auto item_data = unique_item_data[item_name];
-									if (item_data) {
-										local_mec->set_bag_item(item_data);
-									}
+								else if (unique_item_data.count(item_name)) {
+									item_data = unique_item_data[item_name];
 								}
 
-								// Reset selection
+								if (item_data) {
+									local_mec->set_bag_item(item_data);
+								}
+								else {
+									std::cout << "Failed to assign item data for: " << item_name << std::endl;
+								}
+
 								selected_item_name.clear();
 							}
 						}
 
 						ImGui::EndCombo();
 					}
+
 					// Show the checkbox for locking
 					ImGui::SameLine();
 					if (ImGui::Checkbox("Lock", &lock_bag_item)) {
@@ -1130,8 +1150,8 @@ void menu::draw()
 							local_mec->set_bag_state(bag_state);
 						}
 					}
-					else if (bag_item_name == "EGG") {
-						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan"};
+					else if (bag_item_name == "EGG" || bag_item_name == "EASTEREGG") {
+						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan" };
 						int egg_value = bag_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -1218,7 +1238,7 @@ void menu::draw()
 							local_mec->set_bag_state(bag_state);
 						}
 					}
-					else if (bag_item_name == "NAME") { // Pizzushi
+					else if (bag_item_name == "PIZZUSHI" || bag_item_name == "NAME") { // Pizzushi
 						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
 						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
 						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
@@ -1255,44 +1275,7 @@ void menu::draw()
 						bag_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
 						local_mec->set_bag_state(bag_state);
 					}
-					else if (bag_item_name == "PIZZUSHI") { // Pizzushi
-						const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
-						const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
-						const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
-
-						// Default value for Value_8 (1st option for rice, fish, and container)
-						if (bag_state.Value_8 <= 0) {
-							bag_state.Value_8 = 111; // Default to "White Rice", "Salmon", "Green"
-							local_mec->set_bag_state(bag_state); // Ensure it's set in-game
-						}
-
-						int value = bag_state.Value_8;
-						int rice_value = value / 100;
-						int fish_value = (value / 10) % 10;
-						int container_value = value % 10;
-
-						// Initialize indices with default values (0 for the first option)
-						int rice_index = (rice_value > 0) ? rice_value - 1 : 0;
-						int fish_index = (fish_value > 0) ? fish_value - 1 : 0;
-						int container_index = (container_value > 0) ? container_value - 1 : 0;
-
-						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Rice", &rice_index, rice_options, IM_ARRAYSIZE(rice_options))) {
-							rice_value = rice_index + 1;
-						}
-						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Fish", &fish_index, fish_options, IM_ARRAYSIZE(fish_options))) {
-							fish_value = fish_index + 1;
-						}
-						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						if (ImGui::Combo("##Container Color", &container_index, container_colors, IM_ARRAYSIZE(container_colors))) {
-							container_value = container_index + 1;
-						}
-
-						bag_state.Value_8 = (rice_value * 100) + (fish_value * 10) + container_value;
-						local_mec->set_bag_state(bag_state);
-					}
-					else if (bag_item_name == "CASSETTE") {
+					else if (bag_item_name == "CASSETTE" || bag_item_name == "MUSIC") {
 						const char* cassette_titles[] = {
 									"KHARMA",
 									"Who Am I",
@@ -1333,7 +1316,7 @@ void menu::draw()
 							local_mec->set_bag_state(bag_state);
 						}
 					}
-					else if (bag_item_name == "DEFIBRILLATOR") {
+					else if (bag_item_name == "DEFIBRILLATOR" || bag_item_name == "REZ") {
 						int charge_percentage = bag_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -1357,48 +1340,59 @@ void menu::draw()
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 					if (ImGui::BeginCombo("##ChangeBagItem", selected_item_name.empty() ? "Select Item" : selected_item_name.c_str())) {
-						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
-							selected_item_name = "EMPTY";
-							local_mec->set_bag_item(nullptr); // Clear the bag item
+						item_names.clear();
+						inserted_names.clear();
+
+						// Add special items
+						std::unordered_set<std::string> special_items = {
+							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+						};
+
+						for (const auto& special_item : special_items) {
+							item_names.push_back(special_item);
+							inserted_names.insert(special_item);
 						}
 
-						PopulateUniqueItems();
+						// Populate world items only once
+						if (!has_populated_items && local_mec) {
+							PopulateUniqueItems(inserted_names);  // Appends to unique_item_data
+							has_populated_items = true;
+						}
 
-						// List of manually added items
-						std::unordered_set<std::string> special_items = { "SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE", "SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI" };
-
-						// Add special items if not already present
-						for (const auto& special_item : special_items) {
-							if (manually_added_items.find(special_item) == manually_added_items.end()) {
-								manually_added_items.insert(special_item);
-								item_names.push_back(special_item);
+						// Add items from unique_item_data (cached)
+						for (const auto& [name, _] : unique_item_data) {
+							if (inserted_names.insert(name).second) {
+								item_names.push_back(name);
 							}
 						}
 
-						// Render dropdown items
+						// Always allow EMPTY
+						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
+							selected_item_name = "EMPTY";
+							local_mec->set_bag_item(nullptr);
+						}
+
+						// Render all items
 						for (const auto& item_name : item_names) {
 							if (ImGui::Selectable(item_name.c_str(), item_name == selected_item_name)) {
 								selected_item_name = item_name;
 
-								// Handle special items
-								if (special_items.find(item_name) != special_items.end()) {
-									auto item_data = AssignToItemData(item_name);
-									if (item_data) {
-										local_mec->set_bag_item(item_data);
-									}
-									else {
-										std::cout << "Failed to assign item data for: " << item_name << std::endl;
-									}
+								u_data_item* item_data = nullptr;
+								if (special_items.count(item_name)) {
+									item_data = AssignToItemData(item_name);
 								}
-								else {
-									// Handle items from world cache
-									auto item_data = unique_item_data[item_name];
-									if (item_data) {
-										local_mec->set_bag_item(item_data);
-									}
+								else if (unique_item_data.count(item_name)) {
+									item_data = unique_item_data[item_name];
 								}
 
-								// Reset selection
+								if (item_data) {
+									local_mec->set_bag_item(item_data);
+								}
+								else {
+									std::cout << "Failed to assign item data for: " << item_name << std::endl;
+								}
+
 								selected_item_name.clear();
 							}
 						}
@@ -1500,6 +1494,8 @@ void menu::draw()
 				if (aimbot) {
 					ImGui::ColorEdit4("FOV Color", (float*)&fov_color, ImGuiColorEditFlags_AlphaBar);
 				}
+
+				//ImGui::Checkbox("Rainbow Suit", &rainbowsuit);
 			}
 			ImGui::EndChild();
 
@@ -1544,7 +1540,7 @@ void menu::draw()
 				}
 
 				ImGui::EndChild();
-				//calculatedHeight += itemHeight * 6;
+				calculatedHeight += itemHeight * 12;
 			}
 		}
 		ImGui::EndChild();

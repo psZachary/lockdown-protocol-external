@@ -44,11 +44,13 @@ void InitializeItems() {
 	itemData["GAZ BOTTLE"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["FUSE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["EGG"] = ItemProperties(0.2, 0.7, -0.8, 82, 14);
+	itemData["EASTEREGG"] = ItemProperties(0.2, 0.7, -0.8, 82, 14);
 	itemData["SCREW DRIVER"] = ItemProperties(0.1, 0.4, 0.1, 130, 15);
 	itemData["CASSETTE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["BATTERY"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["VENT FILTER"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["DEFIBRILLATOR"] = ItemProperties(0.3, 1, -1, 180, 40);
+	itemData["REZ"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["FISH"] = ItemProperties(0.2, 0.7, 1, 130, 20);
 	itemData["RICE"] = ItemProperties(0.3, 1, -1, 180, 40);
 	itemData["CONTAINER"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
@@ -56,12 +58,12 @@ void InitializeItems() {
 	itemData["NAME"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
 	itemData["PIZZUSHI"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
 	itemData["SAMPLE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
-	itemData["PISTOL"] = ItemProperties(false, 0.1, 5, 1, 30, 0.8, 1.5, 0.3, 40, 0.5, 4, 1);
-	itemData["SHORTY"] = ItemProperties(false, 0.3, 5, 5, 10, 1, 2.5, 0.3, 20, 30, 0.6, 40);
-	itemData["REVOLVER"] = ItemProperties(false, 0.25, 25, 4, 15, 0.8, 2, 0.4, 20, 0.5, 6, 3);
-	itemData["SHOTGUN"] = ItemProperties(true, 0.2, 5, 3, 100, 0.3, 0.8, 0.1, 20, 2, 1, 5);
-	itemData["RIFLE"] = ItemProperties(true, 0.12, 25, 2, 10, 2, 2.5, 0.1, 10, 1, 7, 3);
-	itemData["SMG"] = ItemProperties(true, 0.07, 10, 0.5, 50, 0.6, 1.2, 0.2, 50, 1, 4, 1.5);
+	itemData["PISTOL"] = ItemProperties(false, 0.1, 5, 1, 30, 0.8, 1.5, 0.3, 40, 0.5, 4, 1, 0.8);
+	itemData["SHORTY"] = ItemProperties(false, 0.3, 5, 5, 10, 1, 2.5, 0.3, 20, 30, 0.6, 40, 0.5);
+	itemData["REVOLVER"] = ItemProperties(false, 0.25, 25, 4, 15, 0.8, 2, 0.4, 20, 0.5, 6, 3, 0.5);
+	itemData["SHOTGUN"] = ItemProperties(true, 0.2, 5, 3, 100, 0.3, 0.8, 0.1, 20, 2, 1, 5, 0.25);
+	itemData["RIFLE"] = ItemProperties(true, 0.12, 25, 2, 10, 2, 2.5, 0.1, 10, 1, 7, 3, 0.7);
+	itemData["SMG"] = ItemProperties(true, 0.07, 10, 0.5, 50, 0.6, 1.2, 0.2, 50, 1, 4, 1.5, 0.75);
 }
 
 ItemProperties GetItemProperties(const std::string& itemName) {
@@ -319,10 +321,30 @@ static void cache_useful() {
 
 		// Call PopulateUniqueItems only once after items are populated
 		if (!items_populated && !temp_world_item_cache.empty()) {
-			PopulateUniqueItems();
+			menu::PopulateUniqueItems(inserted_names);
 			items_populated = true;  // Ensure this only happens once
 		}
 	}
+}
+
+inline void StartRainbowSuitThread() {
+	static bool thread_started = false;
+	if (thread_started) return;
+	thread_started = true;
+
+	std::thread([] {
+		int color = 0;
+		while (true) {
+			if (rainbowsuit && local_mec) {
+				int safe_color = color;
+				if (local_mec) {
+					local_mec->set_body_armor_color(safe_color);
+				}
+				color = (color + 1) % 10;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		}
+		}).detach();
 }
 
 static void render_callback() {
@@ -385,24 +407,73 @@ static void render_callback() {
 
 	auto hand_item = local_mec->get_hand_item();
 	auto melee_item_data = (u_data_melee*)hand_item;
+	auto gun_item_data = (u_data_gun*)hand_item;
 
 	if (isDebugging) {
 		if (hand_item) {
 			auto mtype = melee_item_data->get_melee_type();
-			// Retrieve the properties
-			double castTime = mtype->get_cast_time();
-			double recoverTime = mtype->get_recover_time();
-			double stun = mtype->get_stun();
-			int cost = mtype->get_cost();
-			int range = mtype->get_range();
+			/* 
+			if (mtype) {
+				// Retrieve the properties
+				double castTime = mtype->get_cast_time();
+				double recoverTime = mtype->get_recover_time();
+				double stun = mtype->get_stun();
+				int cost = mtype->get_cost();
+				int range = mtype->get_range();
 
+				std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
+					<< "ItemProperties(" << castTime << ", "
+					<< recoverTime << ", "
+					<< stun << ", "
+					<< range << ", "
+					<< cost << ");" << std::endl;
+			}
+			*/
+			auto gun_data = (u_data_gun*)hand_item;
+
+			bool auto_fire = gun_data->get_auto_fire();
+			double fire_rate = gun_data->get_fire_rate();
+			int damage = gun_data->get_damage();
+			double shake = gun_data->get_shake_intensity();
+			double oscill = gun_data->get_oscillation_reactivity();
+			double walk_osc = gun_data->get_walk_oscillation();
+			double run_osc = gun_data->get_run_oscillation();
+			double stand_osc = gun_data->get_stand_oscillation();
+			double recoil = gun_data->get_recoil_reactivity();
+			double walk_prec = gun_data->get_walk_precision();
+			double air_prec = gun_data->get_air_precision();
+			double run_prec = gun_data->get_run_precision();
+			double stun = gun_data->get_stun();
+
+			std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = ItemProperties("
+				<< (auto_fire ? "true" : "false") << ", "
+				<< fire_rate << ", "
+				<< damage << ", "
+				<< shake << ", "
+				<< oscill << ", "
+				<< walk_osc << ", "
+				<< run_osc << ", "
+				<< stand_osc << ", "
+				<< recoil << ", "
+				<< walk_prec << ", "
+				<< air_prec << ", "
+				<< run_prec << ", "
+				<< stun << ");" << std::endl;
+
+
+			/*
 			// Format and output the string to the console
 			std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
-				<< "ItemProperties(" << castTime << ", "
-				<< recoverTime << ", "
-				<< stun << ", "
-				<< range << ", "
-				<< cost << ");" << std::endl;
+				<< "ItemProperties: DMG:" << gun_item_data->get_damage() << ", "
+				<< "Crit: " << gun_item_data->get_crit() << ", "
+				<< "Stam_DMG: " << gun_item_data->get_stamina_damage() << ", "
+				<< "Crit_Stam: " << gun_item_data->get_crit_stamina() << ", "
+				<< "Impact_Type: " << gun_item_data->get_impact_type() << ", "
+				<< "Capacity: " << gun_item_data->get_capacity() << ", "
+				<< "Stun: " << gun_item_data->get_stun() << ", "
+				<< "Stam_Useage: " << gun_item_data->get_stamina_usage() << ", "
+				<< "Fire_Rate: " << gun_item_data->get_fire_rate() << ");" << std::endl;
+			*/
 		}
 	}
 
@@ -559,6 +630,11 @@ static void render_callback() {
 		local_mec->set_health(10000000);
 	}
 
+	if (rainbowsuit) {
+		std::thread rainbowsuit_thread(StartRainbowSuitThread);
+		rainbowsuit_thread.detach();
+	}
+
 	// Track the last tick time for incremental healing
 	static auto last_hp_tick = std::chrono::steady_clock::now();
 	static auto last_stam_tick = std::chrono::steady_clock::now();
@@ -648,7 +724,7 @@ static void render_callback() {
 	}
 
 	if (hand_item) {
-		if (fast_melee || infinite_melee_range) {
+		if (fast_melee || infinite_melee_range || impact_change) {
 			if (util::get_name_from_fname(hand_item->class_private()->fname_index()).find("Data_Melee_C") != std::string::npos) {
 				auto mtype = melee_item_data->get_melee_type();
 
@@ -660,6 +736,9 @@ static void render_callback() {
 				}
 				if (infinite_melee_range) {
 					mtype->set_range(range);
+				}
+				if (impact_change) {
+					mtype->set_stun(impact_change);
 				}
 			}
 		}
@@ -691,7 +770,7 @@ static void render_callback() {
 	}
 
 	if (hand_item) {
-		if (auto_fire || rapid_fire || no_recoil || max_damage) {
+		if (auto_fire || rapid_fire || no_recoil || max_damage || impact_change) {
 			if (util::get_name_from_fname(hand_item->class_private()->fname_index()).find("Data_Gun_C") != std::string::npos) {
 				auto gun_data = (u_data_gun*)hand_item;
 				if (auto_fire) {
@@ -717,6 +796,9 @@ static void render_callback() {
 				}
 				if (max_damage) {
 					gun_data->set_damage(10000);
+				}
+				if (impact_change) {
+					gun_data->set_stun(impact_type);
 				}
 			}
 		}
@@ -749,6 +831,9 @@ static void render_callback() {
 				}
 				if (!max_damage) {
 					gun_data->set_damage(itemprops.damage);
+				}
+				if (!impact_change) {
+					gun_data->set_stun(itemprops.stun);
 				}
 			}
 		}
@@ -947,6 +1032,10 @@ static void render_callback() {
 										info.text = "Clean: " + std::to_string(item_state.Value_8) + "%";
 										info.color = ImGui::ColorConvertFloat4ToU32(vent_filter_color);
 									}
+									else if (item_name == "REZ" || item_name == "DEFIBRILLATOR") {
+										info.text = "Charge: " + std::to_string(item_state.Value_8) + "%";
+										info.color = ImGui::ColorConvertFloat4ToU32(defib_color);
+									}
 									else if (item_name == "BATTERY") {
 										info.text = "Charge: " + std::to_string(item_state.Value_8) + "%";
 										info.color = ImGui::ColorConvertFloat4ToU32(battery_color);
@@ -966,7 +1055,7 @@ static void render_callback() {
 										info.text = std::string(colors[current_value]);
 										info.color = ImGui::ColorConvertFloat4ToU32(container_color);
 									}
-									else if (item_name == "CASSETTE") {
+									else if (item_name == "CASSETTE" || item_name == "MUSIC") {
 										const char* cassette_titles[] = {
 											"KHARMA", "Who Am I", "Burning Wish", "Cake", "Puzzle",
 											"Sun", "Worship", "Royalty (Instrumental)", "Grave"
@@ -979,7 +1068,7 @@ static void render_callback() {
 										}
 										info.color = ImGui::ColorConvertFloat4ToU32(screw_driver_color);
 									}
-									else if (item_name == "NAME") {
+									else if (item_name == "NAME" || item_name == "PIZZUSHI") {
 										const char* rice_options[] = { "White Rice", "Brown Rice", "Black Rice" };
 										const char* fish_options[] = { "Salmon", "Tuna", "Cod", "Shrimp" };
 										const char* container_colors[] = { "Green", "Yellow", "Blue", "White", "Red" };
@@ -1017,6 +1106,15 @@ static void render_callback() {
 											? std::string(sample_colors[index])
 											: "Unknown");
 										info.color = ImGui::ColorConvertFloat4ToU32(sample_color);
+									}
+									else if (item_name == "EGG" || item_name == "EASTEREGG") {
+										const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan" };
+										int egg_index = item_state.Value_8 - 1;
+
+										info.text = ((egg_index >= 0 && egg_index < IM_ARRAYSIZE(egg_types))
+											? std::string(egg_types[egg_index])
+											: "Unknown");
+										info.color = ImGui::ColorConvertFloat4ToU32(rice_color);
 									}
 									else if (item_name == "RICE") {
 										const char* rice_types[] = { "White", "Brown", "Black" };
@@ -1341,7 +1439,7 @@ static void render_callback() {
 			}
 		}
 
-		if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER" || item_name == "EGG" || item_name == "DEFIBRILLATOR") {
+		if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER" || item_name == "EGG" || item_name == "EASTEREGG" || item_name == "DEFIBRILLATOR" || item_name == "REZ") {
 			auto item_root = item->get_root_component();
 			if (!item_root) continue;
 
@@ -1384,10 +1482,51 @@ static void render_callback() {
 						else if (item_name == "SCREW DRIVER") {
 							overlay->draw_text(screen_position, screw_driver_esp_color, name_norm.c_str(), true); // White
 						}
-						else if (item_name == "EGG") {
-							overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true); // green
+						else if (item_name == "EGG" || item_name == "EASTEREGG") {
+							// Calculate text width based on character count and font size
+							std::string name_norm = "[" + item_name + "]" + (secondary_distance ? "[" + distance + "m]" : "");
+
+							if (item_value == 0) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, egg_esp_color, "[Yellow]", true);
+								}
+							}
+							else if (item_value == 1) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									overlay->draw_text(screen_position, egg_esp_color, "[Blue]", true);
+								}
+							}
+							else if (item_value == 2) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, egg_esp_color, "[Green]", true);
+								}
+							}
+							else if (item_value == 3) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, egg_esp_color, "[Pink]", true);
+								}
+							}
+							else if (item_value == 4) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, egg_esp_color, "[Tan]", true);
+								}
+							}
 						}
-						else if (item_name == "DEFIBRILLATOR") {
+						else if (item_name == "DEFIBRILLATOR" || item_name == "REZ") {
 							overlay->draw_text(screen_position, defib_esp_color, name_norm.c_str(), true); // cyan
 							if (secondary_item_state) {
 								screen_position.y += 15;
@@ -1412,7 +1551,7 @@ static void render_callback() {
 									overlay->draw_text(screen_position, container_esp_color, "[Yellow]", true);
 								}
 								else if (item_value == 3) {
-									overlay->draw_text(screen_position, container_esp_color, "[Blue", true);
+									overlay->draw_text(screen_position, container_esp_color, "[Blue]", true);
 								}
 								else if (item_value == 4) {
 									overlay->draw_text(screen_position, container_esp_color, "[White]", true);
@@ -2056,7 +2195,6 @@ static void render_callback() {
 int main() {
 	initialize_process_event();
 	InitializeItems();
-	PopulateUniqueItems();
 	LoadConfig();
 
 	overlay = new c_overlay();
@@ -2078,13 +2216,7 @@ int main() {
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-	if (!overlay->get_window_handle()) {
-		std::cout << "open medal.tv" << std::endl;
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-		exit(1);
-	}
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::cout << "HawkTuahOverlay initialized." << std::endl;
 
 	overlay->load_font();
 

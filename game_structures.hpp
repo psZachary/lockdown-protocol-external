@@ -630,11 +630,11 @@ namespace protocol {
 				GET_OFFSET(0x2D0, am_body_fire, uintptr_t);
 				OFFSET(0x2D8, damage, int32_t);
 				OFFSET(0x2DC, crit, int32_t);
-				GET_OFFSET(0x2E0, stamina_damage, int32_t);
-				GET_OFFSET(0x2E4, crit_stamina, int32_t);
+				OFFSET(0x2E0, stamina_damage, int32_t);
+				OFFSET(0x2E4, crit_stamina, int32_t);
 				OFFSET(0x2E8, fire_rate, double);
 				OFFSET(0x2F0, auto_fire, bool);
-				GET_OFFSET(0x2F4, impact_type, int32_t);
+				OFFSET(0x2F4, impact_type, int32_t);
 				OFFSET(0x2F8, recoil_spread, double);
 				OFFSET(0x300, recoil_interp, double);
 				OFFSET(0x308, recoil_recover, double);
@@ -654,7 +654,7 @@ namespace protocol {
 				OFFSET(0x378, sprint_recover, double);
 				OFFSET(0x380, oscillation_reactivity, double);
 				OFFSET(0x388, recoil_reactivity, double);
-				GET_OFFSET(0x390, pattern, int32_t);
+				OFFSET(0x390, pattern, int32_t);
 				OFFSET(0x398, shake_intensity, double);
 				OFFSET(0x3A0, capacity, int32_t);
 				OFFSET(0x3A8, stun, double);

@@ -30,6 +30,7 @@ struct ItemProperties {
     double walk_precision = 0;
     double air_precision = 0;
     double run_precision = 0;
+    double stun = 0;
 
     // Default constructor
     ItemProperties() = default;
@@ -42,12 +43,12 @@ struct ItemProperties {
     // Gun constructor
     ItemProperties(bool autoFire, double rate, int dmg, double shake, double oscill_reactivity,
         double walk_osc, double run_osc, double stand_osc, double recoil_react,
-        double walk_prec, double air_prec, double run_prec)
+        double walk_prec, double air_prec, double run_prec, double stun)
         : is_melee(false), auto_fire(autoFire), fire_rate(rate), damage(dmg),
         shake_intensity(shake), oscillation_reactivity(oscill_reactivity),
         walk_oscillation(walk_osc), run_oscillation(run_osc), stand_oscillation(stand_osc),
-        recoil_reactivity(recoil_react), walk_precision(walk_prec), air_precision(air_prec),
-        run_precision(run_prec) {}
+        recoil_reactivity(recoil_react), walk_precision(walk_prec),
+        air_precision(air_prec), run_precision(run_prec), stun(stun) {}
 };
 
 // Declare itemData with extern to signal it's defined elsewhere

@@ -33,6 +33,12 @@ BOOL c_overlay::init_device() {
     D3D_FEATURE_LEVEL vFeatureLevel;
     D3D_FEATURE_LEVEL vFeatureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
 
+    if (!window_handle) {
+        std::cout << "Error: OutputWindow handle is null!" << std::endl;
+        return false;
+    }
+
+
     if (D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, vFeatureLevelArray, 2, D3D11_SDK_VERSION, &vSwapChainDesc, &swap_chain, &d3d_device, &vFeatureLevel, &device_context) != S_OK)
         return false;
 
@@ -185,6 +191,46 @@ VOID c_overlay::dest_render_target() {
     render_target_view = NULL;
 }
 
+HWND FindMedalOverlayWindow() {
+    HWND hwnd = nullptr;
+    do {
+        hwnd = FindWindowExW(nullptr, hwnd, nullptr, nullptr);
+        if (!hwnd) break;
+
+        wchar_t class_name[256];
+        wchar_t window_title[256];
+
+        GetClassNameW(hwnd, class_name, 256);
+        GetWindowTextW(hwnd, window_title, 256);
+
+        if (wcsstr(class_name, L"Chrome_WidgetWin") && wcsstr(window_title, L"Medal Overlay")) {
+            return hwnd;
+        }
+    } while (hwnd);
+
+    return nullptr;
+}
+
+HWND create_overlay_window(LPCWSTR window_name) {
+    WNDCLASSEXW wc = { sizeof(WNDCLASSEX), CS_CLASSDC, DefWindowProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, window_name, NULL };
+    RegisterClassExW(&wc);
+
+    HWND hwnd = CreateWindowExW(
+        WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW,
+        window_name,
+        window_name,
+        WS_POPUP,
+        0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
+        NULL, NULL, wc.hInstance, NULL
+    );
+
+    SetLayeredWindowAttributes(hwnd, RGB(0, 0, 0), 255, LWA_ALPHA);
+    MARGINS margins = { -1 };
+    DwmExtendFrameIntoClientArea(hwnd, &margins);
+
+    return hwnd;
+}
+
 c_overlay::c_overlay() :
     exit_ready(false),
     window_handle(nullptr),
@@ -200,7 +246,10 @@ c_overlay::c_overlay() :
     breath(NULL),
     menu_ticks(NULL) {
     //window_handle = FindWindowW(L"HudSight 2Mirror2DesktopWindowClass", L"HudSight 2Mirror2DesktopWindowClass1");
-    window_handle = FindWindowW(L"MedalOverlayClass", L"MedalOverlay");
+    //window_handle = FindWindowW(L"MedalOverlayClass", L"MedalOverlay");
+    //window_handle = FindWindowW(L"Chrome_WidgetWin_1", L"Medal Overlay");
+    //window_handle = FindMedalOverlayWindow();
+    window_handle = create_overlay_window(L"HawkTuahOverlay");
 
     if (window_handle) {
 

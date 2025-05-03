@@ -34,6 +34,7 @@ namespace config {
 	inline bool god_mode = false;
 	inline bool fast_hp_recovery = false;
 	inline bool fast_stam_recovery = false;
+	inline bool rainbowsuit = false;
 	inline int hp_recovery_rate = 100;
 	inline int stam_recovery_rate = 100;
 	inline int player_fov = 103;
@@ -72,7 +73,9 @@ namespace config {
 	inline double shake_intensity = 0.0; // avg 0.5 : 5
 	inline double fire_spread = 0.0;
 	inline bool infinite_ammo = false;
+	inline bool impact_change = false;
 	inline int ammo_count = 12;
+	inline double impact_type = 1.0;
 
 	// Inventory
 	inline bool can_inventory = false;

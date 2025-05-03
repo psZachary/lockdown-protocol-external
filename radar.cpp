@@ -107,12 +107,6 @@ void radar::draw() {
 		ImGui::GetForegroundDrawList()->AddCircle(
 			toImVec2(radarCenter), radarSize / 2, IM_COL32(255, 255, 255, 255), 64, 1.5f); // White outline
 
-		// Calculate triangle vertices for the local player
-		double triangleSize = 8.0; // Triangle size for the local player
-		vector2 top = radarCenter + vector2(triangleSize * cos(camera_yaw), triangleSize * sin(camera_yaw));
-		vector2 left = radarCenter + vector2(triangleSize * cos(camera_yaw + 2.0 * M_PI / 3.0), triangleSize * sin(camera_yaw + 2.0 * M_PI / 3.0));
-		vector2 right = radarCenter + vector2(triangleSize * cos(camera_yaw - 2.0 * M_PI / 3.0), triangleSize * sin(camera_yaw - 2.0 * M_PI / 3.0));
-
 		// Player dot
 		float playerDotSize = 5.0f; // Size of the player's dot
 		ImGui::GetForegroundDrawList()->AddCircleFilled(
@@ -158,6 +152,8 @@ void radar::draw() {
 		ImU32 screwColor = ImGui::ColorConvertFloat4ToU32(config::screw_driver_color);
 		ImU32 batteryColor = ImGui::ColorConvertFloat4ToU32(config::battery_color);
 		ImU32 fuseColor = ImGui::ColorConvertFloat4ToU32(config::fuse_color);
+		ImU32 eggColor = ImGui::ColorConvertFloat4ToU32(config::egg_color);
+		ImU32 defibColor = ImGui::ColorConvertFloat4ToU32(config::defib_color);
 
 		// Helper function for rotation
 		auto rotate_point = [](const vector2& point, double angle) {
@@ -236,7 +232,6 @@ void radar::draw() {
 				}
 			}
 		}
-
 
 		// Plot weapons
 		if (weapon_radar) {
@@ -319,7 +314,6 @@ void radar::draw() {
 			}
 		}
 
-
 		// Plot Secondary Objects
 		if (secondary_radar) {
 			for (auto item : world_item_cache) {
@@ -330,7 +324,8 @@ void radar::draw() {
 
 				// Check if the item is a weapon
 				if (item_name == "BATTERY" || item_name == "FUSE" || item_name == "CONTAINER" ||
-					item_name == "SCREW DRIVER") {
+					item_name == "SCREW DRIVER" || item_name == "EGG" || item_name == "EASTEREGG" || 
+					item_name == "REZ" || item_name == "DEFIBRILLATOR") {
 					auto root_component = item->get_root_component();
 					if (!root_component) continue;
 
@@ -354,6 +349,12 @@ void radar::draw() {
 					}
 					else if (item_name == "SCREW DRIVER") {
 						dotColor = screwColor;
+					}
+					else if (item_name == "EGG" || item_name == "EASTEREGG") {
+						dotColor = eggColor;
+					}
+					else if (item_name == "REZ" || item_name == "DEFIBRILLATOR") {
+						dotColor = defibColor;
 					}
 
 					// Only draw items within radar bounds

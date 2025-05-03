@@ -26,7 +26,10 @@ inline std::unordered_map<std::string, std::string> item_class_map = {
 	{"FISH", "DA_Fish"},
 	{"PIZZUSHI", "DA_Pizzushi"},
 	{"HARDDRIVE", "DA_HardDrive"},
-	{"DEFIBRILLATOR", "DA_Defibrillator"}
+	{"DEFIBRILLATOR", "DA_Rez"},
+	{"REZ", "DA_Rez"},
+	{"EGG", "DA_EasterEgg"},
+	{"EASTEREGG", "DA_EasterEgg"}
 };
 
 std::vector<uintptr_t> find_objects(const std::string& name_find);
@@ -134,42 +137,18 @@ inline std::vector<uintptr_t> find_objects(const std::string& name_find) {
 }
 
 inline u_data_item* AssignToItemData(const std::string& target_name) {
-	// Convert target_name to uppercase
 	std::string upper_name = ToUpperCase(target_name);
 
 	if (item_class_map.find(upper_name) == item_class_map.end()) {
+		std::cout << "[Assign] No mapping for: " << upper_name << std::endl;
 		return nullptr;
 	}
 
 	std::string mapped_name = item_class_map[upper_name];
 	std::vector<uintptr_t> found_objects = find_objects(mapped_name);
 
-	// Fallback for KNIFE or ambiguous matches
-	if (found_objects.empty() && upper_name == "KNIFE") {
-		found_objects = find_objects("Knife");
-	}
-
-	if (upper_name == "DETONATOR") {
-		found_objects = find_objects("Detonator");  // Explicit fallback for Detonator
-	}
-
-	if (upper_name == "C4") {
-		found_objects = find_objects("C4");  // Explicit fallback for C4
-	}
-
-	if (upper_name == "FISH") {
-		found_objects = find_objects("Fish");  // Explicit fallback for fish
-	}
-
-	if (upper_name == "PIZZUSHI") {
-		found_objects = find_objects("Pizzushi");  // Explicit fallback for pizza
-	}
-
-	if (upper_name == "DEFIBRILLATOR") {
-		found_objects = find_objects("Defibrillator");  // Explicit fallback for defib
-	}
-
 	if (found_objects.empty()) {
+		std::cout << "[Assign] No objects found for: " << mapped_name << std::endl;
 		return nullptr;
 	}
 
@@ -179,49 +158,27 @@ inline u_data_item* AssignToItemData(const std::string& target_name) {
 		std::string obj_name = util::get_name_from_fname(obj->fname_index());
 		std::string class_name = util::get_name_from_fname(obj->class_private()->fname_index());
 
-		if (obj_name.find(mapped_name) != std::string::npos) {
-			if ((upper_name == "KNIFE" && obj->is_a("Data_Melee_C")) ||
-				(obj->is_a("Data_Gun_C") && upper_name != "KNIFE")) {
-				selected_object = obj_addr;
-				break; // Stop searching once a valid match is found
-			}
-		}
+		// Skip Default__ prefixed Unreal objects
+		if (obj_name.find("Default__") != std::string::npos) continue;
 
-		if ((upper_name == "DETONATOR" && obj->is_a("Data_Melee_C")) ||
-			(obj->is_a("Data_Gun_C") && upper_name != "DETONATOR")) {
-			selected_object = obj_addr;
-			break; // Stop searching once a valid match is found
-		}
+		// Skip anything that ends with "Default"
+		if (obj_name.size() >= 7 && obj_name.substr(obj_name.size() - 7) == "Default") continue;
 
-		if ((upper_name == "C4" && obj->is_a("Data_Melee_C")) ||
-			(obj->is_a("Data_Gun_C") && upper_name != "C4")) {
-			selected_object = obj_addr;
-			break; // Stop searching once a valid match is found
-		}
+		std::cout << "[Assign] Checking: " << obj_name << " (" << class_name << ")" << std::endl;
 
-		if ((upper_name == "FISH" && obj->is_a("Data_Melee_C")) ||
-			(obj->is_a("Data_Gun_C") && upper_name != "FISH")) {
+		if (obj_name.find(mapped_name) != std::string::npos &&
+			(obj->is_a("Data_Gun_C") || obj->is_a("Data_Melee_C") || obj->is_a("Data_Item_C"))) {
 			selected_object = obj_addr;
-			break; // Stop searching once a valid match is found
-		}
-
-		if ((upper_name == "PIZZUSHI" && obj->is_a("Data_Melee_C")) ||
-			(obj->is_a("Data_Gun_C") && upper_name != "PIZZUSHI")) {
-			selected_object = obj_addr;
-			break; // Stop searching once a valid match is found
-		}
-
-		if ((upper_name == "DEFIBRILLATOR" && obj->is_a("Data_Melee_C")) ||
-			(obj->is_a("Data_Gun_C") && upper_name != "DEFIBRILLATOR")) {
-			selected_object = obj_addr;
-			break; // Stop searching once a valid match is found
+			break;
 		}
 	}
 
 	if (selected_object != 0) {
+		std::cout << "[Assign] Selected: " << util::get_name_from_fname(reinterpret_cast<u_object*>(selected_object)->fname_index()) << std::endl;
 		return reinterpret_cast<u_data_item*>(selected_object);
 	}
 
+	std::cout << "[Assign] No valid non-default item selected for: " << target_name << std::endl;
 	return nullptr;
 }
 
