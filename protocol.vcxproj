@@ -146,7 +146,6 @@
     <ClInclude Include="common.hpp" />
     <ClInclude Include="config.h" />
     <ClInclude Include="data_cache.h" />
-    <ClInclude Include="fstr_color_link.hpp" />
     <ClInclude Include="game_function.hpp" />
     <ClInclude Include="game_locations.h" />
     <ClInclude Include="game_structures.hpp" />

@@ -154,6 +154,8 @@ void radar::draw() {
 		ImU32 fuseColor = ImGui::ColorConvertFloat4ToU32(config::fuse_color);
 		ImU32 eggColor = ImGui::ColorConvertFloat4ToU32(config::egg_color);
 		ImU32 defibColor = ImGui::ColorConvertFloat4ToU32(config::defib_color);
+		ImU32 machinePartColor = ImGui::ColorConvertFloat4ToU32(config::machine_part_color);
+		ImU32 accessCardColor = ImGui::ColorConvertFloat4ToU32(config::access_card_color);
 
 		// Helper function for rotation
 		auto rotate_point = [](const vector2& point, double angle) {
@@ -275,7 +277,7 @@ void radar::draw() {
 
 				// Check if the item is a weapon
 				if (item_name == "GAZ BOTTLE" || item_name == "VENT FILTER" || item_name == "RICE" ||
-					item_name == "PACKAGE" || item_name == "SAMPLE") {
+					item_name == "PACKAGE" || item_name == "SAMPLE" || item_name == "ACCESS CARD") {
 					auto root_component = item->get_root_component();
 					if (!root_component) continue;
 
@@ -303,6 +305,9 @@ void radar::draw() {
 					else if (item_name == "SAMPLE") {
 						dotColor = sampleColor;
 					}
+					else if (item_name == "ACCESS CARD") {
+						dotColor = sampleColor;
+					}
 
 					// Only draw items within radar bounds
 					if (radarPos.magnitude() < radarSize / 2) {
@@ -325,7 +330,7 @@ void radar::draw() {
 				// Check if the item is a weapon
 				if (item_name == "BATTERY" || item_name == "FUSE" || item_name == "CONTAINER" ||
 					item_name == "SCREW DRIVER" || item_name == "EGG" || item_name == "EASTEREGG" || 
-					item_name == "REZ" || item_name == "DEFIBRILLATOR") {
+					item_name == "REZ" || item_name == "DEFIBRILLATOR" || item_name == "MACHINE PART") {
 					auto root_component = item->get_root_component();
 					if (!root_component) continue;
 
@@ -355,6 +360,9 @@ void radar::draw() {
 					}
 					else if (item_name == "REZ" || item_name == "DEFIBRILLATOR") {
 						dotColor = defibColor;
+					}
+					else if (item_name == "MACHINE PART") {
+						dotColor = machinePartColor;
 					}
 
 					// Only draw items within radar bounds

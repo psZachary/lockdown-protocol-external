@@ -296,7 +296,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 13.5;
+						calculatedHeight += itemHeight * 15.5;
 
 						ImGui::EndTabItem();
 					}
@@ -356,10 +356,11 @@ void menu::draw()
 							ImGui::ColorEdit4("Rice Color", (float*)&rice_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Package Color", (float*)&package_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Sample Color", (float*)&sample_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Access Card Color", (float*)&access_card_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 8.5;
+						calculatedHeight += itemHeight * 10.5;
 
 						ImGui::EndTabItem();
 					}
@@ -387,10 +388,11 @@ void menu::draw()
 							ImGui::ColorEdit4("Container Color", (float*)&container_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Egg Color", (float*)&egg_color, ImGuiColorEditFlags_AlphaBar);
 							ImGui::ColorEdit4("Defib Color", (float*)&defib_color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::ColorEdit4("Machine Part Color", (float*)&machine_part_color, ImGuiColorEditFlags_AlphaBar);
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 8.5;
+						calculatedHeight += itemHeight * 10.5;
 
 						ImGui::EndTabItem();
 					}
@@ -428,6 +430,8 @@ void menu::draw()
 								esp_radar_scale = static_cast<double>(esp_radar_scale_float);
 							}
 						}
+
+						calculatedHeight += itemHeight * 10.5;
 
 						ImGui::EndTabItem();
 					}
@@ -503,7 +507,7 @@ void menu::draw()
 			}
 			ImGui::EndChild();
 
-			calculatedHeight += itemHeight * 9.5;
+			calculatedHeight += itemHeight * 12.5;
 		}
 		// WEAPON
 		else if (selected_tab == 3) {
@@ -627,7 +631,7 @@ void menu::draw()
 				float imact_float = static_cast<float>(impact_type);
 
 				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-				if (ImGui::SliderFloat("##imact_float", &imact_float, -500.0f, 1.0f, "impact: %.02f")) {
+				if (ImGui::SliderFloat("##imact_float", &imact_float, -500.0f, 1.0f, "Impact: %.02f")) {
 					impact_type = static_cast<double>(imact_float);
 				}
 			}
@@ -662,7 +666,7 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD" 
 						};
 
 						for (const auto& special_item : special_items) {
@@ -966,7 +970,7 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD"
 						};
 
 						for (const auto& special_item : special_items) {
@@ -1042,7 +1046,7 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD"
 						};
 
 						for (const auto& special_item : special_items) {
@@ -1346,7 +1350,7 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ"
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD"
 						};
 
 						for (const auto& special_item : special_items) {

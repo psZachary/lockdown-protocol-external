@@ -135,6 +135,7 @@ namespace config {
 	inline ImVec4 rice_color = ImVec4(201.0f / 255.0f, 169.0f / 255.0f, 122.0f / 255.0f, 1.0f); // Tan
 	inline ImVec4 package_color = ImVec4(87.0f / 255.0f, 47.0f / 255.0f, 24.0f / 255.0f, 1.0f); // Brown
 	inline ImVec4 sample_color = ImVec4(92.0f / 255.0f, 6.0f / 255.0f, 191.0f / 255.0f, 1.0f); // Purple
+	inline ImVec4 access_card_color = ImVec4(66.0f / 255.0f, 245.0f / 255.0f, 191.0f / 255.0f, 1.0f); // Mint green #42f5bf
 
 	inline bool secondary_item_state = false;
 	inline bool secondary_distance = false;
@@ -145,6 +146,7 @@ namespace config {
 	inline ImVec4 screw_driver_color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f); // White
 	inline ImVec4 container_color = ImVec4(136.0f / 255.0f, 0.0f / 255.0f, 145.0f / 255.0f, 1.0f); // Magenta
 	inline ImVec4 egg_color = ImVec4(67.0f / 255.0f, 140.0f / 255.0f, 95.0f / 255.0f, 1.0f); // Egg Green (#438c5f)
+	inline ImVec4 machine_part_color = ImVec4(58.0f / 255.0f, 58.0f / 255.0f, 255.0f / 166.0f, 1.0f); // Blue-Violet (##3a3aa6)
 
 	inline bool task_object_esp = true;
 	inline bool task_object_distance = true;
@@ -320,10 +322,12 @@ namespace config {
 		j["egg_color"] = { {"r", egg_color.x}, {"g", egg_color.y}, {"b", egg_color.z}, {"a", egg_color.w} };
 		j["container_color"] = { {"r", container_color.x}, {"g", container_color.y}, {"b", container_color.z}, {"a", container_color.w} };
 		j["gaz_bottle_color"] = { {"r", gaz_bottle_color.x}, {"g", gaz_bottle_color.y}, {"b", gaz_bottle_color.z}, {"a", gaz_bottle_color.w} };
+		j["machine_part_color"] = { {"r", machine_part_color.x}, {"g", machine_part_color.y}, {"b", machine_part_color.z}, {"a", machine_part_color.w} };
 		j["vent_filter_color"] = { {"r", vent_filter_color.x}, {"g", vent_filter_color.y}, {"b", vent_filter_color.z}, {"a", vent_filter_color.w} };
 		j["rice_color"] = { {"r", rice_color.x}, {"g", rice_color.y}, {"b", rice_color.z}, {"a", rice_color.w} };
 		j["package_color"] = { {"r", package_color.x}, {"g", package_color.y}, {"b", package_color.z}, {"a", package_color.w} };
 		j["sample_color"] = { {"r", sample_color.x}, {"g", sample_color.y}, {"b", sample_color.z}, {"a", sample_color.w} };
+		j["access_card_color"] = { {"r", access_card_color.x}, {"g", access_card_color.y}, {"b", access_card_color.z}, {"a", access_card_color.w} };
 		j["fov_color"] = { {"r", fov_color.x}, {"g", fov_color.y}, {"b", fov_color.z}, {"a", fov_color.w} };
 		j["alarm_color"] = { {"r", fov_color.x}, {"g", fov_color.y}, {"b", fov_color.z}, {"a", fov_color.w} };
 		j["rez_color"] = { {"r", rez_color.x}, {"g", rez_color.y}, {"b", rez_color.z}, {"a", rez_color.w} };
@@ -616,6 +620,20 @@ namespace config {
 				gaz_bottle_color.y = j["gaz_bottle_color"].at("g").get<float>();
 				gaz_bottle_color.z = j["gaz_bottle_color"].at("b").get<float>();
 				gaz_bottle_color.w = j["gaz_bottle_color"].at("a").get<float>();
+			}
+
+			if (j.contains("machine_part_color")) {
+				machine_part_color.x = j["machine_part_color"].at("r").get<float>();
+				machine_part_color.y = j["machine_part_color"].at("g").get<float>();
+				machine_part_color.z = j["machine_part_color"].at("b").get<float>();
+				machine_part_color.w = j["machine_part_color"].at("a").get<float>();
+			}
+
+			if (j.contains("access_card_color")) {
+				access_card_color.x = j["access_card_color"].at("r").get<float>();
+				access_card_color.y = j["access_card_color"].at("g").get<float>();
+				access_card_color.z = j["access_card_color"].at("b").get<float>();
+				access_card_color.w = j["access_card_color"].at("a").get<float>();
 			}
 
 			if (j.contains("vent_filter_color")) {

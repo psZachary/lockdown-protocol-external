@@ -90,6 +90,10 @@ namespace mem {
         return 0;
     }
 
+    inline void write(uintptr_t address, const void* buffer, size_t size) {
+        WriteProcessMemory(process, (LPVOID)address, buffer, size, nullptr);
+    }
+
     template <typename T>
     inline T rpm(uintptr_t address) {
         T data = T();

@@ -58,6 +58,8 @@ void InitializeItems() {
 	itemData["NAME"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
 	itemData["PIZZUSHI"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
 	itemData["SAMPLE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
+	itemData["MACHINE PART"] = ItemProperties(0.20, 0.70, -0.80, 82, 14);
+	itemData["ACCESS CARD"] = ItemProperties(0.20, 0.70, -0.80, 130, 20);
 	itemData["PISTOL"] = ItemProperties(false, 0.1, 5, 1, 30, 0.8, 1.5, 0.3, 40, 0.5, 4, 1, 0.8);
 	itemData["SHORTY"] = ItemProperties(false, 0.3, 5, 5, 10, 1, 2.5, 0.3, 20, 30, 0.6, 40, 0.5);
 	itemData["REVOLVER"] = ItemProperties(false, 0.25, 25, 4, 15, 0.8, 2, 0.4, 20, 0.5, 6, 3, 0.5);
@@ -333,7 +335,7 @@ inline void StartRainbowSuitThread() {
 	thread_started = true;
 
 	std::thread([] {
-		int color = 0;
+		int color = 1;
 		while (true) {
 			if (rainbowsuit && local_mec) {
 				int safe_color = color;
@@ -412,23 +414,24 @@ static void render_callback() {
 	if (isDebugging) {
 		if (hand_item) {
 			auto mtype = melee_item_data->get_melee_type();
-			/* 
+			
 			if (mtype) {
-				// Retrieve the properties
-				double castTime = mtype->get_cast_time();
-				double recoverTime = mtype->get_recover_time();
-				double stun = mtype->get_stun();
-				int cost = mtype->get_cost();
-				int range = mtype->get_range();
+				double castTime = mtype->get_cast_time();        // 0x0058
+				double recoverTime = mtype->get_recover_time();  // 0x0060
+				double stun = mtype->get_stun();                 // 0x0038
+				int cost = static_cast<int>(mtype->get_cost());  // 0x0050
+				int range = static_cast<int>(mtype->get_range()); // 0x0068
 
-				std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
+				std::cout << std::fixed << std::setprecision(2)
+					<< "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
 					<< "ItemProperties(" << castTime << ", "
 					<< recoverTime << ", "
 					<< stun << ", "
 					<< range << ", "
 					<< cost << ");" << std::endl;
 			}
-			*/
+			
+			/*
 			auto gun_data = (u_data_gun*)hand_item;
 
 			bool auto_fire = gun_data->get_auto_fire();
@@ -459,9 +462,9 @@ static void render_callback() {
 				<< air_prec << ", "
 				<< run_prec << ", "
 				<< stun << ");" << std::endl;
+			*/
 
-
-			/*
+			/* 
 			// Format and output the string to the console
 			std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
 				<< "ItemProperties: DMG:" << gun_item_data->get_damage() << ", "
@@ -476,7 +479,6 @@ static void render_callback() {
 			*/
 		}
 	}
-
 
 	if (aimbot) {
 		// Draw FOV circle
@@ -627,7 +629,8 @@ static void render_callback() {
 	}
 
 	if (god_mode) {
-		local_mec->set_health(10000000);
+		local_mec->set_alive(true);
+		local_mec->set_health(100);
 	}
 
 	if (rainbowsuit) {
@@ -1240,6 +1243,8 @@ static void render_callback() {
 		ImU32 egg_esp_color = ImGui::ColorConvertFloat4ToU32(egg_color);
 		ImU32 defib_esp_color = ImGui::ColorConvertFloat4ToU32(defib_color);
 		ImU32 container_esp_color = ImGui::ColorConvertFloat4ToU32(container_color);
+		ImU32 machine_part_esp_color = ImGui::ColorConvertFloat4ToU32(machine_part_color);
+		ImU32 access_card_esp_color = ImGui::ColorConvertFloat4ToU32(access_card_color);
 
 		if (item_name == "PISTOL" || item_name == "REVOLVER" || item_name == "SHORTY" || item_name == "SMG" || item_name == "RIFLE" || item_name == "SHOTGUN") {
 			auto gun_data = (u_data_gun*)data;
@@ -1292,7 +1297,7 @@ static void render_callback() {
 			}
 		}
 
-		if (item_name == "GAZ BOTTLE" || item_name == "VENT FILTER" || item_name == "RICE" || item_name == "PACKAGE" || item_name == "SAMPLE") {
+		if (item_name == "GAZ BOTTLE" || item_name == "VENT FILTER" || item_name == "RICE" || item_name == "PACKAGE" || item_name == "SAMPLE" || item_name == "ACCESS CARD") {
 			auto item_root = item->get_root_component();
 			if (!item_root) continue;
 
@@ -1327,6 +1332,14 @@ static void render_callback() {
 									overlay->draw_text(screen_position, gaz_bottle_esp_color, "[Color: Blue]", true);
 								}
 							}
+						}
+						else if (item_name == "ACCESS CARD") {
+							// Calculate text width based on character count and font size
+							std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
+							int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+							screen_position.x -= text_width / 2; // Shift the position left by half the text width
+
+							overlay->draw_text(screen_position, access_card_esp_color, name_norm.c_str(), true); // Light Blue
 						}
 						else if (item_name == "VENT FILTER") {
 							// Calculate text width based on character count and font size
@@ -1439,7 +1452,7 @@ static void render_callback() {
 			}
 		}
 
-		if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER" || item_name == "EGG" || item_name == "EASTEREGG" || item_name == "DEFIBRILLATOR" || item_name == "REZ") {
+		if (item_name == "FUSE" || item_name == "BATTERY" || item_name == "SCREW DRIVER" || item_name == "CONTAINER" || item_name == "EGG" || item_name == "EASTEREGG" || item_name == "DEFIBRILLATOR" || item_name == "REZ" || item_name == "MACHINE PART") {
 			auto item_root = item->get_root_component();
 			if (!item_root) continue;
 
@@ -1481,6 +1494,9 @@ static void render_callback() {
 						}
 						else if (item_name == "SCREW DRIVER") {
 							overlay->draw_text(screen_position, screw_driver_esp_color, name_norm.c_str(), true); // White
+						}
+						else if (item_name == "MACHINE PART") {
+							overlay->draw_text(screen_position, machine_part_esp_color, name_norm.c_str(), true); // White
 						}
 						else if (item_name == "EGG" || item_name == "EASTEREGG") {
 							// Calculate text width based on character count and font size

@@ -128,9 +128,6 @@
     <ClInclude Include="radar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fstr_color_link.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_locations.h">
       <Filter>Header Files</Filter>
     </ClInclude>

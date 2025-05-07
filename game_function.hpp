@@ -29,7 +29,8 @@ inline std::unordered_map<std::string, std::string> item_class_map = {
 	{"DEFIBRILLATOR", "DA_Rez"},
 	{"REZ", "DA_Rez"},
 	{"EGG", "DA_EasterEgg"},
-	{"EASTEREGG", "DA_EasterEgg"}
+	{"EASTEREGG", "DA_EasterEgg"},
+	{"ACCESS CARD", "DA_AccessCard"}
 };
 
 std::vector<uintptr_t> find_objects(const std::string& name_find);

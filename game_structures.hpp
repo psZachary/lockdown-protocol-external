@@ -8,8 +8,6 @@
 #include <string>
 #include <map>
 #include "mem.hpp"
-#include "fstr_color_link.hpp"
-
 
 namespace util {
 	std::string get_name_from_fname(int key);
@@ -18,12 +16,12 @@ namespace util {
 namespace protocol {
 	namespace engine {
 
-		constexpr uintptr_t GWORLD = 143247552;
-		constexpr uintptr_t GNAMES = 140767680;
-		constexpr uintptr_t GOBJECTS = 141699376;
-		constexpr uintptr_t PROCESSEVENT = 21283536;
+		constexpr uintptr_t GWORLD = 143278704;
+		constexpr uintptr_t GNAMES = 140788288;
+		constexpr uintptr_t GOBJECTS = 141719984;
+		constexpr uintptr_t PROCESSEVENT = 21284080;
 		constexpr uintptr_t PROCESSEVENT_INDEX = 79;
-		constexpr uintptr_t APPENDSTRING = 19029504;
+		constexpr uintptr_t APPENDSTRING = 19029808;
 
 		namespace sdk {
 			struct fuobjectitem
@@ -292,24 +290,37 @@ namespace protocol {
 			// fix later, fuk u bditt
 			class fstring : public t_array<wchar_t> {
 			public:
+				fstring() = default;
+
+				fstring(const std::wstring& wstr) {
+					this->count = static_cast<int32_t>(wstr.length());
+					this->_max = this->count + 1;
+
+					size_t byte_size = this->_max * sizeof(wchar_t);
+					this->_data = reinterpret_cast<uintptr_t>(mem::virtallocex(nullptr, byte_size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+					if (!this->_data) {
+						std::cout << "[fstring] VirtualAllocEx failed.\n";
+						return;
+					}
+
+					// Write the string to target process memory
+					mem::write(this->_data, (void*)wstr.c_str(), byte_size);
+				}
+
+				fstring(const char* cstr) : fstring(std::wstring(cstr, cstr + strlen(cstr))) {}
+
 				std::string read_string() {
-					if (count <= 0 || count > 500) {
-						return std::string();
-					}
+					if (count <= 0 || count > 500 || !_data) return {};
 
-					// Read the wide character string from memory
-					auto test = mem::rpm<wchar_holder>(_data);
+					auto buffer = mem::rpm<wchar_holder>(_data);
 
-					// Convert from wide string to UTF-8
-					int utf8_len = WideCharToMultiByte(CP_UTF8, 0, test.data, -1, nullptr, 0, nullptr, nullptr);
-					if (utf8_len <= 0) {
-						return std::string();
-					}
+					int utf8_len = WideCharToMultiByte(CP_UTF8, 0, buffer.data, -1, nullptr, 0, nullptr, nullptr);
+					if (utf8_len <= 0) return {};
 
-					std::string utf8_string(utf8_len - 1, '\0'); // -1 to exclude the null terminator
-					WideCharToMultiByte(CP_UTF8, 0, test.data, -1, &utf8_string[0], utf8_len, nullptr, nullptr);
+					std::string result(utf8_len - 1, '\0');
+					WideCharToMultiByte(CP_UTF8, 0, buffer.data, -1, &result[0], utf8_len, nullptr, nullptr);
 
-					return utf8_string;
+					return result;
 				}
 			};
 
@@ -453,7 +464,7 @@ namespace protocol {
 			class a_player_state : public a_actor {
 			public:
 				GET_OFFSET(0x0320, pawn_private, a_pawn*);
-				GET_OFFSET(0x0340, player_name_private, fstring);
+				OFFSET(0x0340, player_name_private, fstring);
 				GET_OFFSET(0x02F8, saved_network_address, fstring);
 				OFFSET(0x02A8, score, float);
 				OFFSET(0x02AC, player_id, int);
@@ -712,7 +723,7 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x031C, request_level, int32_t);
 				GET_OFFSET(0x02F4, level, int32_t);
-				GET_OFFSET(0x02D0, root, u_scene_component*);
+				GET_OFFSET(0x02E8, root, u_scene_component*);
 			};
 			class a_machine_pannel_c : public a_actor {
 			public:
@@ -756,6 +767,10 @@ namespace protocol {
 			public:
 				GET_OFFSET(0x0378, scanner_ref, a_scanner_machine_c*);
 				GET_OFFSET(0x0380, screen_ref, a_scanner_screen_c*);
+			};
+			class u_save_banlist_c : public u_object {
+			public:
+				OFFSET(0x0028, banned, t_array<fstring>);
 			};
 			class u_text_block : public u_object {
 			public:
@@ -830,14 +845,6 @@ namespace protocol {
 			class task_pizzushis : public a_actor {
 			public:
 				GET_OFFSET(0x0388, task_tables, t_array<a_pizzushi_table_c*>);
-			};
-			class a_gm_c : public u_object {
-			public:
-				GET_OFFSET(0x0468, player_colors_app, t_array<FStr_ColorLink>);
-			};
-			class a_pc_c : public u_object {
-			public:
-				GET_OFFSET(0x0998, gm_ref, a_gm_c*);
 			};
 			class u_data_player : public u_object {
 			public:
@@ -931,7 +938,6 @@ namespace protocol {
 				OFFSET(0x0420, head_collider, u_sphere_component*);
 				OFFSET(0x0388, ghost_root, u_scene_component*);
 				OFFSET(0x0820, audio_voice, a_voice_source*);
-				OFFSET(0x0818, pc_ref, a_pc_c*);
 				OFFSET(0x1328, net_fish, int);
 				OFFSET(0x1143, new_var, bool);
 				OFFSET(0x900, heal_buff, int);
@@ -942,6 +948,32 @@ namespace protocol {
 					return reinterpret_cast<a_character*>(this);
 				};
 			};
+
+			struct FStr_ColorLink {
+				int Color_2;
+				mec_pawn* Mec_5;
+			};
+
+			class a_gm_c : public u_object {
+			public:
+				OFFSET(0x0380, employees, t_array<mec_pawn*>);
+				OFFSET(0x0390, dissidents, t_array<mec_pawn*>);
+				OFFSET(0x03A0, game_time, int);
+				OFFSET(0x03A8, th_game_time, FTimerHandle);
+				OFFSET(0x03C8, session_time, int);
+				OFFSET(0x03D8, dissident_count, int);
+				OFFSET(0x0400, armed_c4_ref, a_actor*);
+				OFFSET(0x0420, banned, t_array<fstring>); 
+				OFFSET(0x0461, color_selection, int); // 0=, 1=, 2=
+				OFFSET(0x0468, player_colors_app, t_array<FStr_ColorLink>);
+				OFFSET(0x0448, save_banlist, u_save_banlist_c*);
+				OFFSET(0x0460, difficulty, int); // 0 =, 1 =, 2=, 3 =
+			};
+			class a_pc_c : public u_object {
+			public:
+				GET_OFFSET(0x0998, gm_ref, a_gm_c*);
+			};
+
 		}
 	}
 }
