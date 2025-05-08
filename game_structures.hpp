@@ -16,7 +16,7 @@ namespace util {
 namespace protocol {
 	namespace engine {
 
-		constexpr uintptr_t GWORLD = 143278704;
+		constexpr uintptr_t GWORLD = 143268160;
 		constexpr uintptr_t GNAMES = 140788288;
 		constexpr uintptr_t GOBJECTS = 141719984;
 		constexpr uintptr_t PROCESSEVENT = 21284080;
@@ -111,8 +111,16 @@ namespace protocol {
 
 			struct FStr_SkinSet {
 				int Color_8; // 0 through 10
+				char _pad_1[7];
 				INT32 Skin_18;
 			};
+
+			/*
+			struct FStr_ColorLink {
+				int Color_2;
+				protocol::game::sdk::mec_pawn* Mec_5;
+			};
+			*/
 
 			template <typename T>
 			class t_array {
@@ -414,6 +422,42 @@ namespace protocol {
 						bitfield &= ~(1 << 3); // Clear bit 3
 					mem::wpm<uint8_t>(pthis + 0x189, bitfield);
 				}
+
+				void set_absolute_flags(bool value)
+				{
+					uintptr_t addr = (uintptr_t)this + 0x188;
+					uint8_t flag = mem::rpm<uint8_t>(addr);
+
+					if (value)
+						flag |= (1 << 2);  // Set bAbsoluteLocation
+					else
+						flag &= ~(1 << 2); // Clear bAbsoluteLocation
+
+					mem::wpm<uint8_t>(addr, flag);
+				}
+
+				vector3 get_absolute_position()
+				{
+					// Read from ComponentToWorld.translation
+					f_transform world = mem::rpm<f_transform>(pthis + 0x1D0);
+					return world.translation;
+				}
+
+				void set_absolute_position(vector3 value)
+				{
+					if (pthis < 0x1000) return;
+
+					// Tell the engine we want this RelativeLocation to be treated as absolute
+					set_absolute_flags(true);
+
+					// Write to RelativeLocation field — used directly when bAbsoluteLocation is true
+					mem::wpm<vector3>(pthis + 0x0128, value);
+				}
+
+				void set_mobility(uint8_t mode) {
+					if (pthis < 0x1000) return;
+					mem::wpm<uint8_t>(pthis + 0x18B, mode); // 2 = Movable
+				}
 			};
 
 			class u_capsule_component : public u_object {
@@ -431,7 +475,7 @@ namespace protocol {
 			public:
 				OFFSET(0x178, jump_z_velocity, float);
 				OFFSET(0x170, gravity_scale, float);
-				OFFSET(0x1A4, movement_mode, int); //0:none | 1:walk | 2:navwalk | 3:fall | 4:swim | 5:fly | 6:custom
+				OFFSET(0x221, movement_mode, int); //0:none | 1:walk | 2:navwalk | 3:fall | 4:swim | 5:fly | 6:custom
 			};
 
 			class a_actor : public u_object {
@@ -482,12 +526,32 @@ namespace protocol {
 				OFFSET(0x0320, control_rotation, vector3);
 			};
 
+			class a_character : public a_pawn {
+			public:
+				GET_OFFSET(0x320, character_movement, character_movement_component*);
+			};
+
+			class a_gm_c : public u_object {
+			public:
+				OFFSET(0x03A0, game_time, int);
+				OFFSET(0x03A8, th_game_time, FTimerHandle);
+				OFFSET(0x03C8, session_time, int);
+				OFFSET(0x03D8, dissident_count, int);
+				OFFSET(0x0400, armed_c4_ref, a_actor*);
+				OFFSET(0x0420, banned, t_array<fstring>);
+				OFFSET(0x0461, color_selection, int); // 0=, 1=, 2=
+				//OFFSET(0x0468, player_colors_app, t_array<FStr_ColorLink>);
+				OFFSET(0x0460, difficulty, int); // 0 =, 1 =, 2=, 3 =
+			};
+
 			class a_player_controller : public a_controller {
 			public:
 				GET_OFFSET(0x0360, camera_manager, a_player_camera_manager*);
 				GET_OFFSET(0x0378, target_view_rotation, FRotator);
 				GET_OFFSET(0x03A8, smooth_target_view_rotation_speed, float);
 				GET_OFFSET(0x0350, pawn, a_pawn*);
+				GET_OFFSET(0x02F8, character, a_character*);
+				GET_OFFSET(0x0998, gm_ref, a_gm_c*);
 			};
 
 			class u_player : public u_object {
@@ -506,6 +570,14 @@ namespace protocol {
 					auto lclplrs = mem::rpm<t_array<u_localplayer*>>(pthis + 0x38);
 					return lclplrs.at(0);
 				}
+			};
+
+			class u_main_gi_c : public u_game_instance {
+			public:
+				OFFSET(0x1F8, debug_editor, bool);
+				OFFSET(0x200, ultimate_admins, t_array<fstring>);
+				OFFSET(0x210, admin, bool);
+				OFFSET(0x338, admin_cheats, bool);
 			};
 
 			class u_level {
@@ -538,14 +610,6 @@ namespace protocol {
 
 					return mem::rpm<f_transform>(bone_arr + (static_cast<unsigned long long>(bone_id) * 0x30));
 				};
-			};
-
-			class a_character : public a_pawn {
-			public:
-				u_skeletal_mesh_component* mesh() {
-					return mem::rpm<u_skeletal_mesh_component*>(pthis + 0x0280);
-				}
-				GET_OFFSET(0x320, CharacterMovement, character_movement_component*);
 			};
 
 			struct u_attribute_set : public u_object {
@@ -929,7 +993,7 @@ namespace protocol {
 				OFFSET(0x0888, bag_item, u_data_item*);
 				OFFSET(0x1178, net_bag_item, u_data_item*);
 				OFFSET(0x1198, net_bag_item_new, FStr_Item);
-				OFFSET(0x03B0, camera, u_camera_component*);
+				OFFSET(0x03B8, camera, u_camera_component*);
 				OFFSET(0x0398, absolute_rotation, u_scene_component*);
 				OFFSET(0x0430, orientation, u_scene_component*);
 				OFFSET(0x1250, skin_save, u_save_skin*);
@@ -943,37 +1007,15 @@ namespace protocol {
 				OFFSET(0x900, heal_buff, int);
 				OFFSET(0x1315, wink_lock, bool);
 				OFFSET(0x1142, net_emote_primary, bool);
+				OFFSET(0xE00, pitch, double);
+				OFFSET(0xE08, yaw, double);
+				OFFSET(0xE10, roll, double);
+				OFFSET(0x1168, fly_stamina, double);
 
 				a_character* get_player_character() {
 					return reinterpret_cast<a_character*>(this);
 				};
 			};
-
-			struct FStr_ColorLink {
-				int Color_2;
-				mec_pawn* Mec_5;
-			};
-
-			class a_gm_c : public u_object {
-			public:
-				OFFSET(0x0380, employees, t_array<mec_pawn*>);
-				OFFSET(0x0390, dissidents, t_array<mec_pawn*>);
-				OFFSET(0x03A0, game_time, int);
-				OFFSET(0x03A8, th_game_time, FTimerHandle);
-				OFFSET(0x03C8, session_time, int);
-				OFFSET(0x03D8, dissident_count, int);
-				OFFSET(0x0400, armed_c4_ref, a_actor*);
-				OFFSET(0x0420, banned, t_array<fstring>); 
-				OFFSET(0x0461, color_selection, int); // 0=, 1=, 2=
-				OFFSET(0x0468, player_colors_app, t_array<FStr_ColorLink>);
-				OFFSET(0x0448, save_banlist, u_save_banlist_c*);
-				OFFSET(0x0460, difficulty, int); // 0 =, 1 =, 2=, 3 =
-			};
-			class a_pc_c : public u_object {
-			public:
-				GET_OFFSET(0x0998, gm_ref, a_gm_c*);
-			};
-
 		}
 	}
 }

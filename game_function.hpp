@@ -30,7 +30,12 @@ inline std::unordered_map<std::string, std::string> item_class_map = {
 	{"REZ", "DA_Rez"},
 	{"EGG", "DA_EasterEgg"},
 	{"EASTEREGG", "DA_EasterEgg"},
-	{"ACCESS CARD", "DA_AccessCard"}
+	{"ACCESS CARD", "DA_AccessCard"},
+	{"MACHINE PART A", "DA_MachinePart_A"},
+	{"MACHINE PART B", "DA_MachinePart_B"},
+	{"MACHINE PART C", "DA_MachinePart_C"},
+	{"MACHINE PART D", "DA_MachinePart_D"},
+	{"HARD DRIVE", "DA_HardDrive"}
 };
 
 std::vector<uintptr_t> find_objects(const std::string& name_find);
@@ -111,6 +116,35 @@ inline std::string ToUpperCase(const std::string& str) {
 	std::string upper_case = str;
 	std::transform(upper_case.begin(), upper_case.end(), upper_case.begin(), ::toupper);
 	return upper_case;
+}
+
+inline uintptr_t* find_object(const std::string& target_name) {
+	std::vector<uintptr_t> all_objects = find_objects(""); // Find all objects
+
+	uintptr_t selected_object = 0;
+
+	for (uintptr_t obj_addr : all_objects) {
+		auto obj = reinterpret_cast<u_object*>(obj_addr);
+		std::string obj_name = util::get_name_from_fname(obj->fname_index());
+		std::string class_name = util::get_name_from_fname(obj->class_private()->fname_index());
+
+		// Log every Data_Gun_C or Data_Melee_C object
+		if (obj_name == target_name || class_name == target_name) {
+			std::cout << "[LOG] Found Object: " << obj_name << " | Class: " << class_name
+				<< " | Address: " << std::hex << obj_addr << std::endl;
+
+			selected_object = obj_addr;
+		}
+	}
+
+	// If selected_object is found, return its address
+	if (selected_object != 0) {
+		std::cout << "Selected Object Address: " << std::hex << selected_object << std::endl;
+		return reinterpret_cast<uintptr_t*>(selected_object);
+	}
+
+	std::cout << "Object not found!" << std::endl;
+	return nullptr;
 }
 
 // Find objects by name

@@ -91,7 +91,10 @@ namespace mem {
     }
 
     inline void write(uintptr_t address, const void* buffer, size_t size) {
-        WriteProcessMemory(process, (LPVOID)address, buffer, size, nullptr);
+        if (address < 0x10000 || buffer == nullptr || size == 0) return;
+
+        // Write the raw memory to the target address
+        WriteProcessMemory(process, (LPVOID)address, buffer, size, NULL);
     }
 
     template <typename T>

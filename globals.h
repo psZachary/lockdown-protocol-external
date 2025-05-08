@@ -19,6 +19,7 @@ namespace globals {
 	inline a_player_controller* local_controller = 0;
 	inline a_player_camera_manager* local_camera_manager = 0;
 	inline mec_pawn* local_mec = 0;
+	inline a_gm_c* gm_ref = nullptr;
 
 	inline std::vector < mec_pawn* > player_cache{};
 	inline std::vector < world_item* > world_item_cache{};

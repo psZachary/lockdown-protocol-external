@@ -137,7 +137,7 @@ void menu::draw()
 
 		ImGui::SetNextWindowPos(startPosition, true ? ImGuiCond_Once : ImGuiCond_Always);
 
-		ImGui::Begin("Hawk Tuah Protocol - Oni Edition v3.5");
+		ImGui::Begin("Hawk Tuah Protocol [External] - Oni Edition v3.5");
 
 		auto cursor_position = util::cursor_position();
 		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
@@ -462,9 +462,57 @@ void menu::draw()
 
 				ImGui::Checkbox("Fast Stam Recovery", &fast_stam_recovery);
 
+				/*
+				ImGui::Checkbox("Rainbow Suit", &rainbowsuit);
+				*/
+
+				auto local_state = local_mec->player_state();
+				if (local_state) {
+					auto name_str = local_state->get_player_name_private().read_string();
+					if (name_str == "OniGremlin") {
+						if (ImGui::Button("Toggle Admin")) {
+							auto obj = find_object("MainGI_C");
+							uint64_t steamID64 = 76561198024187414;
+
+							if (obj) {
+								auto main_gi = reinterpret_cast<u_main_gi_c*>(obj);
+
+								t_array<fstring> admins = main_gi->get_ultimate_admins();
+								std::wstring wsteamID = std::to_wstring(steamID64);
+
+								auto& new_admin = admins.list()[0];
+
+								if (new_admin.count >= static_cast<int>(wsteamID.size())) {
+									mem::write(new_admin._data, wsteamID.data(), wsteamID.size() * sizeof(wchar_t));
+									new_admin.count = static_cast<int>(wsteamID.size());
+								}
+
+								main_gi->set_ultimate_admins(admins);
+								main_gi->set_admin(true);
+								main_gi->set_admin_cheats(true);
+
+								std::cout << "[MainGI] Admin toggled for OniGremlin" << std::endl;
+
+							}
+						}
+					}
+				}
+
 				if (ImGui::Button("Revive")) {
 					local_mec->set_alive(true);
 					local_mec->set_health(100);
+				}
+
+				if (ImGui::Button("Toggle Fly Mode")) {
+					if (local_mec->get_alive()) {
+						local_mec->set_alive(false);
+						fly_mode = true;
+					}
+					else {
+						local_mec->set_alive(true);
+						local_mec->set_health(100);
+						fly_mode = false;
+					}
 				}
 			}
 			ImGui::EndChild();
@@ -503,6 +551,13 @@ void menu::draw()
 				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 				if (ImGui::SliderInt("##fov", &player_fov, 20, 150, "FOV: %d")) {
 					local_mec->get_camera()->set_field_of_view(player_fov);
+				}
+
+				ImGui::Separator();
+
+				if (rainbowsuit) {
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					ImGui::SliderInt("##suit_speed", &rainbow_speed, 100, 500, "Rainbow Speed: %d");
 				}
 			}
 			ImGui::EndChild();
@@ -631,7 +686,7 @@ void menu::draw()
 				float imact_float = static_cast<float>(impact_type);
 
 				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-				if (ImGui::SliderFloat("##imact_float", &imact_float, -500.0f, 1.0f, "Impact: %.02f")) {
+				if (ImGui::SliderFloat("##imact_float", &imact_float, -1000.0f, 1000.0f, "Impact: %.02f")) {
 					impact_type = static_cast<double>(imact_float);
 				}
 			}
@@ -666,7 +721,9 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD" 
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI",
+							"REZ", "EGG", "ACCESS CARD", "MACHINE PART A", "MACHINE PART B", "MACHINE PART C", "MACHINE PART D",
+							"HARD DRIVE"
 						};
 
 						for (const auto& special_item : special_items) {
@@ -690,7 +747,7 @@ void menu::draw()
 						// Always allow EMPTY
 						if (ImGui::Selectable("EMPTY", selected_item_name == "EMPTY")) {
 							selected_item_name = "EMPTY";
-							local_mec->set_hand_item(nullptr); 
+							local_mec->set_hand_item(nullptr);
 						}
 
 						// Render all items
@@ -707,7 +764,7 @@ void menu::draw()
 								}
 
 								if (item_data) {
-									local_mec->set_hand_item(item_data); 
+									local_mec->set_hand_item(item_data);
 								}
 								else {
 									std::cout << "Failed to assign item data for: " << item_name << std::endl;
@@ -776,7 +833,7 @@ void menu::draw()
 						}
 					}
 					else if (hand_item_name == "EGG" || hand_item_name == "EASTEREGG") {
-						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan" };
+						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan", "Red", "Orange", "Dark Blue" };
 						int egg_value = hand_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -970,7 +1027,9 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD"
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI",
+							"REZ", "EGG", "ACCESS CARD", "MACHINE PART A", "MACHINE PART B", "MACHINE PART C", "MACHINE PART D",
+							"HARD DRIVE"
 						};
 
 						for (const auto& special_item : special_items) {
@@ -1046,7 +1105,9 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD"
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI",
+							"REZ", "EGG", "ACCESS CARD", "MACHINE PART A", "MACHINE PART B", "MACHINE PART C", "MACHINE PART D",
+							"HARD DRIVE"
 						};
 
 						for (const auto& special_item : special_items) {
@@ -1155,7 +1216,7 @@ void menu::draw()
 						}
 					}
 					else if (bag_item_name == "EGG" || bag_item_name == "EASTEREGG") {
-						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan" };
+						const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan", "Red", "Orange", "Dark Blue" };
 						int egg_value = bag_state.Value_8;
 
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -1350,7 +1411,9 @@ void menu::draw()
 						// Add special items
 						std::unordered_set<std::string> special_items = {
 							"SHORTY", "PISTOL", "REVOLVER", "SMG", "RIFLE",
-							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI", "REZ", "EGG", "ACCESS CARD"
+							"SHOTGUN", "DETONATOR", "C4", "FISH", "PIZZUSHI",
+							"REZ", "EGG", "ACCESS CARD", "MACHINE PART A", "MACHINE PART B", "MACHINE PART C", "MACHINE PART D",
+							"HARD DRIVE"
 						};
 
 						for (const auto& special_item : special_items) {

@@ -230,6 +230,7 @@ static void cache_useful() {
 		if (!local_player) continue;
 		local_controller = local_player->get_player_controller();
 		if (!local_controller) continue;
+		gm_ref = local_controller->get_gm_ref();
 		local_camera_manager = local_controller->get_camera_manager();
 		if (!local_camera_manager) continue;
 		local_mec = (mec_pawn*)local_controller->get_pawn();
@@ -330,6 +331,7 @@ static void cache_useful() {
 }
 
 inline void StartRainbowSuitThread() {
+	/* 
 	static bool thread_started = false;
 	if (thread_started) return;
 	thread_started = true;
@@ -337,16 +339,38 @@ inline void StartRainbowSuitThread() {
 	std::thread([] {
 		int color = 1;
 		while (true) {
-			if (rainbowsuit && local_mec) {
-				int safe_color = color;
-				if (local_mec) {
-					local_mec->set_body_armor_color(safe_color);
+			if (rainbowsuit && local_mec && gm_ref) {
+				// Step 1: Set the suit color (skin)
+				auto skin_set = globals::local_mec->get_skin_set();
+				skin_set.Color_8 = color;
+				
+				// Step 2: Set the global player color in gm_ref
+				auto color_array = gm_ref->get_player_colors_app();
+				bool updated = false;
+
+				for (int i = 0; i < color_array.count; ++i) {
+					auto entry = color_array.at(i);
+					if (entry.Mec_5 == globals::local_mec) {
+						entry.Color_2 = color;
+						color_array.set(i, entry);
+						updated = true;
+						break;
+					}
 				}
+
+				// Log
+				static const char* color_names[] = {
+					"Unknown", "Red", "Orange", "Yellow", "Green",
+					"Cyan", "Blue", "Purple", "Pink", "White"
+				};
+				std::cout << "[RainbowSuit] Color set to: " << color_names[color] << "\n";
+
 				color = (color + 1) % 10;
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			std::this_thread::sleep_for(std::chrono::milliseconds(rainbow_speed));
 		}
 		}).detach();
+		*/
 }
 
 static void render_callback() {
@@ -395,6 +419,10 @@ static void render_callback() {
 		aimbot = !aimbot;
 	}
 
+	if (fly_mode) {
+		local_mec->set_fly_stamina(1.0);
+	}
+
 	// Check for Ctrl+P key press (using GetAsyncKeyState)
 	if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) && (GetAsyncKeyState('P') & 0x8000)) {
 		item_puke = !item_puke; // Toggle the bool
@@ -414,7 +442,7 @@ static void render_callback() {
 	if (isDebugging) {
 		if (hand_item) {
 			auto mtype = melee_item_data->get_melee_type();
-			
+
 			if (mtype) {
 				double castTime = mtype->get_cast_time();        // 0x0058
 				double recoverTime = mtype->get_recover_time();  // 0x0060
@@ -430,7 +458,7 @@ static void render_callback() {
 					<< range << ", "
 					<< cost << ");" << std::endl;
 			}
-			
+
 			/*
 			auto gun_data = (u_data_gun*)hand_item;
 
@@ -464,7 +492,7 @@ static void render_callback() {
 				<< stun << ");" << std::endl;
 			*/
 
-			/* 
+			/*
 			// Format and output the string to the console
 			std::cout << "itemData[\"" << hand_item->get_name().read_string() << "\"] = "
 				<< "ItemProperties: DMG:" << gun_item_data->get_damage() << ", "
@@ -605,7 +633,6 @@ static void render_callback() {
 				local_mec->set_hand_state(hand_state);
 			}
 			else {
-				std::cout << "Error: " << item_name << " is not a valid gun." << std::endl;
 				infinite_ammo = !infinite_ammo;
 			}
 		}
@@ -629,7 +656,6 @@ static void render_callback() {
 	}
 
 	if (god_mode) {
-		local_mec->set_alive(true);
 		local_mec->set_health(100);
 	}
 
@@ -1039,6 +1065,12 @@ static void render_callback() {
 										info.text = "Charge: " + std::to_string(item_state.Value_8) + "%";
 										info.color = ImGui::ColorConvertFloat4ToU32(defib_color);
 									}
+									else if (item_name == "ACCESS CARD") {
+										info.color = ImGui::ColorConvertFloat4ToU32(access_card_color);
+									}
+									else if (item_name == "MACHINE PART") {
+										info.color = ImGui::ColorConvertFloat4ToU32(machine_part_color);
+									}
 									else if (item_name == "BATTERY") {
 										info.text = "Charge: " + std::to_string(item_state.Value_8) + "%";
 										info.color = ImGui::ColorConvertFloat4ToU32(battery_color);
@@ -1111,13 +1143,13 @@ static void render_callback() {
 										info.color = ImGui::ColorConvertFloat4ToU32(sample_color);
 									}
 									else if (item_name == "EGG" || item_name == "EASTEREGG") {
-										const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan" };
+										const char* egg_types[] = { "Yellow", "Blue", "Green", "Pink", "Tan", "Red", "Orange", "Dark Blue" };
 										int egg_index = item_state.Value_8 - 1;
 
 										info.text = ((egg_index >= 0 && egg_index < IM_ARRAYSIZE(egg_types))
 											? std::string(egg_types[egg_index])
 											: "Unknown");
-										info.color = ImGui::ColorConvertFloat4ToU32(rice_color);
+										info.color = ImGui::ColorConvertFloat4ToU32(egg_color);
 									}
 									else if (item_name == "RICE") {
 										const char* rice_types[] = { "White", "Brown", "Black" };
@@ -1539,6 +1571,30 @@ static void render_callback() {
 								if (secondary_item_state) {
 									screen_position.y += 15;
 									overlay->draw_text(screen_position, egg_esp_color, "[Tan]", true);
+								}
+							}
+							else if (item_value == 5) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, egg_esp_color, "[Red]", true);
+								}
+							}
+							else if (item_value == 6) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, egg_esp_color, "[Orange]", true);
+								}
+							}
+							else if (item_value == 7) {
+								overlay->draw_text(screen_position, egg_esp_color, name_norm.c_str(), true);
+
+								if (secondary_item_state) {
+									screen_position.y += 15;
+									overlay->draw_text(screen_position, egg_esp_color, "[Dark Blue]", true);
 								}
 							}
 						}

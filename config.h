@@ -35,9 +35,11 @@ namespace config {
 	inline bool fast_hp_recovery = false;
 	inline bool fast_stam_recovery = false;
 	inline bool rainbowsuit = false;
+	inline int rainbow_speed = 200;
 	inline int hp_recovery_rate = 100;
 	inline int stam_recovery_rate = 100;
 	inline int player_fov = 103;
+	inline bool admin_toggle = false;
 
 	// Aimbot
 	inline bool aimbot = true;
@@ -109,6 +111,7 @@ namespace config {
 	inline float player_list_x = 530;
 	inline float player_list_y = 20;
 	inline bool list_inv = false;
+	inline bool fly_mode = false;
 
 	inline ImVec4 employee_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green
 	inline ImVec4 dissident_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red 
@@ -684,4 +687,23 @@ namespace config {
 			SaveConfig();
 		}
 	}
+}
+
+namespace flyhack {
+	inline bool enabled = false;
+	inline bool noFall = true;
+	inline bool noPush = true;
+	inline bool noClip = false;
+	inline bool directional = true;
+
+	inline int hotkey = 'F';    
+	inline int forwardKey = 'W';
+	inline int backwardKey = 'S';
+	inline int leftKey = 'A';
+	inline int rightKey = 'D';
+	inline int upKey = VK_SPACE;
+	inline int downKey = VK_CONTROL;
+
+	inline double hSpeed = 25.0;
+	inline double vSpeed = 15.0;
 }
