@@ -104,6 +104,10 @@ namespace protocol {
 				UINT64 Handle;
 			};
 
+			struct FBodyInstance {
+				UINT64 Handle;
+			};
+
 			struct FStr_ScannerDot {
 				vector2 Rotation_9;
 				int32_t Process_5;
@@ -164,6 +168,17 @@ namespace protocol {
 					}
 					//delete[] buffer;
 					return list;
+				}
+			};
+
+			struct FUniqueNetIdRepl {
+				t_array<uint8_t> ReplicationBytes;
+
+				uint64_t get_steam_id() const {
+					if (ReplicationBytes.count >= 8 && ReplicationBytes._data) {
+						return mem::rpm<uint64_t>(ReplicationBytes._data);
+					}
+					return 0;
 				}
 			};
 
@@ -483,6 +498,22 @@ namespace protocol {
 				GET_OFFSET(0x0158, owner, a_actor*);
 				GET_OFFSET(0x01B8, root_component, u_scene_component*);
 				OFFSET(0x0068, custom_time_dilation, float);
+
+				// Read collision flag (bit 0 of byte at 0x5C)
+				bool get_enable_collision() {
+					uint8_t value = mem::rpm<uint8_t>(pthis + 0x5C);
+					return value & (1 << 0);
+				}
+
+				// Set collision flag
+				void set_enable_collision(bool enable) {
+					uint8_t value = mem::rpm<uint8_t>(pthis + 0x5C);
+					if (enable)
+						value |= (1 << 0);  // Set bit 0
+					else
+						value &= ~(1 << 0); // Clear bit 0
+					mem::wpm<uint8_t>(pthis + 0x5C, value);
+				}
 			};
 
 			class a_pawn : public a_actor {
@@ -511,7 +542,8 @@ namespace protocol {
 				OFFSET(0x0340, player_name_private, fstring);
 				GET_OFFSET(0x02F8, saved_network_address, fstring);
 				OFFSET(0x02A8, score, float);
-				OFFSET(0x02AC, player_id, int);
+				OFFSET(0x02AC, player_id, INT32);
+				OFFSET(0x02B8, unique_id, FUniqueNetIdRepl);
 			};
 
 			class a_game_state_base {
@@ -596,6 +628,11 @@ namespace protocol {
 				GET_OFFSET(0x0178, levels, t_array<u_level*>);
 			};
 
+			class u_body_setup : public u_object{
+			public:
+				OFFSET(0x148, default_instance, FBodyInstance);
+			};
+
 			class u_skeletal_mesh_component : public u_scene_component {
 			public:
 
@@ -610,6 +647,9 @@ namespace protocol {
 
 					return mem::rpm<f_transform>(bone_arr + (static_cast<unsigned long long>(bone_id) * 0x30));
 				};
+
+				OFFSET(0xA48, body_setup, u_body_setup*);
+
 			};
 
 			struct u_attribute_set : public u_object {
@@ -768,6 +808,9 @@ namespace protocol {
 				OFFSET(0x0300, result, FStr_WeaponCase_Result);
 				OFFSET(0x0398, open_delay, INT32);
 				OFFSET(0x03A0, opening_timer, FTimerHandle);
+			};
+			class a_screw_c : public a_actor {
+			public:
 			};
 			class a_vent_c : public a_actor {
 			public:

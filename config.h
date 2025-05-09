@@ -40,6 +40,7 @@ namespace config {
 	inline int stam_recovery_rate = 100;
 	inline int player_fov = 103;
 	inline bool admin_toggle = false;
+	inline bool collisions_toggle = false;
 
 	// Aimbot
 	inline bool aimbot = true;

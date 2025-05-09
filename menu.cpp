@@ -167,11 +167,12 @@ void menu::draw()
 		}
 		ImGui::Separator;
 		ImGui::Checkbox("Debug##Debugginng", &isDebugging);
+		MenuTooltip("This is just for debugging stuff.");
 		if (isDebugging) {
 			if (ImGui::Button("Actors")) {
 				std::thread save_classes_thread(SaveClasses);
 				save_classes_thread.detach();
-			}
+			} ImGui::SameLine(); MenuTooltip("Outputs a list of actors.");
 		}
 
 		ImGui::EndChild();
@@ -462,56 +463,57 @@ void menu::draw()
 
 				ImGui::Checkbox("Fast Stam Recovery", &fast_stam_recovery);
 
+				//ImGui::Checkbox("Collisions", &collisions_toggle);
+
 				/*
 				ImGui::Checkbox("Rainbow Suit", &rainbowsuit);
 				*/
 
-				auto local_state = local_mec->player_state();
-				if (local_state) {
-					auto name_str = local_state->get_player_name_private().read_string();
-					if (name_str == "OniGremlin") {
-						if (ImGui::Button("Toggle Admin")) {
-							auto obj = find_object("MainGI_C");
-							uint64_t steamID64 = 76561198024187414;
+				ImGui::Checkbox("Fly Mode", &fly_mode); ImGui::SameLine(); MenuTooltip("Must be dead or set dead.");
 
-							if (obj) {
-								auto main_gi = reinterpret_cast<u_main_gi_c*>(obj);
+				if (!admin_toggle) {
+					auto local_state = local_mec->player_state();
+					if (local_state) {
+						auto name_str = local_state->get_player_name_private().read_string();
+						if (name_str == "OniGremlin") {
+							if (ImGui::Button("Admin")) {
+								auto obj = find_object("MainGI_C");
+								uint64_t steamID64 = 76561198024187414;
 
-								t_array<fstring> admins = main_gi->get_ultimate_admins();
-								std::wstring wsteamID = std::to_wstring(steamID64);
+								if (obj) {
+									auto main_gi = reinterpret_cast<u_main_gi_c*>(obj);
 
-								auto& new_admin = admins.list()[0];
+									t_array<fstring> admins = main_gi->get_ultimate_admins();
+									std::wstring wsteamID = std::to_wstring(steamID64);
 
-								if (new_admin.count >= static_cast<int>(wsteamID.size())) {
-									mem::write(new_admin._data, wsteamID.data(), wsteamID.size() * sizeof(wchar_t));
-									new_admin.count = static_cast<int>(wsteamID.size());
+									auto& new_admin = admins.list()[0];
+
+									if (new_admin.count >= static_cast<int>(wsteamID.size())) {
+										mem::write(new_admin._data, wsteamID.data(), wsteamID.size() * sizeof(wchar_t));
+										new_admin.count = static_cast<int>(wsteamID.size());
+									}
+
+									main_gi->set_ultimate_admins(admins);
+									main_gi->set_admin(true);
+									main_gi->set_admin_cheats(true);
+
+									std::cout << "[MainGI] Admin toggled for OniGremlin" << std::endl;
+									admin_toggle = true;
 								}
-
-								main_gi->set_ultimate_admins(admins);
-								main_gi->set_admin(true);
-								main_gi->set_admin_cheats(true);
-
-								std::cout << "[MainGI] Admin toggled for OniGremlin" << std::endl;
-
 							}
 						}
 					}
 				}
 
-				if (ImGui::Button("Revive")) {
-					local_mec->set_alive(true);
-					local_mec->set_health(100);
-				}
-
-				if (ImGui::Button("Toggle Fly Mode")) {
-					if (local_mec->get_alive()) {
+				if (local_mec->get_alive()) {
+					if (ImGui::Button("Set Dead")) {
 						local_mec->set_alive(false);
-						fly_mode = true;
 					}
-					else {
+				}
+				else {
+					if (ImGui::Button("Set Alive")) {
 						local_mec->set_alive(true);
 						local_mec->set_health(100);
-						fly_mode = false;
 					}
 				}
 			}
@@ -686,7 +688,7 @@ void menu::draw()
 				float imact_float = static_cast<float>(impact_type);
 
 				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-				if (ImGui::SliderFloat("##imact_float", &imact_float, -1000.0f, 1000.0f, "Impact: %.02f")) {
+				if (ImGui::SliderFloat("##imact_float", &imact_float, -3000.0f, 1.0f, "Impact: %.02f")) {
 					impact_type = static_cast<double>(imact_float);
 				}
 			}

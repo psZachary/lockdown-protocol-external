@@ -59,7 +59,7 @@ void InitializeItems() {
 	itemData["PIZZUSHI"] = ItemProperties(0.3, 1, -1, 180, 40); // Pizzushi
 	itemData["SAMPLE"] = ItemProperties(0.2, 0.7, -0.8, 130, 20);
 	itemData["MACHINE PART"] = ItemProperties(0.20, 0.70, -0.80, 82, 14);
-	itemData["ACCESS CARD"] = ItemProperties(0.20, 0.70, -0.80, 130, 20);
+	itemData["ACCESS CARD"] = ItemProperties(0.20, 0.70, -0.80, 82, 14);
 	itemData["PISTOL"] = ItemProperties(false, 0.1, 5, 1, 30, 0.8, 1.5, 0.3, 40, 0.5, 4, 1, 0.8);
 	itemData["SHORTY"] = ItemProperties(false, 0.3, 5, 5, 10, 1, 2.5, 0.3, 20, 30, 0.6, 40, 0.5);
 	itemData["REVOLVER"] = ItemProperties(false, 0.25, 25, 4, 15, 0.8, 2, 0.4, 20, 0.5, 6, 3, 0.5);
@@ -331,7 +331,7 @@ static void cache_useful() {
 }
 
 inline void StartRainbowSuitThread() {
-	/* 
+	/*
 	static bool thread_started = false;
 	if (thread_started) return;
 	thread_started = true;
@@ -343,7 +343,7 @@ inline void StartRainbowSuitThread() {
 				// Step 1: Set the suit color (skin)
 				auto skin_set = globals::local_mec->get_skin_set();
 				skin_set.Color_8 = color;
-				
+
 				// Step 2: Set the global player color in gm_ref
 				auto color_array = gm_ref->get_player_colors_app();
 				bool updated = false;
@@ -506,6 +506,15 @@ static void render_callback() {
 				<< "Fire_Rate: " << gun_item_data->get_fire_rate() << ");" << std::endl;
 			*/
 		}
+
+		for (auto mec : player_cache) {
+			auto state = mec->player_state();
+			if (!state) continue;
+			auto name_str = state->get_player_name_private().read_string();
+			auto player_id = state->get_player_id();
+
+			std::cout << "[Lobby] Player: " << name_str << " | Player ID: " << player_id << std::endl;
+		}
 	}
 
 	if (aimbot) {
@@ -656,12 +665,19 @@ static void render_callback() {
 	}
 
 	if (god_mode) {
+		if (!local_mec->get_alive()) {
+			local_mec->set_alive(true);
+		}
 		local_mec->set_health(100);
 	}
 
 	if (rainbowsuit) {
 		std::thread rainbowsuit_thread(StartRainbowSuitThread);
 		rainbowsuit_thread.detach();
+	}
+
+	if (collisions_toggle) {
+
 	}
 
 	// Track the last tick time for incremental healing
