@@ -103,9 +103,9 @@ void radar::draw() {
 
 		// Draw radar background
 		ImGui::GetForegroundDrawList()->AddCircleFilled(
-			toImVec2(radarCenter), radarSize / 2, IM_COL32(0, 0, 0, 150)); // Semi-transparent black
+			toImVec2(radarCenter), static_cast<float>(radarSize) / 2.0f, IM_COL32(0, 0, 0, 150)); // Semi-transparent black
 		ImGui::GetForegroundDrawList()->AddCircle(
-			toImVec2(radarCenter), radarSize / 2, IM_COL32(255, 255, 255, 255), 64, 1.5f); // White outline
+			toImVec2(radarCenter), static_cast<float>(radarSize) / 2.0f, IM_COL32(255, 255, 255, 255), 64, 1.5f); // White outline
 
 		// Player dot
 		float playerDotSize = 5.0f; // Size of the player's dot

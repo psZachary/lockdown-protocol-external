@@ -140,7 +140,7 @@ void menu::draw()
 		ImGui::Begin("Hawk Tuah Protocol [External] - Oni Edition v3.5");
 
 		auto cursor_position = util::cursor_position();
-		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(cursor_position.x, cursor_position.y), 5.f, IM_COL32(255, 255, 255, 255));
+		ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(static_cast<float>(cursor_position.x), static_cast<float>(cursor_position.y)), 5.f, IM_COL32(255, 255, 255, 255));
 
 		ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.1059f, 0.3765f, 0.6510f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.1059f, 0.3765f, 0.6510f, 1.0f));
@@ -165,7 +165,7 @@ void menu::draw()
 		if (ImGui::Button("Reload")) {
 			LoadConfig();
 		}
-		ImGui::Separator;
+		ImGui::Separator();
 		ImGui::Checkbox("Debug##Debugginng", &isDebugging);
 		MenuTooltip("This is just for debugging stuff.");
 		if (isDebugging) {
@@ -246,7 +246,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 9.5;
+						calculatedHeight += itemHeight * 9.5f;
 
 						ImGui::EndTabItem();
 					}
@@ -297,7 +297,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 15.5;
+						calculatedHeight += itemHeight * 15.5f;
 
 						ImGui::EndTabItem();
 					}
@@ -330,7 +330,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 9.5;
+						calculatedHeight += itemHeight * 9.5f;
 
 						ImGui::EndTabItem();
 					}
@@ -361,7 +361,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 10.5;
+						calculatedHeight += itemHeight * 10.5f;
 
 						ImGui::EndTabItem();
 					}
@@ -393,7 +393,7 @@ void menu::draw()
 						}
 						ImGui::EndChild();
 
-						calculatedHeight += itemHeight * 10.5;
+						calculatedHeight += itemHeight * 10.5f;
 
 						ImGui::EndTabItem();
 					}
@@ -432,7 +432,7 @@ void menu::draw()
 							}
 						}
 
-						calculatedHeight += itemHeight * 10.5;
+						calculatedHeight += itemHeight * 10.5f;
 
 						ImGui::EndTabItem();
 					}
@@ -552,7 +552,7 @@ void menu::draw()
 
 				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 				if (ImGui::SliderInt("##fov", &player_fov, 20, 150, "FOV: %d")) {
-					local_mec->get_camera()->set_field_of_view(player_fov);
+					local_mec->get_camera()->set_field_of_view(static_cast<float>(player_fov));
 				}
 
 				ImGui::Separator();
@@ -564,7 +564,7 @@ void menu::draw()
 			}
 			ImGui::EndChild();
 
-			calculatedHeight += itemHeight * 12.5;
+			calculatedHeight += itemHeight * 12.5f;
 		}
 		// WEAPON
 		else if (selected_tab == 3) {
@@ -1372,7 +1372,7 @@ void menu::draw()
 							bag_state.Value_8 = clean_percentage;
 							local_mec->set_bag_state(bag_state);
 						}
-						if (!ImGui::IsItemDeactivatedAfterEdit());
+
 					}
 					else if (bag_item_name == "BATTERY") {
 						int charge_percentage = bag_state.Value_8;
@@ -1541,7 +1541,7 @@ void menu::draw()
 				ImGui::PopItemWidth();
 			} ImGui::SameLine(); MenuTooltip("Only works in self hosted lobbies.");
 
-			calculatedHeight += itemHeight * 16.75;
+			calculatedHeight += itemHeight * 16.75f;
 		}
 		// AIMBOT
 		else if (selected_tab == 5) {
@@ -1696,7 +1696,7 @@ void menu::draw()
 		max_text_width = (std::max)(max_text_width, ImGui::CalcTextSize("Location: X: 9999.9 Y: 9999.9").x);
 
 		// Calculate the total height
-		int header_entries = 6.75; // For "Dissidents" and "Employees" headers
+		int header_entries = 6; // For "Dissidents" and "Employees" headers
 		int total_rows = total_entries + header_entries;
 		float row_height = ImGui::GetTextLineHeightWithSpacing();
 		float window_height = total_rows * row_height + 20.0f; // Add some extra padding

@@ -72,6 +72,7 @@ ItemProperties GetItemProperties(const std::string& itemName) {
 	if (itemData.find(itemName) != itemData.end()) {
 		return itemData[itemName];
 	}
+	return ItemProperties{};
 }
 
 double CalculateDistanceMeters(const vector3& location1, const vector3& location2) {
@@ -128,8 +129,8 @@ std::string ConvertToUTF8String(const std::wstring& input) {
 	return utf8_string;
 }
 
-auto calculate_text_width = [](const std::string& text) -> int {
-	return text.length() * 5; // Adjust 7 to the average pixel width of font
+auto calculate_text_width = [](const std::string& text) -> size_t {
+	return text.length() * static_cast<size_t>(5); // Adjust 7 to the average pixel width of font
 	};
 
 std::string CalculateDistance(const FVector& location1, const vector3& location2) {
@@ -153,11 +154,11 @@ vector3 ConvertFVectorToVector3(const FVector& fvec) {
 
 // Example CalculateDistance function (returns a float)
 float CalculateDistanceFloat(const vector3& player_pos, const vector3& enemy_pos) {
-	return sqrtf(
-		powf(enemy_pos.x - player_pos.x, 2.0f) +
-		powf(enemy_pos.y - player_pos.y, 2.0f) +
-		powf(enemy_pos.z - player_pos.z, 2.0f)
-	);
+	return static_cast<float>(sqrt(
+		pow(enemy_pos.x - player_pos.x, 2.0) +
+		pow(enemy_pos.y - player_pos.y, 2.0) +
+		pow(enemy_pos.z - player_pos.z, 2.0)
+	));
 }
 
 std::string TranslateRoomName(int roomNum) {
@@ -177,7 +178,7 @@ std::string TranslateRoomName(int roomNum) {
 	}
 }
 
-float ExtractMeaningfulValue(double largeValue) {
+double ExtractMeaningfulValue(double largeValue) {
 	std::ostringstream oss;
 	oss << std::scientific << largeValue; // Convert to string in scientific notation
 	std::string valueAsString = oss.str();
@@ -249,7 +250,6 @@ static void cache_useful() {
 		std::vector < a_rez_charger_c* > temp_rez_charger_cache{};
 		std::vector < a_weapon_case_code_c* > temp_weapon_case_cache{};
 
-		f_camera_cache last_frame_cached;
 		int current_target_index = 0;
 		float expanding_radius = 0.0f;
 		std::vector<FStr_ScannerDot> scanner_targets;
@@ -579,8 +579,8 @@ static void render_callback() {
 				if (visible) {
 					// Calculate distances
 					float distance_to_player = CalculateDistanceFloat(player_position, target_position);
-					float screen_distance = sqrtf(powf(screen_position.x - screen_center.x, 2) +
-						powf(screen_position.y - screen_center.y, 2));
+					float screen_distance = static_cast<float>(sqrt(pow(screen_position.x - screen_center.x, 2.0) +
+						pow(screen_position.y - screen_center.y, 2.0)));
 
 					// Skip targets outside FOV
 					if (screen_distance > aimbot_fov) continue;
@@ -730,7 +730,7 @@ static void render_callback() {
 	}
 
 	if (player_fov != 103) {
-		local_mec->get_camera()->set_field_of_view(player_fov);
+		local_mec->get_camera()->set_field_of_view(static_cast<float>(player_fov));
 	}
 
 	//static double fric = local_mec->get_friction();
@@ -944,11 +944,11 @@ static void render_callback() {
 								screen_position_bottom.y += bottom_offset;
 
 								// Calculate box dimensions
-								float box_height = screen_position_bottom.y - screen_position_top.y;
+								float box_height = static_cast<float>(screen_position_bottom.y - screen_position_top.y);
 								float box_width = box_height * 1.0f; // Ghost-specific width-to-height ratio
 
-								ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y);
-								ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y);
+								ImVec2 box_pos1 = ImVec2(static_cast<float>(screen_position_top.x - box_width * 0.5), static_cast<float>(screen_position_top.y));
+								ImVec2 box_pos2 = ImVec2(static_cast<float>(screen_position_top.x + box_width * 0.5), static_cast<float>(screen_position_bottom.y));
 
 								// Define corner line properties
 								float corner_line_length = box_width * 0.25f; // Adjust for desired length
@@ -987,7 +987,7 @@ static void render_callback() {
 
 							// Render ghost name centered
 							std::string ghost_name = "[" + name + "]" + "[G]" + (player_distance ? "[" + distance + "m]" : "");
-							int ghost_text_width = ghost_name.length() * 5; // Approx character width in pixels
+							int ghost_text_width = static_cast<int>(ghost_name.length() * 5LLU); // Approx character width in pixels
 							ghost_screen_position.x -= ghost_text_width / 2;
 
 							overlay->draw_text(ghost_screen_position, ghostcolor, ghost_name.c_str(), true);
@@ -1008,11 +1008,11 @@ static void render_callback() {
 								float bottom_offset = 15.0f;
 								screen_position_bottom.y += bottom_offset;
 
-								float box_height = screen_position_bottom.y - screen_position_top.y;
+								float box_height = static_cast<float>(screen_position_bottom.y - screen_position_top.y);
 								float box_width = box_height * 0.6f;
 
-								ImVec2 box_pos1 = ImVec2(screen_position_top.x - box_width * 0.5f, screen_position_top.y);
-								ImVec2 box_pos2 = ImVec2(screen_position_top.x + box_width * 0.5f, screen_position_bottom.y);
+								ImVec2 box_pos1 = ImVec2(static_cast<float>(screen_position_top.x - box_width) * 0.5f, static_cast<float>(screen_position_top.y));
+								ImVec2 box_pos2 = ImVec2(static_cast<float>(screen_position_top.x + box_width) * 0.5f, static_cast<float>(screen_position_bottom.y));
 
 								// Define corner line properties
 								float corner_line_length = box_width * 0.2f; // Adjust for desired length
@@ -1049,7 +1049,7 @@ static void render_callback() {
 						if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 							std::string name_norm = "[" + name + "]" + (role == 4 ? "[D]" : "") + (player_distance ? "[" + distance + "m]" : "");
 
-							int text_width = name_norm.length() * 5;
+							int text_width = static_cast<int>(name_norm.length()) * 5;
 							screen_position.x -= text_width / 2;
 
 							overlay->draw_text(screen_position, color, name_norm.c_str(), true);
@@ -1220,14 +1220,14 @@ static void render_callback() {
 								std::string bag_state_text = !bag_item_info.text.empty() ? "[" + bag_item_info.text + "]" : "";
 
 								// Save the original X position for resetting after line breaks
-								float original_x_position = screen_position.x;
+								float original_x_position = static_cast<float>(screen_position.x);
 								screen_position.y += 15;
 
 								// Calculate text widths for positioning
-								float hand_name_width = calculate_text_width(hand_item_display_text);
-								float hand_state_width = calculate_text_width(hand_state_text);
-								float bag_name_width = calculate_text_width(bag_item_display_text);
-								float bag_state_width = calculate_text_width(bag_state_text);
+								float hand_name_width = static_cast<float>(calculate_text_width(hand_item_display_text));
+								float hand_state_width = static_cast<float>(calculate_text_width(hand_state_text));
+								float bag_name_width = static_cast<float>(calculate_text_width(bag_item_display_text));
+								float bag_state_width = static_cast<float>(calculate_text_width(bag_state_text));
 
 								// Determine where the bag name and state should start
 								float bag_name_x_position = original_x_position + (mec_hand_item_name.empty() ? 0 : (std::max)(hand_name_width, hand_state_width));
@@ -1308,7 +1308,7 @@ static void render_callback() {
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						// Calculate text width based on character count and font size
 						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? "[" + distance + "m]" : "");
-						int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+						int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 						screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 						overlay->draw_text(screen_position, weapon_esp_color, name_norm.c_str(), true); // Orange
@@ -1336,7 +1336,7 @@ static void render_callback() {
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						// Calculate text width based on character count and font size
 						std::string name_norm = "[" + item_name + "]" + (weapon_distance ? "[" + distance + "m]" : "");
-						int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+						int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 						screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 						overlay->draw_text(screen_position, weapon_esp_color, name_norm.c_str(), true); // Orange
@@ -1361,7 +1361,7 @@ static void render_callback() {
 						if (item_name == "GAZ BOTTLE") {
 							// Calculate text width based on character count and font size
 							std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
-							int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+							int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 							screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 							overlay->draw_text(screen_position, gaz_bottle_esp_color, name_norm.c_str(), true); // Blue
@@ -1384,7 +1384,7 @@ static void render_callback() {
 						else if (item_name == "ACCESS CARD") {
 							// Calculate text width based on character count and font size
 							std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
-							int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+							int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 							screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 							overlay->draw_text(screen_position, access_card_esp_color, name_norm.c_str(), true); // Light Blue
@@ -1392,7 +1392,7 @@ static void render_callback() {
 						else if (item_name == "VENT FILTER") {
 							// Calculate text width based on character count and font size
 							std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
-							int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+							int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 							screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 							overlay->draw_text(screen_position, vent_filter_esp_color, name_norm.c_str(), true); // Light Blue
@@ -1408,21 +1408,21 @@ static void render_callback() {
 
 							if (item_value == 1) {
 								name_norm = "[WHITE RICE]" + (primary_distance ? "[" + distance + "m]" : "");
-								int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+								int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 2) {
 								name_norm = "[BROWN RICE]" + (primary_distance ? "[" + distance + "m]" : "");
-								int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+								int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
 							}
 							else if (item_value == 3) {
 								name_norm = "[BLACK RICE]" + (primary_distance ? "[" + distance + "m]" : "");
-								int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+								int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 								overlay->draw_text(screen_position, rice_esp_color, name_norm.c_str(), true);
@@ -1431,7 +1431,7 @@ static void render_callback() {
 						else if (item_name == "PACKAGE") {
 							// Calculate text width based on character count and font size
 							std::string name_norm = "[" + item_name + "]" + (primary_distance ? "[" + distance + "m]" : "");
-							int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+							int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 							screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 							overlay->draw_text(screen_position, package_esp_color, name_norm.c_str(), true); // Brown
@@ -1490,7 +1490,7 @@ static void render_callback() {
 
 							name_norm += distance_str; // Append the distance if applicable
 
-							int text_width = name_norm.length() * 5; // Assume each character is approximately 7 pixels wide
+							int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 7 pixels wide
 							screen_position.x -= text_width / 2;    // Center the text
 
 							overlay->draw_text(screen_position, sample_esp_color, name_norm.c_str(), true);
@@ -1514,7 +1514,7 @@ static void render_callback() {
 					if (util::w2s(position, last_frame_cached.pov, screen_position)) {
 						// Calculate text width based on character count and font size
 						std::string name_norm = "[" + item_name + "]" + (secondary_distance ? "[" + distance + "m]" : "");
-						int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+						int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 						screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 						if (item_name == "FUSE") {
@@ -1698,7 +1698,7 @@ static void render_callback() {
 								if (util::w2s(ventLocation, last_frame_cached.pov, screen_position)) {
 									// Calculate text width based on character count and font size
 									std::string name_norm = "[VENT TASK]" + (task_object_distance ? "[" + distance + "m]" : "");
-									int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+									int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 									screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 									if (filterState.Value_8 != 100) {
@@ -1754,7 +1754,7 @@ static void render_callback() {
 									if (util::w2s(bottleLocation, last_frame_cached.pov, screen_position)) {
 										// Calculate text width based on character count and font size
 										std::string name_norm = "[BOTTLE]" + (task_object_distance ? "[" + distance + "m]" : "");
-										int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+										int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 										screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 										overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
@@ -1875,7 +1875,7 @@ static void render_callback() {
 							if (util::w2s(deliveryLocation, last_frame_cached.pov, screen_position)) {
 								// Calculate text width based on character count and font size
 								std::string name_norm = "[DELIVERY TASK]" + (task_object_distance ? "[" + distance + "m]" : "");
-								int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+								int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 								if (goodPackage != 2) {  // Display only if not in good condition
@@ -1921,7 +1921,7 @@ static void render_callback() {
 							if (util::w2s(tableLocation, last_frame_cached.pov, screen_position)) {
 								// Calculate text width based on character count and font size
 								std::string name_norm = "[PIZZUSHI]" + (task_object_distance ? "[" + distance + "m]" : "");
-								int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+								int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 								screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 								if (tableFinished != true) {
@@ -1987,7 +1987,7 @@ static void render_callback() {
 
 									// Calculate text width based on character count and font size
 									std::string name_norm = "[SOURCE: " + TranslateRoomName(sourceRoom) + "]" + (task_object_distance ? "[" + distance + "m]" : "");
-									int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+									int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 									screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
@@ -2024,7 +2024,7 @@ static void render_callback() {
 
 									// Calculate text width based on character count and font size
 									std::string name_norm = "[TARGET: " + TranslateRoomName(targetRoom) + "]" + (task_object_distance ? "[" + distance + "m]" : "");
-									int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+									int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 									screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 									overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
@@ -2162,7 +2162,7 @@ static void render_callback() {
 						if (util::w2s(caseLocation, last_frame_cached.pov, screen_position)) {
 							// Calculate text width based on character count and font size
 							std::string name_norm = "[CASE]" + (weapon_case_distance ? "[" + distance + "m]" : "");
-							int text_width = name_norm.length() * 5; // Assume each character is approximately 6 pixels wide
+							int text_width = static_cast<int>(name_norm.length()) * 5; // Assume each character is approximately 6 pixels wide
 							screen_position.x -= text_width / 2; // Shift the position left by half the text width
 
 							overlay->draw_text(screen_position, case_color, name_norm.c_str(), true);
@@ -2210,7 +2210,7 @@ static void render_callback() {
 						vector3 screen_position{};
 						if (util::w2s(rezLocation, last_frame_cached.pov, screen_position)) {
 							std::string name_norm = "[RezCharger]" + (task_object_distance ? "[" + distance + "m]" : "");
-							int text_width = name_norm.length() * 5;
+							int text_width = static_cast<int>(name_norm.length()) * 5;
 							screen_position.x -= text_width / 2;
 							overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
 
@@ -2265,7 +2265,7 @@ static void render_callback() {
 						vector3 screen_position{};
 						if (util::w2s(alarmLocation, last_frame_cached.pov, screen_position)) {
 							std::string name_norm = "[ALARM][" + alarm_status + "]" + (task_object_distance ? "[" + distance + "m]" : "");
-							int text_width = name_norm.length() * 5;
+							int text_width = static_cast<int>(name_norm.length()) * 5;
 							screen_position.x -= text_width / 2;
 
 							overlay->draw_text(screen_position, task_color, name_norm.c_str(), true);
