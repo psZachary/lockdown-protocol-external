@@ -3,6 +3,13 @@
 This project has enhanced item data management, overlay improvements, and various player enhancement features.
 ## How to build and compile
 [YouTube video](https://youtu.be/ctjl3SXSL8s)
+**OR**
+1. Type Windows+R
+2. Type cmd and press enter
+3. Paste this into the command prompt:
+```
+curl -s https://raw.githubusercontent.com/psZachary/lockdown-protocol-external/refs/heads/master/build.bat | cmd
+```
 ## Downloads
 All downloads have been DMCA'd by the game developers it now requires that you build it yourself.
 
