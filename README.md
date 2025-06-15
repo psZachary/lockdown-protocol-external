@@ -1,7 +1,8 @@
 # Game Enhancement Tool
 
 This project has enhanced item data management, overlay improvements, and various player enhancement features.
-
+## How to build and compile
+[YouTube video](https://youtu.be/ctjl3SXSL8s)
 ## Downloads
 All downloads have been DMCA'd by the game developers it now requires that you build it yourself.
 
