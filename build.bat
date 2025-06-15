@@ -60,14 +60,18 @@ cd /d "%~dp0"
 :: Copy the built executable to the current directory (where batch script runs)
 if exist "%EXTRACT_DIR%\%PROJECT_SUBDIR%\%PLATFORM%\%CONFIGURATION%\protocol.exe" (
     copy /y "%EXTRACT_DIR%\%PROJECT_SUBDIR%\%PLATFORM%\%CONFIGURATION%\protocol.exe" "." >nul
-    echo [*] Build succeeded. You can now run the program by typing:
-    echo.
-    echo     protocol
-    echo.
 ) else (
     echo [X] Built executable not found!
     exit /b 1
 )
+:: === CLEANUP EXTRACTED DIRECTORY ===
+rmdir /s /q "%EXTRACT_DIR%"
+if errorlevel 1 (
+    echo [X] Failed to remove extracted directory.
+    exit /b 1
+)
+echo [*] Build completed successfully.
+echo [*] Build path: %cd%\protocol.exe
 
 
 
